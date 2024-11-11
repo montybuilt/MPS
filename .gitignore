@@ -1,0 +1,17 @@
+# Ignore the following folders for production
+/dev/
+/system/
+/utilities/
+
+# Ignore Python bytecode files and folders
+*.pyc
+*.pyo
+__pycache__/
+
+# Ignore environment-specific files
+.env
+.venv
+
+# Ignore temporary IDE files
+.spyderproject
+.spyderworkspace

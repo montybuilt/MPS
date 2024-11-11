@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Code Editor</title>
+    <!-- Link to CodeMirror CSS -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.5/codemirror.min.css">
+    <!-- Link to your custom styles -->
+    <link rel="stylesheet" href="https://montanus-wecib.github.io/MPS-Application/project_1/static/styles.css">
+</head>
+<body>
+
+    <h1>Python Code Editor</h1>
+    <!-- Button to run the code -->
+    <button id="run" disabled>Run Code</button> <!-- Initially disabled -->
+
+    <!-- Parent container for both code editor/console and Q&A window -->
+    <div class="editor-question-container">
+        <!-- Code editor and console container -->
+        <div id="code-console-container">
+            <div id="code-editor">
+                <textarea id="code" name="code">
+# Write your Python code here
+print("Hello, World!")
+                </textarea>
+            </div>
+            <!-- Output console to display code results -->
+            <div id="console"></div>
+        </div>
+
+        <!-- Question window -->
+        <div id="question-window">
+            <div id="question">What is the output of the following code?</div>
+            <label>
+                <input type="radio" name="answer" value="Hello, World!"> Hello, World!
+            </label>
+            <label>
+                <input type="radio" name="answer" value="Hello"> Hello
+            </label>
+            <label>
+                <input type="radio" name="answer" value="World!"> World!
+            </label>
+            <button id="submit-answer">Submit Answer</button> <!-- New button to submit the answer -->
+        </div>
+    </div>
+
+    <!-- Link to CodeMirror JS libraries -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.5/codemirror.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.5/mode/python/python.min.js"></script>
+    <script>
+        // Initialize CodeMirror
+        var editor = CodeMirror.fromTextArea(document.getElementById("code"), {
+            lineNumbers: true,
+            mode: "python",
+            theme: "default",
+            matchBrackets: true,
+            viewportMargin: Infinity,
+        });
+
+        // Handling the Run button click
+        document.getElementById("run").onclick = function() {
+            var code = editor.getValue();
+        
+            // Send code to Flask server
+            fetch('/run_code', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ code: code })
+            })
+            .then(response => response.json())
+            .then(data => {
+                // Display the output in the console div
+                document.getElementById("console").textContent = data.output;
+            })
+            .catch((error) => {
+                console.error('Error:', error);
+            });
+        };
+
+        // Handling the Submit Answer button click
+        document.getElementById("submit-answer").onclick = function() {
+            var selectedAnswer = document.querySelector('input[name="answer"]:checked');
+            if (selectedAnswer && selectedAnswer.value === "Hello, World!") {
+                document.getElementById("run").disabled = false; // Enable the Run Code button
+            } else {
+                alert("Incorrect answer. Please try again.");
+            }
+        };
+    </script>
+</body>
+</html>

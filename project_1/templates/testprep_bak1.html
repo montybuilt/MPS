@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Code Editor</title>
+    <!-- Link to CodeMirror CSS -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.5/codemirror.min.css">
+    <!-- Link to your custom styles -->
+    <link rel="stylesheet" href="https://montanus-wecib.github.io/MPS-Application/project_1/static/styles.css">
+</head>
+<body>
+
+    <h1>Python Code Editor</h1>
+    <!-- Write any starter code inside of the text area below or leave blank -->
+    <textarea id="code" name="code">
+# Write your Python code here
+print("Hello, World!")
+    </textarea>
+    <button id="run">Run Code</button>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.5/codemirror.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.5/mode/python/python.min.js"></script>
+    <script>
+        // Initialize CodeMirror
+        var editor = CodeMirror.fromTextArea(document.getElementById("code"), {
+            lineNumbers: true,
+            mode: "python",
+            theme: "default",
+            matchBrackets: true,
+            viewportMargin: Infinity,
+        });
+
+        // Handling the Run button
+        document.getElementById("run").onclick = function() {
+            var code = editor.getValue();
+            // Here you can add the functionality to run the Python code
+            alert("You would run this code:\n" + code); // Placeholder action
+        };
+    </script>
+</body>
+</html>
+
+

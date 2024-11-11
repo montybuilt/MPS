@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Home</title>
+    <link rel="stylesheet" href="../static/css/styles.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/3.1.9-1/crypto-js.js"></script>
+</head>
+<body>
+    <!-- Banner image at the top -->
+    <div id="banner-container">
+        <img src="https://montanus-wecib.github.io/MPS-Application/project_1/static/Web Banner.png" alt="Web Banner" class="banner">
+    </div>
+
+    <!-- Navbar with login form -->
+    <div id="navbar">
+        {% if username %}
+            <p>Logged in as: <strong>{{ username }}</strong></p>
+            <form action="/logout" method="POST" id="logout-form">
+                <button type="submit">Logout</button> <!-- Logout button -->
+            </form>
+        {% else %}
+            <form action="/login" method="POST" id="login-form">
+                <input type="text" name="username" placeholder="Username" required>
+                <input type="password" name="password" placeholder="Password" required>
+                <button type="submit">Login</button>
+            </form>
+        {% endif %}
+    </div>
+
+    <h2>Welcome to Monty's Python App!</h2>
+
+    <nav>
+        <ul>
+            <li><a href="/testprep">Go to Test Preparation</a></li>
+            <!-- Admin link displayed only if user is an admin -->
+            {% if is_admin %}
+                <li><a href="/content">Create New Question</a></li>
+            {% endif %}
+        </ul>
+    </nav>
+    
+    <!-- Include the script file -->
+    <script src="../static/js/index_script.js"></script>
+</body>
+</html>

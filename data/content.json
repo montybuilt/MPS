@@ -1,0 +1,879 @@
+{
+    "questions": {
+        "pcep.1.1.1": {
+            "Tags": [
+                ""
+            ],
+            "Code": "",
+            "Question": "A code written in a high-level programming language is called:",
+            "Answer": "a source code",
+            "Distractor1": "a binary code",
+            "Distractor2": "machine code",
+            "Distractor3": "the ASCII code",
+            "Video": "",
+            "Difficulty": 0.5
+        },
+        "pcep.1.1.2": {
+            "Tags": [
+                ""
+            ],
+            "Code": "",
+            "Question": "A process in which the source code is immediately executed without translating it into a machine code is called:",
+            "Answer": "interpretation",
+            "Distractor1": "debugging",
+            "Distractor2": "linking",
+            "Distractor3": "compilation",
+            "Video": "",
+            "Difficulty": 0.5
+        },
+        "pcep.1.1.3": {
+            "Tags": [
+                "operators",
+                "precedence"
+            ],
+            "Code": "",
+            "Question": "Arrange the arithmetic operators in the proper order based on precedence.",
+            "Answer": "**, //, +",
+            "Distractor1": "/, **, -",
+            "Distractor2": "*, +, /",
+            "Distractor3": "-, *, **",
+            "Video": "",
+            "Difficulty": 0.5
+        },
+        "pcep.1.1.4": {
+            "Tags": [
+                "operators"
+            ],
+            "Code": "",
+            "Question": "Which of the following expressions evaluate to a non-zero result?",
+            "Answer": "1 // 2 + 3 * 4",
+            "Distractor1": "1 ** 2 - 4 // 3",
+            "Distractor2": "4 / 2 - 2 ** 1",
+            "Distractor3": "2 ** 3 + (3 - 11)",
+            "Video": "",
+            "Difficulty": 0.5
+        },
+        "pcep.1.4.1": {
+            "Tags": [
+                "list",
+                "indexing",
+                "sorted",
+                "boolean expressions"
+            ],
+            "Code": "my_list = [0, .0, True]",
+            "Question": "Which of the following statements evaluates to False?",
+            "Answer": "len(my_list) == my_list[0]",
+            "Distractor1": "0.0 in my_list",
+            "Distractor2": "len(sorted(my_list)) == len(my_list)",
+            "Distractor3": "my_list[-1] == 1",
+            "Video": "",
+            "Difficulty": 1
+        },
+        "pcep.1.4.2": {
+            "Tags": [
+                "operators",
+                "precedence"
+            ],
+            "Code": "print(42 + 5.0 * 3 + 22 // 4 + 11 % 3)",
+            "Question": "What is the output?",
+            "Answer": "64.0",
+            "Distractor1": "64",
+            "Distractor2": "54",
+            "Distractor3": "64.5",
+            "Video": "",
+            "Difficulty": 2
+        },
+        "pcep.1.4.3": {
+            "Tags": [
+                "operators",
+                "precedence"
+            ],
+            "Code": "print(6 // 5 * 16 / 2 ** 2 ** 2)",
+            "Question": "What is the output?",
+            "Answer": "1.0",
+            "Distractor1": "4096.0",
+            "Distractor2": "0.0",
+            "Distractor3": "16.0",
+            "Video": "",
+            "Difficulty": 2
+        },
+        "pcep.1.4.4": {
+            "Tags": [
+                "operators",
+                "precedence"
+            ],
+            "Code": "print(6 // (5 * 16) / 2 ** 2 ** 2)",
+            "Question": "What is the output?",
+            "Answer": "0.0",
+            "Distractor1": "64.0",
+            "Distractor2": "16.0",
+            "Distractor3": "4.0",
+            "Video": "",
+            "Difficulty": 2
+        },
+        "pcep.1.5.1": {
+            "Tags": [
+                "output",
+                "sep"
+            ],
+            "Code": "width = 4\nheight = 5\nprint(width, height, sep=\"*\")",
+            "Question": "What is the expected output?",
+            "Answer": "4*5",
+            "Distractor1": "20",
+            "Distractor2": "4*5*",
+            "Distractor3": "*4*5*",
+            "Video": "",
+            "Difficulty": 0.5
+        },
+        "pcep.2.1.1": {
+            "Tags": [
+                "if",
+                "operators"
+            ],
+            "Code": "stars = 1 + 1 // 2 * 3\n\nif stars > 0:\n  print(\"*\")\n\nelif stars > 1:\n  print(\"**\")\n  \nelse:\n  print(\"***\")",
+            "Question": "How many stars will print?",
+            "Answer": "1",
+            "Distractor1": "2",
+            "Distractor2": "3",
+            "Distractor3": "None",
+            "Video": "",
+            "Difficulty": 1.5
+        },
+        "pcep.2.1.10": {
+            "Tags": [
+                "if",
+                "nested if"
+            ],
+            "Code": "x=8\ny=10\nz=12\n\nif x<y:\n  if x<z:\n    print(\"the smallest number is: \", x)\nelif y<x:\n  if y<z:\n    print(\"The smallest number is: \", y)\nelif z<x:\n  if z<y:\n    print(\"The smallest number is: \", z)\nelse:\n  print(\"else\")",
+            "Question": "What is the expected output?",
+            "Answer": "the smallest number is:  8",
+            "Distractor1": "the smallest number is:  10",
+            "Distractor2": "the smallest number is:  12",
+            "Distractor3": "This code is erroneous",
+            "Video": "",
+            "Difficulty": 2
+        },
+        "pcep.2.1.11": {
+            "Tags": [
+                "if"
+            ],
+            "Code": "x = 42\ny = 42.0\n \nif x == y:\n  print('True', x+y)\nelse:\n  print('False', x-y)",
+            "Question": "What is the expected output of this code?",
+            "Answer": "True 84.0",
+            "Distractor1": "True",
+            "Distractor2": "False",
+            "Distractor3": "False 0.0",
+            "Video": "",
+            "Difficulty": 1.5
+        },
+        "pcep.2.1.12": {
+            "Tags": [
+                ""
+            ],
+            "Code": "if True == True:\n  if False == 0:\n    print('a', end=\"\")\n  else:\n    print('aa', end=\"\")\n  print('aaa', end=\"\")\n  if True < False:\n    print('aaaa', end=\"\")\n  else:\n    print('aaaaa', end=\"\")",
+            "Question": "What is the expected output?",
+            "Answer": "aaaaaaaaa",
+            "Distractor1": "aaa",
+            "Distractor2": "aaaaaaaa",
+            "Distractor3": "This code is erroneous",
+            "Video": "",
+            "Difficulty": 2
+        },
+        "pcep.2.1.13": {
+            "Tags": [
+                "operators",
+                "precedence",
+                "if"
+            ],
+            "Code": "a = 42\nb = 13\nc = 42 // 13 + 3 * 2 ** 3\n\nif c != 5:\n  print ('x', end=\" \")\nif c > 7:\n  print('y', end=\" \")\nif c <= 10:\n  print('z', end=\" \")",
+            "Question": "What is the expected output of this code?",
+            "Answer": "x y",
+            "Distractor1": "x z",
+            "Distractor2": "x y z",
+            "Distractor3": "y z",
+            "Video": "",
+            "Difficulty": 2
+        },
+        "pcep.2.1.14": {
+            "Tags": [
+                "if",
+                "lists",
+                "operators",
+                "len"
+            ],
+            "Code": "points = [65, 75, 90, 80, 80, 100, 100]\navg = sum(points) // len(points)\n\nif 91 <= avg <= 100:\n  grade = 10\nelif 81 <= avg < 90:\n  grade = 9\nelif 71 <= avg < 80:\n  grade = 8\nelif 61 <= avg < 70:\n  grade = 7\nelif 51 <= avg < 60:\n  grade = 6\nelse:\n  grade = 5\n \nprint(grade)",
+            "Question": "What is the expected output?",
+            "Answer": "9",
+            "Distractor1": "8",
+            "Distractor2": "7",
+            "Distractor3": "6",
+            "Video": "",
+            "Difficulty": 2.5
+        },
+        "pcep.2.1.15": {
+            "Tags": [
+                "if",
+                "boolean operators"
+            ],
+            "Code": "x = True\ny = False\nz = False\n \nif not x or y:\n    print(1)\nelif not x or not y and z:\n    print(2)\nelif not x or y or not y and x:\n    print(3)\nelse:\n    print(4)",
+            "Question": "What is the expected output?",
+            "Answer": "3",
+            "Distractor1": "2",
+            "Distractor2": "1",
+            "Distractor3": "4",
+            "Video": "",
+            "Difficulty": 1.5
+        },
+        "pcep.2.1.16": {
+            "Tags": [
+                "if",
+                "boolean operators"
+            ],
+            "Code": "x = False\ny = False\nz = True\n \nif not x or not y:\n  print(1)\nelif not x or not y and z:\n  print(2)\nelif x or y or not y and not x:\n  print(3)\nelse:\n  print(4)",
+            "Question": "What is the expected output?",
+            "Answer": "1",
+            "Distractor1": "2",
+            "Distractor2": "3",
+            "Distractor3": "4",
+            "Video": "",
+            "Difficulty": 1.5
+        },
+        "pcep.2.1.17": {
+            "Tags": [
+                "if",
+                "nested if",
+                "lists",
+                "slicing"
+            ],
+            "Code": "x=\"None\"\n\nif x:\n    if x[1:3] == \"on\":\n        print(\"Hello\")\n    else:\n        print(\"Good Bye\")\n\nelse:\n  print(\"See ya later\")",
+            "Question": "What is the expected output?",
+            "Answer": "Hello",
+            "Distractor1": "Good Bye",
+            "Distractor2": "See ya later",
+            "Distractor3": "None",
+            "Video": "",
+            "Difficulty": 2
+        },
+        "pcep.2.1.18": {
+            "Tags": [
+                "if",
+                "lists",
+                "indexing",
+                "pop"
+            ],
+            "Code": "data = [False]\n\nprint(data[-1], end=\" \")\n\nif not data.pop():\n    print(\"Advertising\", end=\" \")\nelse:\n    print(\"Claim\")",
+            "Question": "What is the output of this code?",
+            "Answer": "False Advertising",
+            "Distractor1": "Advertising",
+            "Distractor2": "Claim",
+            "Distractor3": "This code is erroneous",
+            "Video": "",
+            "Difficulty": 2.5
+        },
+        "pcep.2.1.19": {
+            "Tags": [
+                "if",
+                "lists",
+                "indexing",
+                "pop"
+            ],
+            "Code": "data = [False]\n\nprint(data[1], end=\" \")\n\nif not data.pop():\n    print(\"Advertising\", end=\" \")\nelse:\n    print(\"Claim\")",
+            "Question": "What is the expected output of this code?",
+            "Answer": "This code is erroneous",
+            "Distractor1": "False Advertising",
+            "Distractor2": "Advertising",
+            "Distractor3": "False Claim",
+            "Video": "",
+            "Difficulty": 2.5
+        },
+        "pcep.2.1.2": {
+            "Tags": [
+                "operators",
+                "boolean expresions",
+                "boolean operators"
+            ],
+            "Code": "a = 13\nb = 42\n \nc = a < 30 or b > a and b > 50 and a < b\n\nif c:\n  print(\"Wolf!\")\n  \nelse:\n  print(\"Pack!\")",
+            "Question": "What is the value of c?",
+            "Answer": "Wolf!",
+            "Distractor1": "Pack!",
+            "Distractor2": "True",
+            "Distractor3": "False",
+            "Video": "",
+            "Difficulty": 2
+        },
+        "pcep.2.1.20": {
+            "Tags": [
+                "if"
+            ],
+            "Code": "input = 3\n\nif (input == 1):\n    print(\"1\")\nelif (input == 2):\n    print(\"2\")\n\nprint(\"3\")",
+            "Question": "What is the expected output of this code?",
+            "Answer": "3",
+            "Distractor1": "1",
+            "Distractor2": "2",
+            "Distractor3": "This code is erroneous",
+            "Video": "",
+            "Difficulty": 1
+        },
+        "pcep.2.1.3": {
+            "Tags": [
+                "if",
+                "boolean expressions",
+                "boolean operators",
+                "operators"
+            ],
+            "Code": "x = 42\n \nif x > 10 or not x >= 42:\n  print(\"Hey\", end=\"-\")\nif x > 42:\n  print(\"Hee\", end=\"-\")\nelif x >= 42:\n  print(\"Hi\", end=\"-\")\nelse:\n  print(\"Ho\", end=\"-\")",
+            "Question": "What will print when this code is run?",
+            "Answer": "Hey-Hi-",
+            "Distractor1": "Hey Hi",
+            "Distractor2": "Hey-Hi",
+            "Distractor3": "This code is erroneous",
+            "Video": "",
+            "Difficulty": 2
+        },
+        "pcep.2.1.4": {
+            "Tags": [
+                "if",
+                "boolean expressions",
+                "boolean operators"
+            ],
+            "Code": "x = 42\n \nif x > 10 or not x >= 42:\n  print(\"Hey\", end=\"-\")\nif x > 42:\n  print(\"Hee\", end=\"-\")\nelif x =< 42:\n  print(\"Hi\", end=\"-\")\nelse:\n  print(\"Ho\", end=\"-\")",
+            "Question": "What is the expected output of this code?",
+            "Answer": "This code is erroneous",
+            "Distractor1": "Hey-Hi-",
+            "Distractor2": "Hey-Hi",
+            "Distractor3": "Hey Hi",
+            "Video": "",
+            "Difficulty": 2
+        },
+        "pcep.2.1.5": {
+            "Tags": [
+                "if",
+                "bitwise operators",
+                "boolean"
+            ],
+            "Code": "a = 0\nb = True\nc = False\n\nif a ^ b: \n  print('x', end=\"\")\nif b or c:\n  print('y', end=\"\")\nif a and not c:\n  print('z', end=\"\")",
+            "Question": "What is the expected ouput of this code?",
+            "Answer": "xy",
+            "Distractor1": "xyz",
+            "Distractor2": "yz",
+            "Distractor3": "xz",
+            "Video": "",
+            "Difficulty": 2.5
+        },
+        "pcep.2.1.6": {
+            "Tags": [
+                "boolean",
+                "if",
+                "bitwise operators"
+            ],
+            "Code": "a = 1\nb = 0\nc = False\n\nif a ^ b: \n  print('x', end=\"\")\nif b or c:\n  print('y', end=\"\")\nif a and not c:\n  print('z', end=\"\")",
+            "Question": "What is the expected output?",
+            "Answer": "xz",
+            "Distractor1": "xy",
+            "Distractor2": "yz",
+            "Distractor3": "xyz",
+            "Video": "",
+            "Difficulty": 2.5
+        },
+        "pcep.2.1.7": {
+            "Tags": [
+                "boolean",
+                "bitwise operators",
+                "if"
+            ],
+            "Code": "x = 0 + True\n \nif bool(\"\") ^ bool([]):    \n  if x < 0:\n    print('Less than 0')\n  elif x > 0:\n    print('Greater than 0')\n  elif x == 0:\n    print('is 0')\nelse:\n   print('mysterious output')",
+            "Question": "What is the expected output of this code?",
+            "Answer": "mysterious output",
+            "Distractor1": "This code is erroneous",
+            "Distractor2": "Less than 0",
+            "Distractor3": "Greater than 0",
+            "Video": "",
+            "Difficulty": 3
+        },
+        "pcep.2.1.8": {
+            "Tags": [
+                "if",
+                "bitwise shift"
+            ],
+            "Code": "x = 52 >> 2\n\nif x != 13:\n  print(\"*\",end=',')\n  if x < 7:\n    print(\">\")\n  elif x == 20:\n    print(\">>\")\n  else:\n    print(\"+\" * 3) \nelse:\n  print(\"-2\" * 2)",
+            "Question": "What is the output of this code?",
+            "Answer": "-2-2",
+            "Distractor1": "*,>",
+            "Distractor2": "*,>>",
+            "Distractor3": "*,+++",
+            "Video": "",
+            "Difficulty": 3
+        },
+        "pcep.2.1.9": {
+            "Tags": [
+                "if",
+                "casting"
+            ],
+            "Code": "priority = float(input())\n\nif (priority == 1):\n  print(\"FR\")\nelif (priority==2):\n  print(\"GR\")\nelif (priority==3):\n  print(\"EN\")\nelse:\n  print(\"None\")",
+            "Question": "What is the output of this code?",
+            "Answer": "None",
+            "Distractor1": "FR",
+            "Distractor2": "GR",
+            "Distractor3": "EN",
+            "Video": "",
+            "Difficulty": 1.5
+        },
+        "pcep.2.2.1": {
+            "Tags": [
+                "for",
+                "if"
+            ],
+            "Code": "total = 0\n\nfor i in range(5):\n  \n  if i % 2 == 1:\n    total += 1\n    \nelse:\n  total -= 1\n  \nprint(total)\n    ",
+            "Question": "What is the value of total?",
+            "Answer": "1",
+            "Distractor1": "2",
+            "Distractor2": "3",
+            "Distractor3": "The code enters an infinite loop",
+            "Video": "",
+            "Difficulty": 1.5
+        },
+        "pcep.2.2.10": {
+            "Tags": [
+                "lists",
+                "slicing",
+                "for",
+                "if",
+                "boolean"
+            ],
+            "Code": "x = [False, True, True, False, True]\ny = x[:]\ni = 0\n\nfor j in y[2:]:\n  if j:\n    i +=1\n\nprint(i)",
+            "Question": "What is the expected output of this code?",
+            "Answer": "2",
+            "Distractor1": "3",
+            "Distractor2": "1",
+            "Distractor3": "0",
+            "Video": "",
+            "Difficulty": 2
+        },
+        "pcep.2.2.11": {
+            "Tags": [
+                "for",
+                "if",
+                "nested loops",
+                "break"
+            ],
+            "Code": "x = 42\n\nfor i in range(2, 8, 2):\n  for j in range(-5, 2, 3):\n    if i==j:\n      x += 2\n    else:\n      break\n\nprint(x)",
+            "Question": "What is the expected output of this code?",
+            "Answer": "42",
+            "Distractor1": "46",
+            "Distractor2": "44",
+            "Distractor3": "48",
+            "Video": "",
+            "Difficulty": 2
+        },
+        "pcep.2.2.12": {
+            "Tags": [
+                "for",
+                "if",
+                "else"
+            ],
+            "Code": "x = 0\n\nfor i in range(-2, 4, 2):\n  if 4 * i < 8:\n    x += 3\nelse:\n  x += 2\n    \nprint(x)",
+            "Question": "What is the expected output of this code?",
+            "Answer": "8",
+            "Distractor1": "0",
+            "Distractor2": "3",
+            "Distractor3": "5",
+            "Video": "",
+            "Difficulty": 2
+        },
+        "pcep.2.2.13": {
+            "Tags": [
+                "while",
+                "else"
+            ],
+            "Code": "data=\"\"\n\nwhile data:\n  print(\"Data is not empty\")\nelse:\n  print(\"Data is empty\")",
+            "Question": "What is the expected output of this code?",
+            "Answer": "Data is empty",
+            "Distractor1": "Data is not empty",
+            "Distractor2": "This code raises an exception",
+            "Distractor3": "This code creates an infinite loop",
+            "Video": "",
+            "Difficulty": 1.5
+        },
+        "pcep.2.2.14": {
+            "Tags": [
+                "while",
+                "else"
+            ],
+            "Code": "x = 3\n\nwhile x != 0:\n  x //= 2\n  print('*', sep=\"\", end=\"*\")\nelse:\n  print('*', sep=\"\", end=\"*\")",
+            "Question": "What is the expected output of this code?",
+            "Answer": "******",
+            "Distractor1": "***",
+            "Distractor2": "**",
+            "Distractor3": "****",
+            "Video": "",
+            "Difficulty": 2
+        },
+        "pcep.2.2.15": {
+            "Tags": [
+                "while",
+                "if",
+                "else"
+            ],
+            "Code": "x = 2\n\nwhile x < 4:\n  x += 1\n  if (x == 3):\n    continue\n  else:\n    print('*', end=\"*\")\nelse:\n  print('*')",
+            "Question": "What is the expected output of this code?",
+            "Answer": "***",
+            "Distractor1": "****",
+            "Distractor2": "**",
+            "Distractor3": "*****",
+            "Video": "",
+            "Difficulty": 2
+        },
+        "pcep.2.2.16": {
+            "Tags": [
+                "while",
+                "else"
+            ],
+            "Code": "i = 0\n\nwhile i != 0:\n  i = i + 1\nelse:\n  i = i + 1\n    \nprint(i)",
+            "Question": "What is the expected output of this code?",
+            "Answer": "1",
+            "Distractor1": "2",
+            "Distractor2": "0",
+            "Distractor3": "This code is erroneous",
+            "Video": "",
+            "Difficulty": 1.5
+        },
+        "pcep.2.2.17": {
+            "Tags": [
+                "while",
+                "pass"
+            ],
+            "Code": "x='Rappahannok'\n\ny=0\nwhile y<len(x):\n  y+=1\n  pass\n    \nprint(\"y: \", y)",
+            "Question": "What is the expected output of this code?",
+            "Answer": "y:  11",
+            "Distractor1": "y:",
+            "Distractor2": "y:  0",
+            "Distractor3": "y:  10",
+            "Video": "",
+            "Difficulty": 1.5
+        },
+        "pcep.2.2.18": {
+            "Tags": [
+                "while"
+            ],
+            "Code": "a = 'Mavericks'\ni = 7\n\nwhile i < len(a):\n  i += 2\n    \nprint(i+1)",
+            "Question": "What is the expected output of this code?",
+            "Answer": "10",
+            "Distractor1": "7",
+            "Distractor2": "9",
+            "Distractor3": "11",
+            "Video": "",
+            "Difficulty": 1.5
+        },
+        "pcep.2.2.19": {
+            "Tags": [
+                "for",
+                "nested loops",
+                "if",
+                "continue"
+            ],
+            "Code": "num = 10\n\nfor i in range(10):\n  for j in range(2, 15, 3):\n    if num % 2 == 0:\n      continue\n      num += 1\n  num+=1\nelse:\n  num+=1\n    \nprint(num)",
+            "Question": "What is the expected output of this code?",
+            "Answer": "21",
+            "Distractor1": "11",
+            "Distractor2": "10",
+            "Distractor3": "This code creates an infinite loop.",
+            "Video": "",
+            "Difficulty": 3
+        },
+        "pcep.2.2.2": {
+            "Tags": [
+                "while"
+            ],
+            "Code": "torque = 1\n\nwhile torque < 2:\n  torque *= 2\n  print(\"@\", end=\"\")\n  \nelse:\n  print(\"@\")",
+            "Question": "What is the expected output of this code?",
+            "Answer": "@@",
+            "Distractor1": "@",
+            "Distractor2": "@@@",
+            "Distractor3": "This code enters an infinite loop",
+            "Video": "",
+            "Difficulty": 1.5
+        },
+        "pcep.2.2.20": {
+            "Tags": [
+                "for",
+                "indexing",
+                "len"
+            ],
+            "Code": "sport=\"judo\"\n\nfor i in range (0, len(sport)):\n  print(sport[i])",
+            "Question": "What is the expected output of this code?",
+            "Answer": "j*u*d*o",
+            "Distractor1": "judo",
+            "Distractor2": "0123",
+            "Distractor3": "0*1*2*3",
+            "Video": "",
+            "Difficulty": 1.5
+        },
+        "pcep.2.2.21": {
+            "Tags": [
+                "while",
+                "if",
+                "break"
+            ],
+            "Code": "while True:\n    \n  password = input()\n  if password == 'qwerty':\n    print(\"Ok password: \", password)\n    break\n    print(\"End\")\n  else:\n    print(\"Wrong password: \", password)",
+            "Question": "What is the expected output of this code?",
+            "Answer": "Ok password:  qwerty",
+            "Distractor1": "End",
+            "Distractor2": "Wrong password:  qwerty",
+            "Distractor3": "Ok password:  qwerty End",
+            "Video": "",
+            "Difficulty": 2
+        },
+        "pcep.2.2.22": {
+            "Tags": [
+                "while"
+            ],
+            "Code": "a = 13\nb = 42\n \nwhile a < b:\n  print(\"*\", sep=\"-\", end=\"\")\n  a += 7",
+            "Question": "What is the expected output of this code?",
+            "Answer": "*****",
+            "Distractor1": "*-*-*-*-*",
+            "Distractor2": "****",
+            "Distractor3": "*****-",
+            "Video": "",
+            "Difficulty": 2
+        },
+        "pcep.2.2.23": {
+            "Tags": [
+                "for"
+            ],
+            "Code": "for i in range(-3, 3, 2):\n  print(\"*\", end=\"\")",
+            "Question": "What is the expected output of this code?",
+            "Answer": "***",
+            "Distractor1": "**",
+            "Distractor2": "****",
+            "Distractor3": "This code is erroneous",
+            "Video": "",
+            "Difficulty": 1.5
+        },
+        "pcep.2.2.24": {
+            "Tags": [
+                "while",
+                "break"
+            ],
+            "Code": "x=42\n\nwhile x<46:\n  x+=1\n  print(x)\n  break\nelse:\n  print(\"break\")",
+            "Question": "What is the expected output of this code?",
+            "Answer": "43",
+            "Distractor1": "46",
+            "Distractor2": "44",
+            "Distractor3": "break",
+            "Video": "",
+            "Difficulty": 2
+        },
+        "pcep.2.2.25": {
+            "Tags": [
+                "for",
+                "if",
+                "break"
+            ],
+            "Code": "x = 'State'\n\nfor char in x:\n  if char == 't':\n    break\n  print(char)\nelse:\n  print('Finished!')",
+            "Question": "What is the expected output of this code?",
+            "Answer": "S",
+            "Distractor1": "t",
+            "Distractor2": "Finished",
+            "Distractor3": "char",
+            "Video": "",
+            "Difficulty": 1.5
+        },
+        "pcep.2.2.3": {
+            "Tags": [
+                "for"
+            ],
+            "Code": "others = 0\n\nfor i in range(2):\n  for j in range(2):\n    if i != j:\n      others += 1\n\nelse:\n  others += 1\n  \nprint(others)\n      ",
+            "Question": "What is the value of others?",
+            "Answer": "3",
+            "Distractor1": "1",
+            "Distractor2": "3",
+            "Distractor3": "This code is erroneous",
+            "Video": "",
+            "Difficulty": 1.5
+        },
+        "pcep.2.2.4": {
+            "Tags": [
+                "while",
+                "continue"
+            ],
+            "Code": "power = 1\n\nwhile power != 10:\n  power *= 2\n  if power == 5:\n    continue\n  print(\"@\", end=\"\")\n  \nelse:\n  print(\"@\")",
+            "Question": "What is the expected result of this code?",
+            "Answer": "The program enters an infinite loop.",
+            "Distractor1": "@@@",
+            "Distractor2": "@@",
+            "Distractor3": "@",
+            "Video": "",
+            "Difficulty": 1.5
+        },
+        "pcep.2.2.5": {
+            "Tags": [
+                "tuples",
+                "slicing",
+                "for",
+                "if"
+            ],
+            "Code": "answers = (True, False, True)\n\nselection = answers[2:]\n\npoints = 0\n\nfor answer in selection[-1:]:\n  if answer:\n    points += 1\n    \nprint(points)",
+            "Question": "What is the result of this code?",
+            "Answer": "1",
+            "Distractor1": "2",
+            "Distractor2": "0",
+            "Distractor3": "3",
+            "Video": "",
+            "Difficulty": 1.5
+        },
+        "pcep.2.2.6": {
+            "Tags": [
+                "for",
+                "if",
+                "break"
+            ],
+            "Code": "tot = 0\n\nfor n in range(5):\n    if n == 3:\n        break\n    else:\n        tot += 1\nelse:\n    tot -= 1\n\nprint(tot)",
+            "Question": "What is the output of this code?",
+            "Answer": "3",
+            "Distractor1": "4",
+            "Distractor2": "2",
+            "Distractor3": "1",
+            "Video": "",
+            "Difficulty": 3
+        },
+        "pcep.2.2.7": {
+            "Tags": [
+                "lists",
+                "for"
+            ],
+            "Code": "sports = ['basketball', 'judo', 'tennis', 'football']\nfor sport in sports:\n  if sport != 'judo':\n    print(sport, end=',')",
+            "Question": "What is the expected output of this code?",
+            "Answer": "basketball, tennis, football",
+            "Distractor1": "basketball, judo, football",
+            "Distractor2": "judo",
+            "Distractor3": "basketball judo tennis football",
+            "Video": "",
+            "Difficulty": 1.5
+        },
+        "pcep.2.2.8": {
+            "Tags": [
+                "for"
+            ],
+            "Code": "for x in range(13, 2, -2):\n  print(x, end=\",\", sep=\" \")",
+            "Question": "What is the output of this code?",
+            "Answer": "13,11,9,7,5,3",
+            "Distractor1": "2,4,6,8,10,11",
+            "Distractor2": "13 11 9 7 5 3,",
+            "Distractor3": "This code is erroneous",
+            "Video": "",
+            "Difficulty": 2
+        },
+        "pcep.2.2.9": {
+            "Tags": [
+                "for",
+                "nested loops"
+            ],
+            "Code": "var=0\n\nfor i in range(3):\n  for j in range(-2, -7, -2):\n    var+=1\n\nprint(var)",
+            "Question": "What is the expected output of this code?",
+            "Answer": "9",
+            "Distractor1": "15",
+            "Distractor2": "10",
+            "Distractor3": "5",
+            "Video": "",
+            "Difficulty": 1.5
+        },
+        "pcep.3.1.1": {
+            "Tags": [
+                "lists",
+                "copying",
+                "indexing",
+                "append",
+                "slicing"
+            ],
+            "Code": "list_one = [1,2,3]\n\nlist_two = list_one[:]\n\nlist_two.append(3)\n\nprint(list_one[-1])",
+            "Question": "What is the expected result of this code?",
+            "Answer": "3",
+            "Distractor1": "2",
+            "Distractor2": "1",
+            "Distractor3": "This code is erroneous",
+            "Video": "",
+            "Difficulty": 1
+        },
+        "pcep.3.1.2": {
+            "Tags": [
+                "lists",
+                "list comprehension",
+                "indexing",
+                "functions",
+                "scope",
+                "local",
+                "global"
+            ],
+            "Code": "def process(data):\n  data = [1,2,3]\n  return data[-2]\n\nmeasurements = [0 for i in range(3)]\nprocess(measurements)\nprint(measurements[-2])",
+            "Question": "What is the value printed?",
+            "Answer": "0",
+            "Distractor1": "1",
+            "Distractor2": "2",
+            "Distractor3": "Thiis code is erroneous",
+            "Video": "",
+            "Difficulty": 1.5
+        },
+        "pcep.3.3.1": {
+            "Tags": [
+                "dictionaries",
+                "for",
+                "indexing",
+                "strings"
+            ],
+            "Code": "colors = {\"Red\": 155, \"Green\": 209, \"Blue\": 77}\n\nfor color in colors:\n  print(color[0], end=\"\")",
+            "Question": "What is the expected output of this code?",
+            "Answer": "RGB",
+            "Distractor1": "127",
+            "Distractor2": "RedGreenBlue",
+            "Distractor3": "15520977",
+            "Video": "",
+            "Difficulty": 1.5
+        },
+        "pcep.4.1.1": {
+            "Tags": [
+                "functions",
+                "recursion",
+                "default parameters",
+                "keyword"
+            ],
+            "Code": "def walk(stop, start=1):\n  print(start, end=\" \")\n  if start + 1 < stop:\n    walk(stop, start + 1)\n    \nwalk(3)",
+            "Question": "What will be printed?",
+            "Answer": "1 2",
+            "Distractor1": "1 2 3",
+            "Distractor2": "2 3",
+            "Distractor3": "0 1 2 3",
+            "Video": "",
+            "Difficulty": 2
+        },
+        "pcep.4.1.2": {
+            "Tags": [
+                "functions",
+                "keyword"
+            ],
+            "Code": "def sample(value):\n  return value + value\n\nx = sample(value=1)\ny = sample(x)\nprint(y)",
+            "Question": "What is the expected output?",
+            "Answer": "4",
+            "Distractor1": "2",
+            "Distractor2": "1",
+            "Distractor3": "This code is erroneous",
+            "Video": "",
+            "Difficulty": 1.5
+        },
+        "pcep.4.1.3": {
+            "Tags": [
+                "functions",
+                "keyword",
+                "tuples",
+                "indexing"
+            ],
+            "Code": "def combine(width, height=2, depth=0, is_3D=False):\n  return (is_3D, width, height, depth)\n\nprint(combine(1)[2])",
+            "Question": "What is the result of this code?",
+            "Answer": "2",
+            "Distractor1": "1",
+            "Distractor2": "False",
+            "Distractor3": "This code is erroneous",
+            "Video": "",
+            "Difficulty": 2
+        }
+    }
+}

@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Create Question</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.5/codemirror.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.5/codemirror.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.5/mode/python/python.min.js"></script>
+    <link rel="stylesheet" href="../static/css/content_styles.css">
+</head>
+<body>
+    <h1>Create Question</h1>
+    
+    <!-- Question form -->
+    <form id="questionForm">
+        <label for="questionKey">Question Key:</label>
+        <input type="text" id="questionKey" required><br><br>
+        
+        <label for="code">Code:</label>
+        <textarea id="code" name="code"></textarea><br><br>
+
+        <label for="questionStem">Question Stem:</label>
+        <textarea id="questionStem" required>What is the expected output of this code?</textarea><br><br>
+
+
+        <label for="answer">Answer:</label>
+        <input type="text" id="answer" required><br><br>
+
+        <label for="distractor1">Distractor 1:</label>
+        <input type="text" id="distractor1" required><br><br>
+
+        <label for="distractor2">Distractor 2:</label>
+        <input type="text" id="distractor2" required><br><br>
+
+        <label for="distractor3">Distractor 3:</label>
+        <input type="text" id="distractor3" required><br><br>
+
+        <label for="videoURL">Video URL:</label>
+        <input type="url" id="videoURL"><br><br>
+
+        <label for="videoStart">Video Start Time:</label>
+        <input type="number" id="videoStart"><br><br>
+
+        <label for="videoEnd">Video End Time:</label>
+        <input type="number" id="videoEnd"><br><br>
+
+        <label for="difficulty">Difficulty:</label>
+        <input type="number" id="difficulty" min="0" max="3" step="0.1" required><br><br>
+
+        <label for="tags">Tags (comma separated):</label>
+        <input type="text" id="tags"><br><br>
+
+        <button type="submit">Submit Question</button>
+    </form>
+
+    <script>
+        // Initialize the CodeMirror editor
+        var codeEditor = CodeMirror.fromTextArea(document.getElementById("code"), {
+            mode: "python",
+            lineNumbers: true,
+            matchBrackets: true
+        });
+    
+        // Handle form submission
+        document.getElementById("questionForm").addEventListener("submit", function(event) {
+            event.preventDefault();
+        
+            // Update the hidden textarea with CodeMirror's content before form submission
+            document.getElementById("code").value = codeEditor.getValue();
+        
+            // Collect form data
+            const questionData = {
+                questionKey: document.getElementById("questionKey").value,
+                code: codeEditor.getValue(),
+                questionStem: document.getElementById("questionStem").value,
+                answer: document.getElementById("answer").value,
+                distractors: [
+                    document.getElementById("distractor1").value,
+                    document.getElementById("distractor2").value,
+                    document.getElementById("distractor3").value
+                ],
+                videoURL: document.getElementById("videoURL").value,
+                videoStart: parseFloat(document.getElementById("videoStart").value),
+                videoEnd: parseFloat(document.getElementById("videoEnd").value),
+                difficulty: parseFloat(document.getElementById("difficulty").value),
+                tags: document.getElementById("tags").value.split(",").map(tag => tag.trim())
+            };
+            
+            console.log("Content:", questionData);
+        
+            // Send data to the backend
+            fetch('/submit_question', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(questionData)
+            })
+            .then(response => {
+                if (!response.ok) {
+                    return response.json().then(errData => {
+                        throw new Error(errData.error || 'An error occurred');
+                    });
+                }
+                return response.json();
+            })
+            .then(data => {
+                console.log('Response data:', data);  // Log the response to troubleshoot
+                alert(data.message || 'Success!');  // Use data.message if it exists, else default
+                document.getElementById("questionForm").reset();
+                codeEditor.setValue('');
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert('There was an error submitting the question: ' + error.message);
+            });
+        });
+    </script>
+</body>
+</html>
