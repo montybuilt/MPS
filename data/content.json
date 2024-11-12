@@ -780,19 +780,159 @@
         "pcep.3.1.1": {
             "Tags": [
                 "lists",
-                "copying",
-                "indexing",
-                "append",
+                "boolean expressions"
+            ],
+            "Code": "lst = [True, 3.14, -1]\nx=-1 in lst\ny= lst.index(-1) not in lst\nz = lst[lst[-1]]==-1\nt = len(lst[0:2])==1\nprint(x, y, z, t)",
+            "Question": "What is the expected output of this code?",
+            "Answer": "True True True False",
+            "Distractor1": "True False True False",
+            "Distractor2": "True True False True",
+            "Distractor3": "True True False False",
+            "Video": "",
+            "Difficulty": 2.5
+        },
+        "pcep.3.1.10": {
+            "Tags": [
+                "lists",
+                "slicing",
+                "indexing"
+            ],
+            "Code": "lst = [-1, -0.25, 0.5, 1.5]\n \nlst2 =  lst[0:5]\ny = lst[lst[0]]\n \nprint(lst2, end = \" || \")\nprint(y)",
+            "Question": "What is the expected output of this code?",
+            "Answer": "[-1, -0.25, 0.5, 1.5] || 1.5",
+            "Distractor1": "[-1, -0.25, 0.5, 1.5] || -1",
+            "Distractor2": "[-1, -0.25, 0.5, 1.5] || 0",
+            "Distractor3": "An unhandled exception occurred",
+            "Video": "",
+            "Difficulty": 2.5
+        },
+        "pcep.3.1.11": {
+            "Tags": [
+                "lists",
                 "slicing"
             ],
-            "Code": "list_one = [1,2,3]\n\nlist_two = list_one[:]\n\nlist_two.append(3)\n\nprint(list_one[-1])",
-            "Question": "What is the expected result of this code?",
-            "Answer": "3",
-            "Distractor1": "2",
-            "Distractor2": "1",
+            "Code": "x = list('Election')\n\nprint( x[::-2] )",
+            "Question": "What is the expected output of this code?",
+            "Answer": "['n', 'i', 'c', 'l']",
+            "Distractor1": "['E', 'e', 't', 'o']",
+            "Distractor2": "['noitcelE']",
+            "Distractor3": "['n', 'o', 'i', 't', 'c', 'e', 'l', 'E']",
+            "Video": "",
+            "Difficulty": 2.5
+        },
+        "pcep.3.1.12": {
+            "Tags": [
+                "lists",
+                "slicing"
+            ],
+            "Code": "lst = ['Ana', 1, 4, 2, (6, 5), False]\ndel lst[-5:-3]\n \nprint(lst)",
+            "Question": "What is the expected output of this code?",
+            "Answer": "['Ana', 2, (6, 5), False]",
+            "Distractor1": "['Ana', 1, 4, 2, False]",
+            "Distractor2": "[1, 4, 2]",
             "Distractor3": "This code is erroneous",
             "Video": "",
-            "Difficulty": 1
+            "Difficulty": 2.5
+        },
+        "pcep.3.1.13": {
+            "Tags": [
+                "lists"
+            ],
+            "Code": "lst = [3, 1, -1]\nlst[-2] = lst[1]\nprint(lst)",
+            "Question": "What is the expected output of this code?",
+            "Answer": "[3, 1, -1]",
+            "Distractor1": "False",
+            "Distractor2": "True",
+            "Distractor3": "[1]",
+            "Video": "",
+            "Difficulty": 2
+        },
+        "pcep.3.1.14": {
+            "Tags": [
+                "lists",
+                "append",
+                "indexing"
+            ],
+            "Code": "lst = [11, 42, 13]\nlst2 = lst[:]\nlst2.append(3)\nprint(lst[-1] + lst2[-1])",
+            "Question": "What is the expected output of this code?",
+            "Answer": "16",
+            "Distractor1": "26",
+            "Distractor2": "22",
+            "Distractor3": "84",
+            "Video": "",
+            "Difficulty": 2
+        },
+        "pcep.3.1.15": {
+            "Tags": [
+                "lists",
+                "append",
+                "indexing"
+            ],
+            "Code": "lst = [11, 42, 13]\nlst2 = lst\nlst2.append(3)\nprint(lst[-1] + lst2[-1])",
+            "Question": "What is the expected output of this code?",
+            "Answer": "6",
+            "Distractor1": "26",
+            "Distractor2": "16",
+            "Distractor3": "22",
+            "Video": "",
+            "Difficulty": 2
+        },
+        "pcep.3.1.16": {
+            "Tags": [
+                "lists",
+                "insert",
+                "for"
+            ],
+            "Code": "lst = [41, 42]\n \nfor x in range(3):\n  lst.insert(-1, lst[x])\n \nprint(lst)",
+            "Question": "What is the expected output of this code?",
+            "Answer": "[41, 41, 41, 41, 42]",
+            "Distractor1": "[41, 42, 41, 42, 41]",
+            "Distractor2": "[42, 41, 41, 41, 41]",
+            "Distractor3": "[41, 41, 41, 42",
+            "Video": "",
+            "Difficulty": 3
+        },
+        "pcep.3.1.17": {
+            "Tags": [
+                "lists",
+                "boolean operators"
+            ],
+            "Code": "x = [False, True, \"42\", 3, 4, 5]\na=42 in x\nprint(a, end=\" \")\nb=0 in x\nprint(b)",
+            "Question": "What is the expected output of this code?",
+            "Answer": "False True",
+            "Distractor1": "True True",
+            "Distractor2": "False False",
+            "Distractor3": "True False",
+            "Video": "",
+            "Difficulty": 2
+        },
+        "pcep.3.1.18": {
+            "Tags": [
+                "lists",
+                "slicing"
+            ],
+            "Code": "a = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 13, 42]\nprint(a[::-2])",
+            "Question": "What is the expected output of this code?",
+            "Answer": "[42, 10, 8, 6, 4, 2]",
+            "Distractor1": "[2, 4, 6, 8, 10, 42]",
+            "Distractor2": "[13]",
+            "Distractor3": "[13, 9, 7, 5, 3, 1]",
+            "Video": "",
+            "Difficulty": 2
+        },
+        "pcep.3.1.19": {
+            "Tags": [
+                "lists",
+                "copying"
+            ],
+            "Code": "languages = ['English', 'Spanish', 'German']\nmore_languages = ['English', 'Spanish', 'German']\nextra_languages = more_languages\n\nx = more_languages == languages\ny = more_languages is languages\nprint(x, y)",
+            "Question": "What is the expected output of this code?",
+            "Answer": "True False",
+            "Distractor1": "True True",
+            "Distractor2": "False False",
+            "Distractor3": "False True",
+            "Video": "",
+            "Difficulty": 2
         },
         "pcep.3.1.2": {
             "Tags": [
@@ -813,6 +953,183 @@
             "Video": "",
             "Difficulty": 1.5
         },
+        "pcep.3.1.20": {
+            "Tags": [
+                "lists",
+                "cloning"
+            ],
+            "Code": "languages = ['English', 'Spanish', 'German']\nmore_languages = languages\nextra_languages = more_languages\n\nx = more_languages == languages\ny = more_languages is languages\nprint(x, y)",
+            "Question": "What is the expected output of this code?",
+            "Answer": "True True",
+            "Distractor1": "True False",
+            "Distractor2": "False True",
+            "Distractor3": "False False",
+            "Video": "",
+            "Difficulty": 2
+        },
+        "pcep.3.1.3": {
+            "Tags": [
+                "lists",
+                "boolean expressions"
+            ],
+            "Code": "lst = [True, 3.14, -1]\nx=-1 in lst\ny= lst.index(-1) not in lst\nz = lst[lst[-1]]==-1\nt = len(lst[0:2])==1\nprint(x, y, z, t)",
+            "Question": "What is the expected output of this code?",
+            "Answer": "True True True False",
+            "Distractor1": "True True False True",
+            "Distractor2": "False True False True",
+            "Distractor3": "True False True False",
+            "Video": "",
+            "Difficulty": 2.5
+        },
+        "pcep.3.1.4": {
+            "Tags": [
+                "lists",
+                "copying",
+                "slicing",
+                "boolean operators"
+            ],
+            "Code": "lst1 = [13, 17, 23, 42, 'a', False]\nlst2 = lst1[:]\nprint(lst1 is lst2)\nprint(lst1 == lst2)",
+            "Question": "What is the expected output of this code?",
+            "Answer": "False True",
+            "Distractor1": "False False",
+            "Distractor2": "True False",
+            "Distractor3": "True True",
+            "Video": "",
+            "Difficulty": 2
+        },
+        "pcep.3.1.5": {
+            "Tags": [
+                "lists",
+                "nested lists",
+                "indexing",
+                "for"
+            ],
+            "Code": "list=[[1, 2, 3, 4]]\nresult=1\n \nfor i in range(1):\n  result *=10\n  for j in range(1):\n    list[i][j]*=result\n      \nprint(list)",
+            "Question": "What is the expected output of this code?",
+            "Answer": "[[10, 2, 3, 4]]",
+            "Distractor1": "[[1, 20, 3, 4]]",
+            "Distractor2": "[1, 2, 3, 4]",
+            "Distractor3": "[[10, 20, 30, 40]]",
+            "Video": "",
+            "Difficulty": 2
+        },
+        "pcep.3.1.6": {
+            "Tags": [
+                "lists",
+                "boolean operators",
+                "cloning"
+            ],
+            "Code": "lst1 = [1,2,3]\nlst2 = lst1\n\nprint(lst1 is lst2)",
+            "Question": "What is the expected output of this code?",
+            "Answer": "True",
+            "Distractor1": "False",
+            "Distractor2": "[1,2,3] [1,2,3]",
+            "Distractor3": "FALSE",
+            "Video": "",
+            "Difficulty": 1.5
+        },
+        "pcep.3.1.7": {
+            "Tags": [
+                "lists",
+                "len"
+            ],
+            "Code": "data = [1, 2, 'a', None, (), [], ]\nprint(len(data))",
+            "Question": "What is the expected output of this code?",
+            "Answer": "6",
+            "Distractor1": "5",
+            "Distractor2": "7",
+            "Distractor3": "3",
+            "Video": "",
+            "Difficulty": 1.5
+        },
+        "pcep.3.1.8": {
+            "Tags": [
+                "lists",
+                "list comprehensions"
+            ],
+            "Code": "lst = [x for x in range(5)]\nprint(lst)",
+            "Question": "What is the expected output of this code?",
+            "Answer": "[0,1,2,3,4]",
+            "Distractor1": "[1,2,3,4,5]",
+            "Distractor2": "[1,2,3,4]",
+            "Distractor3": "['x', 'x', 'x', 'x', 'x']",
+            "Video": "",
+            "Difficulty": 2.5
+        },
+        "pcep.3.1.9": {
+            "Tags": [
+                "lists",
+                "slicing",
+                "copying",
+                "for",
+                "if"
+            ],
+            "Code": "x = [False, True, True, False, True]\ny = x[:]\ni = 0\n\nfor j in y[2:]:\n  if j:\n    i +=1\n      \nprint(i)",
+            "Question": "What is the expected output of this code?",
+            "Answer": "2",
+            "Distractor1": "3",
+            "Distractor2": "0",
+            "Distractor3": "1",
+            "Video": "",
+            "Difficulty": 2.5
+        },
+        "pcep.3.2.1": {
+            "Tags": [
+                "tuples",
+                "concatenation"
+            ],
+            "Code": "x = '1', '2'\ny = ('3', '4')\nprint(x + y)",
+            "Question": "What is the expected output of this code?",
+            "Answer": "('1', '2', '3', '4')",
+            "Distractor1": "10",
+            "Distractor2": "('1', '2')('3', '4')",
+            "Distractor3": "This code is erroneous",
+            "Video": "",
+            "Difficulty": 1.5
+        },
+        "pcep.3.2.2": {
+            "Tags": [
+                "tuples",
+                "concatenation"
+            ],
+            "Code": "tup = (1, ) + (2, ) + (3,)\n\ntup = tup + tup\n\nprint(len(tup))",
+            "Question": "What is the expected output of this code?",
+            "Answer": "6",
+            "Distractor1": "(1, 2, 3, 1, 2, 3)",
+            "Distractor2": "3",
+            "Distractor3": "(1, 2, 3)",
+            "Video": "",
+            "Difficulty": 2
+        },
+        "pcep.3.2.3": {
+            "Tags": [
+                "tuples",
+                "slicing",
+                "indexing"
+            ],
+            "Code": "data = (1, 2, 8, 16)\ndata = data[-2:-1]\ndata = data[-1]\nprint(data)",
+            "Question": "What is the expected output of this code?",
+            "Answer": "8",
+            "Distractor1": "(8, 16)",
+            "Distractor2": "16",
+            "Distractor3": "This code is erroneous",
+            "Video": "",
+            "Difficulty": 2
+        },
+        "pcep.3.2.4": {
+            "Tags": [
+                "tuples",
+                "concatenation"
+            ],
+            "Code": "x = (1, 2)\ny = ('x', 'y', 42)\nz = x + y * 2\nprint(z)",
+            "Question": "What is the expected output of this code?",
+            "Answer": "(1, 2, 'x', 'y', 42, 'x', 'y', 42)",
+            "Distractor1": "(1, 2, 'x', 'y', 84)",
+            "Distractor2": "(1, 2, 'x', 'y', 42, 1, 2, 'x', 'y', 42)",
+            "Distractor3": "This code raises a TypeError",
+            "Video": "",
+            "Difficulty": 2
+        },
         "pcep.3.3.1": {
             "Tags": [
                 "dictionaries",
@@ -828,6 +1145,105 @@
             "Distractor3": "15520977",
             "Video": "",
             "Difficulty": 1.5
+        },
+        "pcep.3.3.2": {
+            "Tags": [
+                "dictionaries",
+                "cloning"
+            ],
+            "Code": "dict1 = {7: 'Java', 4: 'JavaScript', 3: 'Python', 1:\"C#\"}\n \ndict2 = dict1\ndel dict1\n \nprint(dict2)dict1 = {7: 'Java', 4: 'JavaScript', 3: 'Python', 1:\"C#\"}",
+            "Question": "What is the expected output of this code?",
+            "Answer": "{7: 'Java', 4: 'JavaScript', 3: 'Python', 1: 'C#'}",
+            "Distractor1": "{}",
+            "Distractor2": "{7: 'Java', 4: 'JavaScript', 3: 'Python'}",
+            "Distractor3": "This code is erroneous",
+            "Video": "",
+            "Difficulty": 2.5
+        },
+        "pcep.3.3.3": {
+            "Tags": [
+                "dictionaries",
+                "indexing"
+            ],
+            "Code": "d={\"one\":\"two\", \"two\":\"None\"}\nkey=\"one\"\nkey=d[key]\nkey=d[key]\nprint(key)",
+            "Question": "What is the expected output of this code?",
+            "Answer": "None",
+            "Distractor1": "one",
+            "Distractor2": "two",
+            "Distractor3": "This code is erroneous",
+            "Video": "",
+            "Difficulty": 2
+        },
+        "pcep.3.3.4": {
+            "Tags": [
+                "dictionaries",
+                "KeyError"
+            ],
+            "Code": "animals = {'Tom': 10, 'Jerry': 20}\nprint(animals[20])",
+            "Question": "What is the expected output of this code?",
+            "Answer": "This code raises KeyError",
+            "Distractor1": "This code raises IndexError",
+            "Distractor2": "This code raises ValueError",
+            "Distractor3": "Jerry",
+            "Video": "",
+            "Difficulty": 2
+        },
+        "pcep.3.3.5": {
+            "Tags": [
+                "dictionaries"
+            ],
+            "Code": "dic = {'one': 1, 'two': 7, 'three': 3}\n \ndic['two'] = 4\ndic[7] = 'seven'\n   \nprint(dic)",
+            "Question": "What is the expected output of this code?",
+            "Answer": "{'one': 1, 'two': 4, 'three': 3, 7: 'seven'}",
+            "Distractor1": "{'one': 1, 'two': 7, 'three': 3}",
+            "Distractor2": "{'one': 1, 'two': 7, 'three': 3, 4: 'four'}",
+            "Distractor3": "This code is erroneous",
+            "Video": "",
+            "Difficulty": 2.5
+        },
+        "pcep.3.4.1": {
+            "Tags": [
+                "strings",
+                "concatenation",
+                "indexing",
+                "len"
+            ],
+            "Code": "string1 = 'Petrol'\nstring2 = string1[0] + string1[-4] * len(string1)\nprint(string2)",
+            "Question": "What is the expected output of this code?",
+            "Answer": "Ptttttt",
+            "Distractor1": "Petrol",
+            "Distractor2": "Poooooo",
+            "Distractor3": "This code is erroneous",
+            "Video": "",
+            "Difficulty": 2
+        },
+        "pcep.3.4.2": {
+            "Tags": [
+                "dictionaries",
+                "indexing",
+                "for"
+            ],
+            "Code": "d = {}\nd[1] = 7\nd['1'] = 8\nd[1] -= 4\n \ns = 0\n \nfor i in d:\n  s += d[i]\n \nprint(s)",
+            "Question": "What is the expected output of this code?",
+            "Answer": "11",
+            "Distractor1": "10",
+            "Distractor2": "12",
+            "Distractor3": "9",
+            "Video": "",
+            "Difficulty": 2.5
+        },
+        "pcep.3.4.3": {
+            "Tags": [
+                "dictionaries"
+            ],
+            "Code": "data = {}\ndata[0] = 'Math'\ndata['Languages'] = ['English', 'Serbian']\nprint(data)",
+            "Question": "What is the expected output of this code?",
+            "Answer": "{0: 'Math', 'Languages': ['English', 'Serbian']}",
+            "Distractor1": "'Math'",
+            "Distractor2": "['English, 'Serbian']",
+            "Distractor3": "This code rises an exception as dictionaries are immutable.",
+            "Video": "",
+            "Difficulty": 2
         },
         "pcep.4.1.1": {
             "Tags": [
@@ -874,6 +1290,21 @@
             "Distractor3": "This code is erroneous",
             "Video": "",
             "Difficulty": 2
+        },
+        "pcep.4.3.1": {
+            "Tags": [
+                "lists",
+                "insert",
+                "NameError"
+            ],
+            "Code": "my_list = [9, 15, 8, 15]\n\nmy_list.insert(2, 6)\ninsert.my_list(3, 2)\ny_list[2] = 6\ny_list.insert(4, 3)\n\nprint(my_list)",
+            "Question": "What is the expected output of this code?",
+            "Answer": "This code raises a NameError",
+            "Distractor1": "[9, 15, 6, 2, 3, 8, 15]",
+            "Distractor2": "This code raises an IndexError",
+            "Distractor3": "[9, 15, 8, 15]",
+            "Video": "",
+            "Difficulty": 3
         }
     }
 }
