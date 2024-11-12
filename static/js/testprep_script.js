@@ -228,7 +228,8 @@ function updateXP(questionId, content, subject, difficulty, status) {
     // Apply the multiplier to the XP change
     dXP = dXP * multiplier;
     dXP = Math.round(dXP * 100) / 100;
-    let dXP_possible = Math.round(((Number(difficulty) / 3) * multiplier) * 100) / 100;
+    let dXP_accrued = Math.max(dXP, 0);
+    let dXP_possible = ((Number(difficulty) / 3) * multiplier);
 
     // Get the current XP data from localStorage, or initialize it if it doesn't exist
     let xpData = JSON.parse(localStorage.getItem('xp')) || {
@@ -254,11 +255,11 @@ function updateXP(questionId, content, subject, difficulty, status) {
     localStorage.setItem('xp', JSON.stringify(xpData));
     
     // Update content score
-    updateContentScores(content, dXP, dXP_possible);
+    updateContentScores(content, dXP_accrued, dXP_possible);
     
     // Update curriculum score
     let currentCurriculum = localStorage.getItem('currentCurriculum');
-    updateCurriculumScores(currentCurriculum, dXP, dXP_possible);
+    updateCurriculumScores(currentCurriculum, dXP_accrued, dXP_possible);
     
     // Update the XP data bar
     updateXPDisplay(content)
@@ -421,6 +422,9 @@ function nextQuestion() {
         const nextQuestionId = questionsList[currentQuestionIndex];
         localStorage.setItem('currentQuestionId', nextQuestionId);
         fetchAndUpdateQuestion(nextQuestionId);
+        
+        // Update the curriculum score display
+        document.getElementById('curriculumScore').textContent = curriculumScore + '%';
 
     } else {
         // Find the next unanswered question in the current curriculum
