@@ -1,5 +1,49 @@
 {
     "questions": {
+        "4.1.5": {
+            "Tags": [
+                "functions",
+                "return",
+                "recursion"
+            ],
+            "Code": "def f(x):\n    if x == 1:\n        return 1\n    else:\n        return x * f(x - 1)\n \nx = 5\nprint(\"The result is\", f(x))",
+            "Question": "What is the expected output of this code?",
+            "Answer": "The result is 120",
+            "Distractor1": "The result is 0",
+            "Distractor2": "The result is 15",
+            "Distractor3": "15",
+            "Video": "",
+            "Difficulty": 3
+        },
+        "4.3.2": {
+            "Tags": [
+                "exceptions",
+                "abstract exceptions"
+            ],
+            "Code": "try:\n  print(42/0) \nexcept (ZeroDivisionError):\n  print(\"Zero division\")\nexcept: \n  print(\"You made a mistake\")\nexcept (ValueError):\n  print(\"Boo!\")",
+            "Question": "What is the expected output of this code?",
+            "Answer": "This code raises an unhandled exception",
+            "Distractor1": "Zero division",
+            "Distractor2": "Boo!",
+            "Distractor3": "You made a mistake",
+            "Video": "",
+            "Difficulty": 3
+        },
+        "pcep 4.3.13": {
+            "Tags": [
+                "exceptions",
+                "exception hierarchy",
+                "KeyError"
+            ],
+            "Code": "try:\n    x = {\"Spring\": 66, \"Summer\": 94}\n    y = x[\"Winter\"] * 2\n\nexcept KeyError as ke:\n    print(\"KeyError:\", ke)\n\nexcept IndexError as ie:\n    print(\"IndexError:\", ie)\n\nexcept LookupError as le:\n    print(\"LookuError:\", le)\n\nexcept:\n    print(\"An unexpected error has occurred\")",
+            "Question": "Which exception branch will handle this error?",
+            "Answer": "KeyError",
+            "Distractor1": "IndexError",
+            "Distractor2": "LookupError",
+            "Distractor3": "abstract except",
+            "Video": "",
+            "Difficulty": 1.5
+        },
         "pcep.1.1.1": {
             "Tags": [
                 ""
@@ -686,7 +730,7 @@
             "Question": "What is the value of others?",
             "Answer": "3",
             "Distractor1": "1",
-            "Distractor2": "3",
+            "Distractor2": "2",
             "Distractor3": "This code is erroneous",
             "Video": "",
             "Difficulty": 1.5
@@ -1261,6 +1305,126 @@
             "Video": "",
             "Difficulty": 2
         },
+        "pcep.4.1.10": {
+            "Tags": [
+                "functions",
+                "return"
+            ],
+            "Code": "def test(x):\n  return 42 if x % 3 != 0 else 13\n \nprint(test(test(100)))",
+            "Question": "What is the expected output of this code?",
+            "Answer": "13",
+            "Distractor1": "42",
+            "Distractor2": "1",
+            "Distractor3": "This code is erroneous",
+            "Video": "",
+            "Difficulty": 2
+        },
+        "pcep.4.1.11": {
+            "Tags": [
+                "functions",
+                "return",
+                "if",
+                "recursion"
+            ],
+            "Code": "def f(x):\n  if x == 0:\n    return 1\n  return x + f(x-1)\n   \nprint(f(4))",
+            "Question": "What is the expected output of this code?",
+            "Answer": "11",
+            "Distractor1": "10",
+            "Distractor2": "12",
+            "Distractor3": "24",
+            "Video": "",
+            "Difficulty": 3
+        },
+        "pcep.4.1.12": {
+            "Tags": [
+                "functions",
+                "scope"
+            ],
+            "Code": "def change(a, b):\n  a, b = b, a\n \na = 13\nb = 42\nchange(a, b)\nprint(a, b)",
+            "Question": "What is the expected output of this code?",
+            "Answer": "13 42",
+            "Distractor1": "42 13",
+            "Distractor2": "13 13",
+            "Distractor3": "42 42",
+            "Video": "",
+            "Difficulty": 1.5
+        },
+        "pcep.4.1.13": {
+            "Tags": [
+                "functions",
+                "scope",
+                "global"
+            ],
+            "Code": "def fun():\n  ???\n  x *= 2\n\nx = 6\nfun()\nprint(x)",
+            "Question": "Which expression is needed for ??? so that this code prints 12?",
+            "Answer": "global x",
+            "Distractor1": "x = 6",
+            "Distractor2": "x == 6",
+            "Distractor3": "return x",
+            "Video": "",
+            "Difficulty": 2
+        },
+        "pcep.4.1.14": {
+            "Tags": [
+                "functions",
+                "scope"
+            ],
+            "Code": "x = 17\n \ndef f():\n  if x >= 10:\n    x += 10\n\nf()\nprint(x)",
+            "Question": "What is the expected output of this code?",
+            "Answer": "This code is erroneous",
+            "Distractor1": "27",
+            "Distractor2": "17",
+            "Distractor3": "7",
+            "Video": "",
+            "Difficulty": 2
+        },
+        "pcep.4.1.15": {
+            "Tags": [
+                "functions",
+                "return",
+                "TypeError"
+            ],
+            "Code": "def f(x):\n  if x % 2 == 0:\n    return 1\n  else:\n    return\n \nprint(f(f(2)) + 11)",
+            "Question": "What is the expected output of this code?",
+            "Answer": "TypeError",
+            "Distractor1": "ValueError",
+            "Distractor2": "13",
+            "Distractor3": "11",
+            "Video": "",
+            "Difficulty": 3
+        },
+        "pcep.4.1.16": {
+            "Tags": [
+                "functions",
+                "lists",
+                "pop",
+                "del"
+            ],
+            "Code": "data = [1, 2, 3, 4, 5]\n \ndef test(x):\n  del x[0]\n  x.pop(2)\n \ntest(data)\nprint(data) ",
+            "Question": "What is the expected output of this code?",
+            "Answer": "[2, 3, 5]",
+            "Distractor1": "[3, 4, 5]",
+            "Distractor2": "[1, 2, 3, 4, 5]",
+            "Distractor3": "This code is erroneous",
+            "Video": "",
+            "Difficulty": 2.5
+        },
+        "pcep.4.1.17": {
+            "Tags": [
+                "functions",
+                "lists",
+                "scope",
+                "mutability"
+            ],
+            "Code": "def func(a):\n  a[3]='shark'\n \nx = ['cat', 'dog', 'mouse', 'cow']\nfunc(x)\nprint(x)",
+            "Question": "What is the expected output of this code?",
+            "Answer": "['cat', 'dog', 'mouse', 'shark']",
+            "Distractor1": "['cat', 'dog', 'mouse', 'cow']",
+            "Distractor2": "['shark']",
+            "Distractor3": "['cat', 'dog', 'mouse', 'cow', 'shark']",
+            "Video": "",
+            "Difficulty": 2
+        },
         "pcep.4.1.2": {
             "Tags": [
                 "functions",
@@ -1291,6 +1455,211 @@
             "Video": "",
             "Difficulty": 2
         },
+        "pcep.4.1.4": {
+            "Tags": [
+                "functions",
+                "return"
+            ],
+            "Code": "def f(x):\n    return x ** 3 - 24\n\nprint(f(f(f(3))))",
+            "Question": "What is the expected output of this code?",
+            "Answer": "3",
+            "Distractor1": "0",
+            "Distractor2": "24",
+            "Distractor3": "15",
+            "Video": "",
+            "Difficulty": 1.5
+        },
+        "pcep.4.1.5": {
+            "Tags": [
+                "functions",
+                "while"
+            ],
+            "Code": "x=123\n\ndef f(y):\n  sum=0\n  while (y!=0):\n    sum+=int(y%10)\n    y=int(y/10)\n  print(sum)\n  \nf(x)",
+            "Question": "What is the expected output of this code?",
+            "Answer": "6",
+            "Distractor1": "5",
+            "Distractor2": "4",
+            "Distractor3": "0",
+            "Video": "",
+            "Difficulty": 3
+        },
+        "pcep.4.1.6": {
+            "Tags": [
+                "functions"
+            ],
+            "Code": "def test():\n  x = 'Pink Floyd'\n  print(x)\n \nx = 'Led Zeppelin'\ntest()",
+            "Question": "What is the expected output of this code?",
+            "Answer": "Pink Floyd",
+            "Distractor1": "Led Zeppelin",
+            "Distractor2": "x",
+            "Distractor3": "This code is erroneous",
+            "Video": "",
+            "Difficulty": 1
+        },
+        "pcep.4.1.7": {
+            "Tags": [
+                "functions",
+                "scope",
+                "global"
+            ],
+            "Code": "def t(y):\n  global x\n  x += y    \n \nx = 12\nt(3)\nprint(x)",
+            "Question": "What is the expected output of this code?",
+            "Answer": "15",
+            "Distractor1": "12",
+            "Distractor2": "3",
+            "Distractor3": "9",
+            "Video": "",
+            "Difficulty": 2
+        },
+        "pcep.4.1.8": {
+            "Tags": [
+                "functions",
+                "for"
+            ],
+            "Code": "def f(x):\n  res = '*'\n  for _ in range(x):\n    res += res\n  return res\n \nfor x in f(3):\n  print(x, end='-')",
+            "Question": "What is the expected output of this code?",
+            "Answer": "*-*-*-*-*-*-*-*-",
+            "Distractor1": "********",
+            "Distractor2": "*-*-*-",
+            "Distractor3": "*-*-*-*-*-*-",
+            "Video": "",
+            "Difficulty": 3
+        },
+        "pcep.4.1.9": {
+            "Tags": [
+                "functions",
+                "return",
+                "for",
+                "if"
+            ],
+            "Code": "def average_of_evens(numbers):\n    total = 0\n    count = 0\n    for num in numbers:\n        if num % 2 == 0:\n            total += num\n            count += 1\n    if count == 0:\n        return None\n    else:\n        return total / count\n \nprint(average_of_evens([1,2,3,4]))",
+            "Question": "What is the expected output of this code?",
+            "Answer": "3.0",
+            "Distractor1": "5",
+            "Distractor2": "3.5",
+            "Distractor3": "3",
+            "Video": "",
+            "Difficulty": 3
+        },
+        "pcep.4.2.1": {
+            "Tags": [
+                "functions",
+                "scope",
+                "global"
+            ],
+            "Code": "str = \"Hello\"\ndef f():\n    global str\n    str=str*2\n    print(str, end=\" \")\n\nf()\nprint(str)",
+            "Question": "What is the expected output of this code?",
+            "Answer": "HelloHello HelloHello",
+            "Distractor1": "Hello",
+            "Distractor2": "HelloHello",
+            "Distractor3": "This code is erroneous",
+            "Video": "",
+            "Difficulty": 2
+        },
+        "pcep.4.2.2": {
+            "Tags": [
+                "functions",
+                "scope"
+            ],
+            "Code": "msg = \"Hello\"\ndef f(msg):\n    msg=msg*2\n    print(msg, end=\" \")\n\nf(\"Goodbye\")\nprint(msg)",
+            "Question": "What is the expected output of this code?",
+            "Answer": "GoodbyeGoodbye Hello",
+            "Distractor1": "HelloHello Hello",
+            "Distractor2": "HelloHello HelloHello",
+            "Distractor3": "This code is erroneous",
+            "Video": "",
+            "Difficulty": 2
+        },
+        "pcep.4.2.3": {
+            "Tags": [
+                "functions",
+                "scope"
+            ],
+            "Code": "msg = \"Hello\"\ndef f():\n    msg=msg*2\n    print(msg, end=\" \")\n\nf()\nprint(msg)",
+            "Question": "What is the expected output of this code?",
+            "Answer": "This code is Erroneous",
+            "Distractor1": "HelloHello Hello",
+            "Distractor2": "HelloHello HelloHello",
+            "Distractor3": "msg",
+            "Video": "",
+            "Difficulty": 2
+        },
+        "pcep.4.2.4": {
+            "Tags": [
+                "functions",
+                "global",
+                "scope"
+            ],
+            "Code": "x = 13\n\ndef change():\n    global x\n    print(x, end=\" \")\n    x = 42\n    print(x, end=\" \")\n\nchange()\nprint(x)",
+            "Question": "What is the expected output of this code?",
+            "Answer": "13 42 42",
+            "Distractor1": "13 13 42",
+            "Distractor2": "13 42 13",
+            "Distractor3": "This code is erroneous",
+            "Video": "",
+            "Difficulty": 2
+        },
+        "pcep.4.2.5": {
+            "Tags": [
+                "functions",
+                "return",
+                "keyword",
+                "default parameter values"
+            ],
+            "Code": "def f(x=2, y=2):\n  return x ** y-3\n \nprint(f(y=3))",
+            "Question": "What is the expected output of this code?",
+            "Answer": "5",
+            "Distractor1": "1",
+            "Distractor2": "0",
+            "Distractor3": "This code is erroneous",
+            "Video": "",
+            "Difficulty": 2
+        },
+        "pcep.4.2.6": {
+            "Tags": [
+                "functions",
+                "lists",
+                "scope"
+            ],
+            "Code": "def f(x):\n  x=['a', 'b', 'c', 'd', 'e']\n  print(x, end=\" \")\n \nx=['p','q','r']\nf(x)\nprint(x)",
+            "Question": "What is the expected output of this code?",
+            "Answer": "['a', 'b', 'c', 'd', 'e'] ['p', 'q', 'r']",
+            "Distractor1": "['p','q', 'r'] ['p', 'q', 'r']",
+            "Distractor2": "['a', 'b', 'c', 'd', 'e'] ['a', 'b', 'c', 'd', 'e']",
+            "Distractor3": "This code is erroneous",
+            "Video": "",
+            "Difficulty": 2.5
+        },
+        "pcep.4.2.7": {
+            "Tags": [
+                "functions",
+                "default parameter values",
+                "keyword"
+            ],
+            "Code": "def funct(x=13, y=42, z=0):\n  x = x + y + z\n  y -= 11\n  z +=10\n  print(x, y, z)\n \nfunct(3, 2, 1)",
+            "Question": "What is the expected output of this code?",
+            "Answer": "6 -9 11",
+            "Distractor1": "55 31 10",
+            "Distractor2": "6 13 11",
+            "Distractor3": "16 31 10",
+            "Video": "",
+            "Difficulty": 3
+        },
+        "pcep.4.2.8": {
+            "Tags": [
+                "functions",
+                "keyword",
+                "defaut parameter values"
+            ],
+            "Code": "def test(a, b, c=0, d=4):\n    pass",
+            "Question": "Which of the following will call the test function without error?",
+            "Answer": "test(b=4, a=6)",
+            "Distractor1": "test()",
+            "Distractor2": "test(a=6, c=2, d=4)",
+            "Distractor3": "test(3, c=3)",
+            "Video": "",
+            "Difficulty": 2.5
+        },
         "pcep.4.3.1": {
             "Tags": [
                 "lists",
@@ -1305,6 +1674,152 @@
             "Distractor3": "[9, 15, 8, 15]",
             "Video": "",
             "Difficulty": 3
+        },
+        "pcep.4.3.10": {
+            "Tags": [
+                "exceptions",
+                "exception hierarchy",
+                "TypeError"
+            ],
+            "Code": "try:\n    result = 10 / \"0\"\n\nexcept ZeroDivisionError as ze:\n    print(\"Handled ZeroDivisionError:\", ze)\n\nexcept ValueError as ve:\n    print(\"Handled ValueError:\", ve)\n\nexcept TypeError as te:\n    print(\"Handled TypeError:\", te)\n    \nexcept:\n    print(\"An unexpected error occurred\")",
+            "Question": "Which exception branch will handle this error?",
+            "Answer": "TypeError",
+            "Distractor1": "ZeroDivisionError",
+            "Distractor2": "ValueError",
+            "Distractor3": "abstract except",
+            "Video": "",
+            "Difficulty": 1.5
+        },
+        "pcep.4.3.11": {
+            "Tags": [
+                "exceptions",
+                "exception hierarchy",
+                "ValueError"
+            ],
+            "Code": "try:\n    result = float(\"zero\")\n\nexcept ArithmeticError as ze:\n    print(\"Handled ZeroDivisionError:\", ze)\n\nexcept ValueError as ve:\n    print(\"Handled ValueError:\", ve)\n\nexcept TypeError as te:\n    print(\"Handled TypeError:\", te)\n    \nexcept:",
+            "Question": "Which exception branch will handle this error?",
+            "Answer": "ValueError",
+            "Distractor1": "ArithmeticError",
+            "Distractor2": "TypeError",
+            "Distractor3": "abstract except",
+            "Video": "",
+            "Difficulty": 1.5
+        },
+        "pcep.4.3.12": {
+            "Tags": [
+                "exceptions",
+                "exception hierarchy",
+                "IndexError"
+            ],
+            "Code": "try:\n    x = [4,9,3]\n    y = x[3] * 2\n\nexcept KeyError as ke:\n    print(\"KeyError:\", ke)\n\nexcept IndexError as ie:\n    print(\"IndexError:\", ie)\n\nexcept LookupError as le:\n    print(\"LookuError:\", le)\n\nexcept:\n    print(\"An unexpected error has occurred\")",
+            "Question": "Which exception branch will handle this error?",
+            "Answer": "IndexError",
+            "Distractor1": "KeyError",
+            "Distractor2": "LookupError",
+            "Distractor3": "abstract exception",
+            "Video": "",
+            "Difficulty": 1.5
+        },
+        "pcep.4.3.14": {
+            "Tags": [
+                "exceptions",
+                "exception hierarchy",
+                "LookupError"
+            ],
+            "Code": "try:\n    x = {\"Spring\": 66, \"Summer\": 94}\n    y = x[\"Winter\"] * 2\n\nexcept LookupError as le:\n    print(\"LookupError:\", le)\n\nexcept KeyError as ke:\n    print(\"KeyError:\", ke)\n\nexcept IndexError as ie:\n    print(\"IndexError:\", ie)\n\nexcept:\n    print(\"An unexpected error has occurred\")",
+            "Question": "Which exception branch will handle this error?",
+            "Answer": "LookupError",
+            "Distractor1": "KeyError",
+            "Distractor2": "IndexError",
+            "Distractor3": "abstract except",
+            "Video": "",
+            "Difficulty": 2
+        },
+        "pcep.4.3.3": {
+            "Tags": [
+                "exceptions",
+                "exception hierarchy"
+            ],
+            "Code": "answer1 = issubclass(ValueError, Exception)\n\nanswer2 = issubclass(Exception, BaseException)\n\nprint(answer1, answer2)",
+            "Question": "Is ValueError a subclass of Exception?  And, is Exception a subclass of BaseException?",
+            "Answer": "True True",
+            "Distractor1": "True False",
+            "Distractor2": "False True",
+            "Distractor3": "False False",
+            "Video": "",
+            "Difficulty": 0.5
+        },
+        "pcep.4.3.4": {
+            "Tags": [
+                "exceptions",
+                "SystemExit"
+            ],
+            "Code": "import sys\n\nx = 100\n\ntry:\n  if x >= 100:\n    sys.exit()\n    \nexcept SystemExit as e:\n  print(\"sys.exit has been invoked\")",
+            "Question": "When a program is terminated using sys.exit(), a SystemExit exception is raised, true or false?",
+            "Answer": "True",
+            "Distractor1": "False",
+            "Distractor2": "n/a",
+            "Distractor3": "n/a",
+            "Video": "",
+            "Difficulty": 1
+        },
+        "pcep.4.3.5": {
+            "Tags": [
+                "exceptions",
+                "KeyboardInterrupt"
+            ],
+            "Code": "import time\n\ntry:\n    while True:\n        print(\"Running... Press Ctrl+C to stop.\")\n        time.sleep(1)\n        \nexcept KeyboardInterrupt:\n    print(\"\\nProgram was interrupted by the user. Exiting gracefully.\")\n",
+            "Question": "This code creates an infinite loop. If the user interrupts the program using Ctrl+C, it will raise a KeyboardInterrupt exception, true or false?",
+            "Answer": "True",
+            "Distractor1": "False",
+            "Distractor2": "n/a",
+            "Distractor3": "n/a",
+            "Video": "",
+            "Difficulty": 1
+        },
+        "pcep.4.3.6": {
+            "Tags": [
+                "exceptions",
+                "abstract exceptions"
+            ],
+            "Code": "try:\n  x = int(input(\"Enter a number\"))\n  \nexcept TypeError:\n  print(\"A type error has occurred\")\n  \nexcept:\n  print(\"An abstract error has occurred\")",
+            "Question": "Assuming the user input the letter \"p\", what is the output of this code?",
+            "Answer": "An abstract error has occurred",
+            "Distractor1": "A type error has occurred",
+            "Distractor2": "An unhandled exception will occur",
+            "Distractor3": "p",
+            "Video": "",
+            "Difficulty": 1
+        },
+        "pcep.4.3.7": {
+            "Tags": [
+                "exceptions",
+                "exception hierarchy",
+                "ArithmeticError"
+            ],
+            "Code": "try:\n    result = 10 / 0\n    \nexcept ArithmeticError as ae:\n    print(\"Handled ArithmeticError:\", ae)\n    \nexcept ValueError as ve:\n    print(\"Handled ValueError:\", ve)\n    \nexcept TypeError as te:\n    print(\"Handled TypeError:\", te)\n    \nexcept:\n    print(\"An unexpected error occurred\")",
+            "Question": "Which exception will handle this error?",
+            "Answer": "ArithmeticError",
+            "Distractor1": "ValueError",
+            "Distractor2": "TypeError",
+            "Distractor3": "abstract exception",
+            "Video": "",
+            "Difficulty": 1.5
+        },
+        "pcep.4.3.9": {
+            "Tags": [
+                "excpetions",
+                "exception hierarchy",
+                "ZeroDivisionError"
+            ],
+            "Code": "try:\n    result = 10 / 0\n    \nexcept ZeroDivisionError as ze:\n    print(\"Handled ZeroDivisionError:\", ze)\n    \nexcept ValueError as ve:\n    print(\"Handled ValueError:\", ve)\n    \nexcept TypeError as te:\n    print(\"Handled TypeError:\", te)\n    \nexcept:\n    print(\"An unexpected error occurred\")",
+            "Question": "Which exception branch will handle this error?",
+            "Answer": "ZeroDivisionError",
+            "Distractor1": "ValueError",
+            "Distractor2": "TypeError",
+            "Distractor3": "abstract exception",
+            "Video": "",
+            "Difficulty": 1.5
         }
     }
 }

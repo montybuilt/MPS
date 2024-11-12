@@ -132,6 +132,26 @@ function rickRoll() {
 
 //--------------------------------------------------------------------------------------
 
+// Initialize the curriculumScores structure in local storage if it doesn't already exist
+(function initializeCurriculumScores() {
+    if (!localStorage.getItem('curriculumScores')) {
+        const initialScores = {};
+        localStorage.setItem('curriculumScores', JSON.stringify(initialScores));
+    }
+})();
+
+//--------------------------------------------------------------------------------------
+
+// Initialize the contentScores structure in local storage if it doesn't already exist
+(function initializeContentScores() {
+    if (!localStorage.getItem('contentScores')) {
+        const initialScores = {};
+        localStorage.setItem('contentScores', JSON.stringify(initialScores));
+    }
+})();
+
+//--------------------------------------------------------------------------------------
+
 // This function checks to see if the question has been previously answered successfully
 
 function checkQuestionStatus(questionId) {
@@ -140,6 +160,49 @@ function checkQuestionStatus(questionId) {
 }
 
 //--------------------------------------------------------------------------------------
+
+// Function to update the curriculumScores collection
+function updateCurriculumScores(curriculumID, XP_earned, XP_possible) {
+    // Get the current curriculumScores from localStorage
+    let curriculumScores = JSON.parse(localStorage.getItem('curriculumScores')) || {};
+
+    // If the curriculum does not exist in curriculumScores, initialize it
+    if (!curriculumScores[curriculumID]) {
+        curriculumScores[curriculumID] = { Earned: 0, Possible: 0 };
+    }
+
+    // Update the Earned and Possible values for the specific curriculum
+    curriculumScores[curriculumID].Earned = parseFloat((curriculumScores[curriculumID].Earned + XP_earned).toFixed(2));
+    curriculumScores[curriculumID].Possible = parseFloat((curriculumScores[curriculumID].Possible + XP_possible).toFixed(2));
+
+    // Save the updated curriculumScores back to localStorage
+    localStorage.setItem('curriculumScores', JSON.stringify(curriculumScores));
+}
+
+//--------------------------------------------------------------------------------------
+
+// Function to update the contentScores collection in localStorage
+function updateContentScores(contentId, XP_earned, XP_possible) {
+    // Retrieve the current contentScores from localStorage
+    let contentScores = JSON.parse(localStorage.getItem('contentScores')) || {};
+
+    // If the contentId doesn't exist in the contentScores collection, initialize it
+    if (!contentScores[contentId]) {
+        contentScores[contentId] = {
+            Earned: 0,
+            Possible: 0
+        };
+    }
+
+    // Update the Earned and Possible values for the specified contentId
+    contentScores[contentId].Earned = parseFloat((contentScores[contentId].Earned + XP_earned).toFixed(2));
+    contentScores[contentId].Possible = parseFloat((contentScores[contentId].Possible + XP_possible).toFixed(2));
+
+    // Save the updated contentScores back to localStorage
+    localStorage.setItem('contentScores', JSON.stringify(contentScores));
+}
+
+//------------------------------------------------------------------------------------------
 
 // Function to calculate the XP change and update the XP storage
 
@@ -165,6 +228,7 @@ function updateXP(questionId, content, subject, difficulty, status) {
     // Apply the multiplier to the XP change
     dXP = dXP * multiplier;
     dXP = Math.round(dXP * 100) / 100;
+    let dXP_possible = Math.round(((Number(difficulty) / 3) * multiplier) * 100) / 100;
 
     // Get the current XP data from localStorage, or initialize it if it doesn't exist
     let xpData = JSON.parse(localStorage.getItem('xp')) || {
@@ -189,8 +253,16 @@ function updateXP(questionId, content, subject, difficulty, status) {
     // Save the updated XP data back to localStorage
     localStorage.setItem('xp', JSON.stringify(xpData));
     
+    // Update content score
+    updateContentScores(content, dXP, dXP_possible);
+    
+    // Update curriculum score
+    let currentCurriculum = localStorage.getItem('currentCurriculum');
+    updateCurriculumScores(currentCurriculum, dXP, dXP_possible);
+    
     // Update the XP data bar
     updateXPDisplay(content)
+    
 
     return dXP; // Return the XP change for display
 }
@@ -219,6 +291,7 @@ function updateNavbarData(questionId) {
 
 // Function to update the XP data bar
 
+// Function to update the XP data bar
 function updateXPDisplay(content) {
     // Retrieve the XP data from local storage
     const xpData = JSON.parse(localStorage.getItem('xp')) || {};
@@ -228,22 +301,33 @@ function updateXPDisplay(content) {
         // Retrieve the overall XP and specific XP values for the content
         const overallXP = xpData.overallXP || 0;
         const contentXP = xpData.certifications[content];
-        console.log("Inside the updateXPDidsplay function")
-        console.log(overallXP, contentXP)
         
         // Update the overall XP display
         document.getElementById('overallXP').textContent = overallXP.toFixed(2);
         
         // Loop through each XP entry in the content-specific XP data
         for (const [key, value] of Object.entries(contentXP)) {
-            // Assuming you have elements with IDs like "xp_X" for each category (e.g., "xp_1", "xp_2")
             const element = document.getElementById(key.toLowerCase());
             if (element) {
                 element.textContent = value.toFixed(2);
             }
         }
     }
+    
+    // Retrieve and display the curriculum score
+    const currentCurriculum = localStorage.getItem('currentCurriculum');
+    const curriculumScores = JSON.parse(localStorage.getItem('curriculumScores')) || {};
+    
+    if (currentCurriculum && curriculumScores[currentCurriculum]) {
+        const earned = curriculumScores[currentCurriculum].Earned || 0;
+        const possible = curriculumScores[currentCurriculum].Possible || 0;
+        const curriculumScore = possible > 0 ? ((earned / possible) * 100).toFixed(2) : '0.00';
+        
+        // Update the curriculum score display
+        document.getElementById('curriculumScore').textContent = curriculumScore + '%';
+    }
 }
+
 
 //--------------------------------------------------------------------------------------
 
