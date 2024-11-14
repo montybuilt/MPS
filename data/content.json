@@ -23,7 +23,7 @@
             "Distractor1": "imports the pandas module with the alias *",
             "Distractor2": "Will raise an unhandled exception",
             "Distractor3": "imports the * module from the pandas package",
-            "Video": "",
+            "Video": "https://www.youtube.com/watch?v=iXIeF2UYkW0",
             "Difficulty": 0.5
         },
         "pcap.1.1.3": {
