@@ -12,8 +12,6 @@ let timeLimit;
 let timerInterval;
 let video;
 
-
-
 //--------------------------------------------------------------------------------------
 
 // Function to start the timer
@@ -624,6 +622,7 @@ document.getElementById("submit-answer").onclick = function() {
             
             updateAnswerStatus(currentQuestionId, "incorrect");
             document.getElementById("submit-answer").disabled = true;
+            document.getElementById("run").disabled = false; // Enable the Run Code button
         }
         
         // Display the video
