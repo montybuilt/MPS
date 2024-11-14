@@ -207,7 +207,7 @@
             "Distractor2": "54",
             "Distractor3": "64.5",
             "Video": "",
-            "Difficulty": 2
+            "Difficulty": 2.5
         },
         "pcep.1.4.3": {
             "Tags": [
@@ -221,7 +221,7 @@
             "Distractor2": "0.0",
             "Distractor3": "16.0",
             "Video": "",
-            "Difficulty": 2
+            "Difficulty": 2.5
         },
         "pcep.1.4.4": {
             "Tags": [
@@ -277,7 +277,7 @@
             "Distractor2": "the smallest number is:  12",
             "Distractor3": "This code is erroneous",
             "Video": "",
-            "Difficulty": 2
+            "Difficulty": 2.5
         },
         "pcep.2.1.11": {
             "Tags": [
@@ -303,7 +303,7 @@
             "Distractor2": "aaaaaaaa",
             "Distractor3": "This code is erroneous",
             "Video": "",
-            "Difficulty": 2
+            "Difficulty": 2.5
         },
         "pcep.2.1.13": {
             "Tags": [
@@ -469,7 +469,7 @@
             "Distractor2": "Hey-Hi",
             "Distractor3": "Hey Hi",
             "Video": "",
-            "Difficulty": 2
+            "Difficulty": 1.5
         },
         "pcep.2.1.5": {
             "Tags": [
