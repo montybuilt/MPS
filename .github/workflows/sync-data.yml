@@ -1,33 +1,34 @@
-name: Sync data to MPS-data repo
+name: Sync data folder to MPS-data repository
 
 on:
   push:
-    branches:
-      - main  # Or whichever branch you're working on
+    paths:
+      - 'data/**'
 
 jobs:
-  sync_data:
+  sync:
     runs-on: ubuntu-latest
+
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v3
+    - name: Checkout main repository
+      uses: actions/checkout@v3
 
-      - name: Set up Git
-        run: |
-          git config --global user.name "montanus-wecib"
-          git config --global user.email "amontanus@wcpss.net"
+    - name: Add remote for MPS-data
+      run: git remote add data https://github.com/montanus-wecib/MPS-data.git
 
-      - name: Clone MPS-data repository
-        run: |
-          git clone https://github.com/montanus-wecib/MPS-data.git data-repo
+    - name: Set up Git
+      run: |
+        git config --global user.name "montanus-wecib"
+        git config --global user.email "amontanus@wcpss.net"
 
-      - name: Copy data files to MPS-data repo
-        run: |
-          cp -r data/* data-repo/
+    - name: Copy data to MPS-data repo
+      run: |
+        git clone https://github.com/montanus-wecib/MPS-data.git
+        cp -r data/* MPS-data/
 
-      - name: Commit and push data to MPS-data repo
-        run: |
-          cd data-repo
-          git add .
-          git commit -m "Sync updated data"
-          git push https://github.com/montanus-wecib/MPS-data.git main
+    - name: Commit and push changes to MPS-data repository
+      run: |
+        cd MPS-data
+        git add .
+        git commit -m "Sync data folder"
+        git push https://github.com/montanus-wecib/MPS-data.git main
