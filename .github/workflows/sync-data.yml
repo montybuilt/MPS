@@ -28,4 +28,3 @@ jobs:
         git add .
         git commit -m "Sync data folder"
         git push https://${{ secrets.GH_TOKEN }}@github.com/montanus-wecib/MPS-data.git HEAD:main
-y
