@@ -18,7 +18,7 @@ jobs:
 
     - name: Set up Git
       run: |
-        git config --global user.name "amontanus@wcpss.net"
+        git config --global user.name "montanus-wecib"
         git config --global user.email "amontanus@wcpss.net"
 
     - name: Copy data to MPS-data repo
