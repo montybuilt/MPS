@@ -14,8 +14,8 @@ jobs:
 
       - name: Set up Git
         run: |
-          git config --global user.name "Your GitHub Username"
-          git config --global user.email "your-email@example.com"
+          git config --global user.name "montanus-wecib"
+          git config --global user.email "amontanus@wcpss.net"
 
       - name: Clone MPS-data repository
         run: |
