@@ -29,4 +29,4 @@ jobs:
         git commit -m "Sync data folder"
         git push https://github.com/montanus-wecib/MPS-data.git HEAD:main
       env:
-        GH_TOKEN: ${{ secrets.GH_TOKEN }}  # Ensure GH_TOKEN is set as a secret in your repository
+        GH_TOKEN: ${{ secrets.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 }}  # Ensure GH_TOKEN is set as a secret in your repository
