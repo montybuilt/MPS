@@ -15,16 +15,23 @@ jobs:
 
     - name: Set up Git
       run: |
-        git config --global user.name "montanus-wecib"
-        git config --global user.email "amontanus@wcpss.net" 
+        git config --global user.name "montanus-wecib"  # Replace with your GitHub username
+        git config --global user.email "amontanus@wcpss.net"  # Replace with your email
 
     - name: Sync data folder
       run: |
-        # Copy the data folder to the MPS-data repo (if this is a separate directory in your project)
+        # Copy the data folder to the MPS-data repo
         cp -r ./data /tmp/data-folder  # Adjust this path to your local data folder
         cd /tmp/data-folder
         git init
         git remote add data https://github.com/montanus-wecib/MPS-data.git  # Use your repo URL
+
+        # Add and commit the changes
         git add .
         git commit -m "Sync data folder"
-        git push https://${{ secrets.GH_TOKEN }}@github.com/montanus-wecib/MPS-data.git HEAD:main
+        
+        # Force push to the remote repo (will overwrite history in MPS-data)
+        git push --force https://github.com/montanus-wecib/MPS-data.git HEAD:main
+      env:
+        GH_TOKEN: ${{ secrets.GH_TOKEN }}  # Ensure GH_TOKEN is set as a secret in your repository
+
