@@ -31,7 +31,7 @@ jobs:
         git commit -m "Sync data folder"
         
         # Force push to the remote repo (will overwrite history in MPS-data)
-        git push --force https://github.com/montanus-wecib/MPS-data.git HEAD:main
+        git push https://$GH_TOKEN@github.com/montanus-wecib/MPS-data.git HEAD:main
       env:
         GH_TOKEN: ${{ secrets.GH_TOKEN }}  # Ensure GH_TOKEN is set as a secret in your repository
 
