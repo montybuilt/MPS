@@ -21,7 +21,7 @@ jobs:
     - name: Sync data folder
       run: |
         # Copy the data folder to the MPS-data repo (if this is a separate directory in your project)
-        cp -r ./path/to/your/data /tmp/data-folder  # Adjust this path to your local data folder
+        cp -r ./data/tmp/data-folder  # Adjust this path to your local data folder
         cd /tmp/data-folder
         git init
         git remote add data https://github.com/montanus-wecib/MPS-data.git  # Use your repo URL
