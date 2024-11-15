@@ -1,0 +1,33 @@
+name: Sync data to MPS-data repo
+
+on:
+  push:
+    branches:
+      - main  # Or whichever branch you're working on
+
+jobs:
+  sync_data:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Set up Git
+        run: |
+          git config --global user.name "Your GitHub Username"
+          git config --global user.email "your-email@example.com"
+
+      - name: Clone MPS-data repository
+        run: |
+          git clone https://github.com/montanus-wecib/MPS-data.git data-repo
+
+      - name: Copy data files to MPS-data repo
+        run: |
+          cp -r data/* data-repo/
+
+      - name: Commit and push data to MPS-data repo
+        run: |
+          cd data-repo
+          git add .
+          git commit -m "Sync updated data"
+          git push https://github.com/montanus-wecib/MPS-data.git main
