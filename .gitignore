@@ -12,6 +12,11 @@ __pycache__/
 .env
 .venv
 
+# Ignore Python virtual environment directories
+venv/
+env/
+mps/bin/
+
 # Ignore temporary IDE files
 .spyderproject
 .spyderworkspace
