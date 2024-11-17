@@ -7,6 +7,7 @@
 *.pyc
 *.pyo
 __pycache__/
+*$py.class
 
 # Ignore environment-specific files
 .env
@@ -20,3 +21,11 @@ mps/bin/
 # Ignore temporary IDE files
 .spyderproject
 .spyderworkspace
+
+# Ignore local system files
+.DS_Store
+*.swp
+*.swo
+
+# Ignore any other unintended local artifacts
+*.log
