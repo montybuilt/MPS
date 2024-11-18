@@ -10,6 +10,7 @@
             "Distractor1": "The matplotlib module resides in the pyplot package",
             "Distractor2": "This is importing the plot module from the matplotlib.pyplot package",
             "Distractor3": "pyplot is the function being imported from module plot in the matplotlib package",
+            "Description": "💡If you see dot notation in an import statement it will always be the form from package.module import item",
             "Video": "",
             "Difficulty": 0.5
         },
@@ -23,6 +24,7 @@
             "Distractor1": "imports the pandas module with the alias *",
             "Distractor2": "Will raise an unhandled exception",
             "Distractor3": "imports the * module from the pandas package",
+            "Description": "💡import * will bring every named item in the module into your project namespace\n\n💡 be careful as this can create name conflicts!",
             "Video": "https://www.youtube.com/watch?v=iXIeF2UYkW0",
             "Difficulty": 0.5
         },
