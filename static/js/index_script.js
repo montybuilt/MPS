@@ -1,4 +1,18 @@
+let isElectron;
+
+// Detect if running in Electron or a web environment
+(function detectEnvironment() {
+    isElectron = typeof window !== 'undefined' && window.process && window.process.versions.electron;
+    console.log("Operating Environment", isElectron);
+})();
+
 document.addEventListener("DOMContentLoaded", function() {
+    // Set the hidden input field for isElectron
+    const isElectronInput = document.getElementById("isElectron");
+    if (isElectronInput) {
+        isElectronInput.value = isElectron; // Set the hidden field to true/false
+    }
+
     // Function to encrypt the password before submitting the login form
     function encryptPassword() {
         const username = document.querySelector('input[name="username"]').value; // Capture the username
@@ -22,3 +36,4 @@ document.addEventListener("DOMContentLoaded", function() {
         });
     }
 });
+

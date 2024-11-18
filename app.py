@@ -1,21 +1,11 @@
 # Import packages
 from flask import Flask, render_template, request, jsonify, session, redirect, url_for
-from modules.helpers import Args, RemoteTemplate, Question, Curriculum, verify, login_required
+from modules.helpers import Question, Curriculum, verify, login_required
 import subprocess
 import logging
 import secrets
 import os
 import json
-
-# Check for appropriate source of files
-try:
-    args = Args()
-except:
-    print("Setting source to default of 'local'")
-    source = 'local'
-else:
-    source = args.source
-    print(f" * Server using {source} files")
 
 # Create the flask object
 app = Flask(__name__)
@@ -52,6 +42,8 @@ def login():
     # get the username and password form the form post
     username = request.form['username']
     password = request.form['password']
+    is_electron = request.form.get('isElectron', 'false') == 'true'
+    app.logger.debug(f"Electron Environment? {is_electron}")
     
     # Call the verify function to check credentials
     if verify(username, password):
@@ -77,11 +69,7 @@ def logout():
 def testprep():
     
     username = session.get('username')
-    
-    if source == 'local':
-        return render_template("testprep.html", username=username)
-    else:
-        return RemoteTemplate("testprep").text
+    return render_template("testprep.html", username=username)
     
 @app.route('/test_request', methods=['POST'])
 def test_request():
@@ -95,7 +83,7 @@ def test_request():
     app.logger.debug(f"Question ID: {question_id}, Type: {type(question_id)}")
     
     # create a question object that retrieves the question data as an attribute
-    question_data = Question(question_id, source)
+    question_data = Question(question_id)
     question_data = question_data.data
     
     # Respond to the request by returning the data as a json
@@ -114,7 +102,7 @@ def get_curriculum():
     app.logger.debug(f"Curriculum ID: {curriculum_id}, Type: {type(curriculum_id)}")
     
     # create a question object that retrieves the question data as an attribute
-    curriculum_data = Curriculum(curriculum_id, source).data
+    curriculum_data = Curriculum(curriculum_id).data
     
     # Respond to the request by returning the data as a json
     return jsonify(curriculum_data)

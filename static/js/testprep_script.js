@@ -389,15 +389,15 @@ function updatePage(data) {
 
 // Function to identify and load the next unanswered question or advance through the curriculum
 function nextQuestion() {
-    
-    // Stop and active timer before fetching the next question
+    // Stop any active timer before fetching the next question
     stopTimer();
-    
+
     // Retrieve the current curriculum, questions list, and answers from local storage
     const curriculumKey = localStorage.getItem('currentCurriculum');
     const questionsList = JSON.parse(localStorage.getItem('questionsList')) || [];
     const correctAnswers = JSON.parse(localStorage.getItem('correctAnswers')) || [];
     const completedCurriculums = JSON.parse(localStorage.getItem('completedCurriculums')) || [];
+    const currentQuestionId = localStorage.getItem('currentQuestionId');
 
     // Check if the current curriculum is complete
     const isCurriculumComplete = correctAnswers.filter(id => questionsList.includes(id)).length === questionsList.length;
@@ -411,7 +411,7 @@ function nextQuestion() {
         }
 
         // Loop back to the start or proceed through all questions as usual
-        let currentQuestionIndex = questionsList.indexOf(localStorage.getItem('currentQuestionId'));
+        let currentQuestionIndex = questionsList.indexOf(currentQuestionId);
 
         // If we are at the last question, loop back to the first question
         currentQuestionIndex = (currentQuestionIndex === questionsList.length - 1) ? 0 : currentQuestionIndex + 1;
@@ -420,21 +420,26 @@ function nextQuestion() {
         const nextQuestionId = questionsList[currentQuestionIndex];
         localStorage.setItem('currentQuestionId', nextQuestionId);
         fetchAndUpdateQuestion(nextQuestionId);
-        
+
         // Update the curriculum score display
         document.getElementById('curriculumScore').textContent = curriculumScore + '%';
 
     } else {
-        // Find the next unanswered question in the current curriculum
-        const nextUnansweredQuestionId = questionsList.find(id => !correctAnswers.includes(id));
+        // Find the next unanswered question that is not the current question
+        const nextUnansweredQuestionId = questionsList.find(id => !correctAnswers.includes(id) && id !== currentQuestionId);
 
         if (nextUnansweredQuestionId) {
             // Set the next unanswered question in local storage and fetch it
             localStorage.setItem('currentQuestionId', nextUnansweredQuestionId);
             fetchAndUpdateQuestion(nextUnansweredQuestionId);
+        } else {
+            // If no other unanswered questions are found, reload the current question as a fallback
+            alert("No other unanswered questions available. Reloading the current question.");
+            fetchAndUpdateQuestion(currentQuestionId);
         }
     }
 }
+
 
 //--------------------------------------------------------------------------------------
 

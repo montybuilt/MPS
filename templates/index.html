@@ -10,7 +10,7 @@
 <body>
     <!-- Banner image at the top -->
     <div id="banner-container">
-        <img src="https://montanus-wecib.github.io/MPS-Application/project_1/static/Web Banner.png" alt="Web Banner" class="banner">
+        <img src="../static/images/Web Banner.png" alt="Web Banner" class="banner">
     </div>
 
     <!-- Navbar with login form -->
@@ -25,6 +25,8 @@
                 <input type="text" name="username" placeholder="Username" required>
                 <input type="password" name="password" placeholder="Password" required>
                 <button type="submit">Login</button>
+                <!-- Hidden input for isElectron -->
+                <input type="hidden" id="isElectron" name="isElectron" value="">
             </form>
         {% endif %}
     </div>
@@ -45,3 +47,4 @@
     <script src="../static/js/index_script.js"></script>
 </body>
 </html>
+
