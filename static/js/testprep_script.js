@@ -10,6 +10,7 @@ let difficulty;
 let questionStartTime;
 let timeLimit;
 let timerInterval;
+let description;
 let video;
 
 //--------------------------------------------------------------------------------------
@@ -288,7 +289,13 @@ function updateNavbarData(questionId) {
 
 //--------------------------------------------------------------------------------------
 
-// Function to update the XP data bar
+// Function to update the description and enable the video button
+function updateDescription() {
+    // Directly update the content of the description element
+    document.getElementById("description").innerHTML = description;
+}
+
+//---------------------------------------------------------------------------------------
 
 // Function to update the XP data bar
 function updateXPDisplay(content) {
@@ -334,7 +341,7 @@ function updateXPDisplay(content) {
 function updatePage(data) {
     console.log(data);
     // Access the currentQuestionId
-    const currentQuestionId = localStorage.getItem('currentQuestionId')
+    const currentQuestionId = localStorage.getItem('currentQuestionId');
     
     // Clear the console output
     document.getElementById("console").textContent = '';
@@ -354,7 +361,7 @@ function updatePage(data) {
     // Shuffle answers
     const shuffledAnswers = answers.sort(() => Math.random() - 0.5);
     // Set the global correctAnswer variable
-    correctAnswer = data.Answer
+    correctAnswer = data.Answer;
 
     // Set answer choices in the radio buttons
     shuffledAnswers.forEach((answer, index) => {
@@ -366,23 +373,30 @@ function updatePage(data) {
         }
     });
 
-    // Hide the placeholder text for the video
-    document.getElementById('loading-message').style.display = 'none';
+    // Reset the description content and disable the video button
+    const feedbackWindow = document.getElementById('description');
+    const videoButton = document.getElementById('launch-video');
+    
+    if (feedbackWindow) {
+        feedbackWindow.innerHTML = '';  // Clear the description
+    }
+    
+    if (videoButton) {
+        videoButton.disabled = true;  // Disable the video button
+    }
 
     // Update the code editor
     editor.setValue(data.Code); // Ensure that data.Code is correctly populated
     
     // Update the question metadata on the navbar
-    updateNavbarData(currentQuestionId)
+    updateNavbarData(currentQuestionId);
     
     // Update the XP data bar
-    updateXPDisplay(content)
+    updateXPDisplay(content);
     
     // Disable the Submit button again
     document.getElementById("submit-answer").disabled = false;
     
-    // Set up the Rick Roll
-    rickRoll();
 }
 
 //--------------------------------------------------------------------------------------------
@@ -504,6 +518,7 @@ function fetchAndUpdateQuestion(keyInput) {
         content = parsed_key[0].toLowerCase();
         subject = parsed_key[1];
         objective = parsed_key[2];
+        description = data.Description;
         difficulty = data.Difficulty;
         video = data.Video;
         //Update the page
@@ -630,8 +645,8 @@ document.getElementById("submit-answer").onclick = function() {
             document.getElementById("run").disabled = false; // Enable the Run Code button
         }
         
-        // Display the video
-        updateVideo();
+        // Display the description and the video button
+        updateDescription();
         
     } else {
         alert("Please select an answer.");

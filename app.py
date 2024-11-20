@@ -1,5 +1,5 @@
 # Import packages
-from flask import Flask, render_template, request, jsonify, session, redirect, url_for
+from flask import Flask, render_template, request, jsonify, session, redirect, url_for, Response
 from modules.helpers import Question, Curriculum, verify, login_required
 import subprocess
 import logging
@@ -86,8 +86,13 @@ def test_request():
     question_data = Question(question_id)
     question_data = question_data.data
     
+    # Log the problematic description
+    app.logger.debug(f"Description to send: {question_data['Description']}")
+    
     # Respond to the request by returning the data as a json
-    return jsonify(question_data)
+    response = jsonify(question_data)
+    response.headers['Content-Type'] = 'application/json; charset=UTF-8'
+    return response
 
 @app.route('/get_curriculum', methods=['POST'])
 def get_curriculum():
@@ -186,4 +191,4 @@ def submit_question():
 #------------------------------------------------------------------------------------------#
 
 if __name__ == '__main__':
-    app.run(debug=False)
+    app.run(debug=True)

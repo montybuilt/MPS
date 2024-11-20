@@ -10,7 +10,7 @@
             "Distractor1": "The matplotlib module resides in the pyplot package",
             "Distractor2": "This is importing the plot module from the matplotlib.pyplot package",
             "Distractor3": "pyplot is the function being imported from module plot in the matplotlib package",
-            "Description": "💡If you see dot notation in an import statement it will always be the form from package.module import item",
+            "Description": "\uD83D\uDCA1 imports with nested structures have the structure<br><br><code>from package.module import item</code>",
             "Video": "",
             "Difficulty": 0.5
         },
@@ -24,7 +24,7 @@
             "Distractor1": "imports the pandas module with the alias *",
             "Distractor2": "Will raise an unhandled exception",
             "Distractor3": "imports the * module from the pandas package",
-            "Description": "💡import * will bring every named item in the module into your project namespace\n\n💡 be careful as this can create name conflicts!",
+            "Description": "💡 This will bring all entities in the pandas module into your namespace",
             "Video": "https://www.youtube.com/watch?v=iXIeF2UYkW0",
             "Difficulty": 0.5
         },
@@ -39,6 +39,7 @@
             "Distractor1": "help(np)",
             "Distractor2": "print(help(np))",
             "Distractor3": "contents(numpy)",
+			"Description": "💡 This is an industry standard",
             "Video": "",
             "Difficulty": 0.5
         },
@@ -52,6 +53,7 @@
             "Distractor1": "print(dir(sys))",
             "Distractor2": "print(modules(path))",
             "Distractor3": "print(path.sys)",
+			"Description": "💡 sys.path is a list of paths as strings\n\n💡 Use .append('path') to add a new path to it",
             "Video": "",
             "Difficulty": 1
         },

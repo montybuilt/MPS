@@ -101,13 +101,13 @@ nav a:hover {
 /*---------------------------------------------------------------------------------------*/
 
 /* Ensure button is above the flex container */
-#run-button-container {
+/*#run-button-container {
     background-color: #f5f3e6;
     margin-bottom: 5px;
-}
+}*/
 
 /* Container for both code editor/console and Q&A window */
-.editor-question-video-scoring-container {
+.editor-question-feedback-scoring-container {
     display: flex;
     flex-wrap: nowrap; /* Allow wrapping if there's not enough space */
     justify-content: flex-start;
@@ -129,7 +129,7 @@ nav a:hover {
     border-radius: 1px;
     font-family: monospace;
     /*width: 50%;*/
-    height: 345px; /* Fixed height */
+    height: 356px; /* Fixed height */
     margin-bottom: 1px;
 }
 
@@ -143,17 +143,17 @@ nav a:hover {
     background-color: #ffffff;
 }
 
-/* Question and video sub-container styles */
-.question-video-container {
+/* Question and feedback sub-container styles */
+.question-feedback-container {
     flex-basis: 45%; /* Adjust based on your layout needs */
     display: flex;
     flex-direction: column;
-    justify-content: space-between; /* Ensure video and question are spaced properly */
+    justify-content: space-between; /* Ensure feedback and question are spaced properly */
 }
 
 /* Question window */
 #question-window {
-    height: 205px;
+    height: 230px;
     margin-bottom: 1px;
     border: 1px solid #007bff;
     border-radius: 4px;
@@ -170,7 +170,7 @@ nav a:hover {
 
 /* Style for the submit button */
 .button {
-    width: 30%; /* sets the button width to 1/2 the box */
+    width: 30%;
     margin-top: auto;
     background-color: #007bff;
     color: #ffffff;
@@ -178,7 +178,6 @@ nav a:hover {
     border-radius: 4px;
     padding: 10px;
     cursor: pointer;
-    flex: 1;
     margin: 0 5px;
     transition: background-color 0.3s, transform 0.1s;
 }
@@ -201,23 +200,54 @@ nav a:hover {
     opacity: 0.6; /* Slightly transparent */
 }
 
-/* Styling for the YouTube video container */
-#youtube-container {
-    width: 100%; /* Take full width within its container */
-    margin-top: 0px; /* Add some spacing below the question */
+.v_button {
+    width: 30%;
+    margin-top: auto;
+    background-color: #007bff;
+    color: #ffffff;
+    border: none;
+    border-radius: 4px;
+    padding: 10px;
+    cursor: pointer;
+    margin: 0 5px;
+    transition: background-color 0.3s, transform 0.1s;
+}
+
+/* Change background color on hover */
+.v_button:hover {
+    background-color: #45a049; /* Darker green */
+}
+
+/* Add transform effect on active state */
+.v_button:active {
+    transform: scale(0.95); /* Slightly shrink the button */
+}
+
+/* Style to format the run button when disabled */
+.v_button:disabled {
+    background-color: #ccc; /* Gray */
+    color: #666; /* Lighter text color */
+    cursor: not-allowed; /* Change cursor to indicate it's disabled */
+    opacity: 0.6; /* Slightly transparent */
+}
+
+/* Styling for the YouTube feedback container */
+#feedback-window {
+    height: 275px;
+    border: 1px solid #007bff;
+    border-radius: 0px;
+    padding: 12px;
+    background-color: #ffffff;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
 }
 
 #loading-message {
     color: #ffffff;
 }
 
-/* YouTube iframe size adjustments (optional) */
-#youtube-container iframe {
-    width: 100%; /* Full width */
-    height: 325px; /* Adjust height */
-}
 
-/* Add this to your styles.css */
 .scoring-container {
     flex-basis: 15%; /* Adjust based on your layout needs */
     display: flex;

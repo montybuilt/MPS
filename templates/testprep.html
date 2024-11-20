@@ -40,7 +40,7 @@
     </div>
     
     <!-- Parent container for both code editor/console and Q&A window -->
-    <div class="editor-question-video-scoring-container">
+    <div class="editor-question-feedback-scoring-container">
         <!-- Code editor and console container -->
         <div id="code-console-container">
             <div id="code-editor">
@@ -50,7 +50,7 @@
             <div id="console"></div>
         </div>
         
-        <div class="question-video-container">
+        <div class="question-feedback-container">
             <!-- Question window -->
             <div id="question-window">
                 <div id="question">Loading question...</div>
@@ -66,12 +66,12 @@
                 </div>
             </div>
             
-            <!-- YouTube video container -->
-            <div id="youtube-container">
-                <div id="loading-message">Loading video...</div>
-                <iframe id="video-frame" width="400" height="300" src=""
-                title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; 
-                encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
+            <!-- Feedback container -->
+            <div id="feedback-window">
+                <div id="description">Answer Description...</div>
+                <div id="launch-video-container">
+                    <button id="launch-video" class="v_button">Watch Video</button>
+                </div>
             </div>
         </div>
             
