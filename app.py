@@ -139,6 +139,17 @@ def content_page():
 
     return render_template('content.html')  # Render the content creation page        
 
+@app.route('/content_keys', methods=['GET'])
+def content_keys():
+    try:
+        with open(content_file_path, 'r') as file:
+            content = json.load(file)
+        return jsonify({"keys": list(content.get('questions', {}).keys())})
+    except Exception as e:
+        app.logger.error(f"Error loading keys: {e}")
+        return jsonify({"error": "Failed to load keys"}), 500
+
+
 # Content creation route (only for admins)
 @app.route('/submit_question', methods=['POST'])
 def submit_question():
@@ -152,7 +163,7 @@ def submit_question():
     app.logger.debug(question_data)
 
     # The questionKey (ID) from the data
-    question_key = question_data['questionKey']
+    question_key = question_data['key']
 
     # Read the existing content from content.json
     try:
@@ -167,11 +178,12 @@ def submit_question():
     content['questions'][question_key] = {
         'Tags': question_data['tags'],
         'Code': question_data['code'],
-        'Question': question_data['questionStem'],
+        'Question': question_data['stem'],
         'Answer': question_data['answer'],
         'Distractor1': question_data['distractors'][0],
         'Distractor2': question_data['distractors'][1],
         'Distractor3': question_data['distractors'][2],
+        'Description': question_data['description'],
         'Video': question_data['videoURL'],
         'Difficulty': question_data['difficulty']
     }
@@ -183,6 +195,24 @@ def submit_question():
         json.dump(content, file, indent=4)
 
     return jsonify({"message": "Question submitted successfully"}), 200  # JSON success response
+
+@app.route('/content_data', methods=['POST'])
+def content_data():
+    '''This function gets a question for the content page'''
+    
+    #Extract the question key from the request
+    data = request.get_json()
+    question_id = data.get('questionKey').lower()
+    
+    # Create a question object that retrieves the question data as an attribute
+    question_data = Question(question_id)
+    question_data = question_data.data
+    
+    # Respond to the request by returning the data as a json
+    response = jsonify(question_data)
+    response.headers['Content-Type'] = 'application/json; charset=UTF-8'
+    return response
+   
 
 
 
