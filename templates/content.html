@@ -83,6 +83,9 @@
         <div id="left-column">
             <label for="questionKey">Question Key:</label>
             <input type="text" id="questionKey" required>
+            
+            <button type="button" id="newQuestion">New Question</button>
+
 
             <label for="code">Code:</label>
             <textarea id="code" name="code"></textarea>
@@ -175,12 +178,47 @@
             });
         }
         
+        // Function to create a new question
+        
+        function createNewQuestion() {
+            questionKey = "";  // Reset the global questionKey
+            document.getElementById("questionKey").value = "";  // Allow user to input a new key
+            codeEditor.setValue("");  // Clear the code editor
+            document.getElementById("difficulty").value = "";  // Clear difficulty
+            document.getElementById("tags").value = "";  // Clear tags
+            document.getElementById("questionStem").value = "";  // Clear question stem
+            document.getElementById("answer").value = "";  // Clear correct answer
+            document.getElementById("distractor1").value = "";  // Clear distractor 1
+            document.getElementById("distractor2").value = "";  // Clear distractor 2
+            document.getElementById("distractor3").value = "";  // Clear distractor 3
+            document.getElementById("description").value = "";  // Clear description
+            document.getElementById("videoURL").value = "";  // Clear video URL
+            document.getElementById("videoStart").value = "";  // Clear video start time
+            document.getElementById("videoEnd").value = "";  // Clear video end time
+        
+            alert("Ready to create a new question. Enter a new question key and fill in the details.");
+        }
+
+        
         // Save the current question
         function saveQuestion() {
+            const newKey = document.getElementById("questionKey").value.trim();
+            if (!newKey) {
+                alert("Please enter a valid question key.");
+                return;
+            }
+        
+            // Check if the key already exists
+            if (questionKeys.includes(newKey)) {
+                if (!confirm("This key already exists. Do you want to overwrite it?")) {
+                    return;
+                }
+            }
+        
             const questionData = {
-                key: document.getElementById("questionKey").value,
+                key: newKey,
                 code: codeEditor.getValue(),
-                difficulty: parseFloat(document.getElementById("difficulty").value),
+                difficulty: parseFloat(document.getElementById("difficulty").value) || 0,
                 tags: document.getElementById("tags").value.split(",").map(tag => tag.trim()),
                 stem: document.getElementById("questionStem").value,
                 answer: document.getElementById("answer").value,
@@ -191,11 +229,9 @@
                 ],
                 description: document.getElementById("description").value,
                 videoURL: document.getElementById("videoURL").value,
-                videoStart: parseFloat(document.getElementById("videoStart").value),
-                videoEnd: parseFloat(document.getElementById("videoEnd").value)
+                videoStart: parseFloat(document.getElementById("videoStart").value) || 0,
+                videoEnd: parseFloat(document.getElementById("videoEnd").value) || 0
             };
-            
-            console.log('Saving question with the following data:', questionData);  // Log data being sent
         
             fetch('/submit_question', {
                 method: 'POST',
@@ -206,13 +242,17 @@
             })
             .then(response => response.json())
             .then(data => {
-                console.log('Response from server:', data);  // Log response from the server
                 alert(data.message || "Question saved successfully!");
+                if (!questionKeys.includes(newKey)) {
+                    questionKeys.push(newKey);  // Add the new key to the list
+                }
             })
-            .catch(error => {
-                console.error('Error saving question:', error);
-            });
+            .catch(error => console.error('Error saving question:', error));
         }
+
+
+        // New question handler
+        document.getElementById("newQuestion").addEventListener("click", createNewQuestion);
 
         
         // Navigation handlers

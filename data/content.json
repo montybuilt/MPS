@@ -10,7 +10,7 @@
             "Distractor1": "The matplotlib module resides in the pyplot package",
             "Distractor2": "This is importing the plot module from the matplotlib.pyplot package",
             "Distractor3": "pyplot is the function being imported from module plot in the matplotlib package",
-            "Description": "\uD83D\uDCA1 imports with nested structures have the structure<br><br><code>from package.module import item</code>",
+            "Description": "\ud83d\udca1 imports with nested structures have the structure<br><br><code>from package.module import item</code>",
             "Video": "",
             "Difficulty": 0.5
         },
@@ -24,7 +24,7 @@
             "Distractor1": "imports the pandas module with the alias *",
             "Distractor2": "Will raise an unhandled exception",
             "Distractor3": "imports the * module from the pandas package",
-            "Description": "💡 This will bring all entities in the pandas module into your namespace",
+            "Description": "\ud83d\udca1 This will bring all entities in the pandas module into your namespace",
             "Video": "https://www.youtube.com/watch?v=iXIeF2UYkW0",
             "Difficulty": 0.5
         },
@@ -39,7 +39,7 @@
             "Distractor1": "help(np)",
             "Distractor2": "print(help(np))",
             "Distractor3": "contents(numpy)",
-			"Description": "💡 This is an industry standard",
+            "Description": "\ud83d\udca1 This is an industry standard way to alias numpy.<br><br>\ud83d\udca1 The numpy module is used for multi-dimensional arrays which are important in mathematical computing.<br><br>\ud83d\udca1 The numpy module was released in 2005 by Travis Oliphant who was also one of the founders of Anaconda and one of the creators of the SciPy package.",
             "Video": "",
             "Difficulty": 0.5
         },
@@ -53,7 +53,7 @@
             "Distractor1": "print(dir(sys))",
             "Distractor2": "print(modules(path))",
             "Distractor3": "print(path.sys)",
-			"Description": "💡 sys.path is a list of paths as strings\n\n💡 Use .append('path') to add a new path to it",
+            "Description": "\ud83d\udca1 sys.path is a list of paths as strings.<br><br>\ud83d\udca1 Use .append('path') to add a new path to it.<br><br>\ud83d\udca1 Care should be taken when manipulating sys.path as incorrect paths can lead to frustrating errors.",
             "Video": "",
             "Difficulty": 1
         },
@@ -68,6 +68,7 @@
             "Distractor1": "harold",
             "Distractor2": "__main__",
             "Distractor3": "This code is erroneous",
+            "Description": "\ud83d\udca1 When a python file is run as a script, its __name__ is \"__main__\".  But when it is imported as a module, its __name__ is the name of the module.<br><br>\ud83d\udca1 The alias \"harold\" in this case is just an alias that can be used in dot notation to refer to the math module; however, the __name__ variable is not set to the alias, it remains the name of the module.",
             "Video": "",
             "Difficulty": 0.5
         },
@@ -82,6 +83,7 @@
             "Distractor1": "True",
             "Distractor2": "False",
             "Distractor3": "2",
+            "Description": "\ud83d\udca1 math.e is ~2.718 while math.pow(2, 4) is 16.  So the result of line 4 is True.  The code on line 4 casts the result to an integer and the integer value of True is 1.<br><br>\ud83d\udca1 Had the value been False, the integer value of False is 0.<br><br>\ud83d\udca1 Working the other way, from int to boolean, 0 evaluates to False and any non-zero number evaluates to True as boolean.",
             "Video": "",
             "Difficulty": 1
         },
@@ -97,6 +99,7 @@
             "Distractor1": "nums.shuffle()",
             "Distractor2": "shuffle(nums)",
             "Distractor3": "shuffle.random(nums)",
+            "Description": "\ud83d\udca1 This form of import means that you must use dot notation to access the entities in the random module.<br><br>\ud83d\udca1 This is because the expression \"import random\" only brings random into the project namespace.<br><br>\ud83d\udca1 Had the expression been \"from random import shuffle\", then the shuffle function can be accessed directly without dot notation.",
             "Video": "",
             "Difficulty": 1
         },
@@ -112,10 +115,11 @@
             "Distractor1": "version",
             "Distractor2": "machine",
             "Distractor3": "processor",
+            "Description": "\ud83d\udca1 The system function just returns the OS as a string.<br><br>\ud83d\udca1 The platform function also returns the OS name, but includes more information such as the version and service pack number.",
             "Video": "",
             "Difficulty": 0.5
         },
-        "pcep 4.3.13": {
+        "pcep.4.3.13": {
             "Tags": [
                 "exceptions",
                 "exception hierarchy",
@@ -127,6 +131,7 @@
             "Distractor1": "IndexError",
             "Distractor2": "LookupError",
             "Distractor3": "abstract except",
+            "Description": "\ud83d\udca1 The error is occurring on line 3 - there no key \"Winter\" in the dictionary named \"x\".<br><br>\ud83d\udca1 As a result, this line raises a KeyError and will be handled on lines 5 and 6.<br><br>\ud83d\udca1 KeyError is a subclass of LookupError - if the KeyError handler was not present, then the LookupError would have handled it.<br><br>\ud83d\udca1 IndexError is raised when using an improper index with a list, tuple, or string.",
             "Video": "",
             "Difficulty": 1.5
         },
@@ -145,7 +150,7 @@
         },
         "pcep.1.1.2": {
             "Tags": [
-                ""
+                "python fundamentals"
             ],
             "Code": "",
             "Question": "A process in which the source code is immediately executed without translating it into a machine code is called:",
@@ -153,6 +158,7 @@
             "Distractor1": "debugging",
             "Distractor2": "linking",
             "Distractor3": "compilation",
+            "Description": "\ud83d\udca1 Python is an interpreted language.  First your Python source code is semi-complied into a lower-level language.  Then that semi-complied code is interpreted and executed.<br><br>\ud83d\udca1 Other major interpreted languages are JavaScript, Ruby, Perl, R, and Matlab.<br><br>\ud83d\udca1 Major compiled languages are C++, Java, Swift, and C#.",
             "Video": "",
             "Difficulty": 0.5
         },
@@ -167,6 +173,7 @@
             "Distractor1": "/, **, -",
             "Distractor2": "*, +, /",
             "Distractor3": "-, *, **",
+            "Description": "\ud83d\udca1 Remember PEMDAS - Parenthesis, Exponentiation, Multiplication, Division, Addition, Subtraction.<br><br>\ud83d\udca1 The // operator is integer division and has the same precedence as division.<br><br>\ud83d\udca1 When evaluating expressions, you generally work left-to-right except if you have operators with right-sided binding.<br><br>\ud83d\udca1 In Python, exponentiation and assignment operators (like =, +=, *=, etc.) have right-sided binding.  This means you evaluate to the right of the operator first.<br><br>\ud83d\udca1 For example: 3 ** 2 ** 3 would be evaluated as 3 ** 8, not 9 ** 3.<br><br>\ud83d\udca1 Similarly, the expression x *= x + 1 if x=3 would be evaluated as 3 * 4, which is 12 - not 9 + 1, which is 10.",
             "Video": "",
             "Difficulty": 0.5
         },
@@ -180,6 +187,7 @@
             "Distractor1": "1 ** 2 - 4 // 3",
             "Distractor2": "4 / 2 - 2 ** 1",
             "Distractor3": "2 ** 3 + (3 - 11)",
+            "Description": "\ud83d\udca1 1 // 2 evaluates to 0 and 3 * 4 evaluates to 12, 0 + 12 = 12.<br><br>\ud83d\udca1 Remember that // is integer division, it only returns the integer part of the division (i.e., how many times does the denominator go into the numerator?)<br><br>\ud83d\udca1 Unlike division, which always returns a float, integer division returns an integer (as does modulo \"%\").",
             "Video": "",
             "Difficulty": 0.5
         },
@@ -196,6 +204,7 @@
             "Distractor1": "0.0 in my_list",
             "Distractor2": "len(sorted(my_list)) == len(my_list)",
             "Distractor3": "my_list[-1] == 1",
+            "Description": "\ud83d\udca1 len(my_list) evaluates to 3 and the value in my_list at index 0 is a 0, therefor 3 == 0 is False. <br><br>\ud83d\udca1 One the PCEP, make sure you read the question carefully! Many students answer a question like this assuming it is asking for the True result.",
             "Video": "",
             "Difficulty": 1
         },
@@ -205,11 +214,12 @@
                 "precedence"
             ],
             "Code": "print(42 + 5.0 * 3 + 22 // 4 + 11 % 3)",
-            "Question": "What is the output?",
+            "Question": "What is the output of this code?",
             "Answer": "64.0",
             "Distractor1": "64",
             "Distractor2": "54",
             "Distractor3": "64.5",
+            "Description": "\ud83d\udca1 Break this expression down into four parts:<br><br>\n42 = 42<br>\n5.0 * 3  = 15.0<br>\n22 // 4 = 5<br>\n11 % 3 = 2<br><br>\n\ud83d\udca1 42 + 15.0 + 5 + 2 = 64.0<br><br>\n\ud83d\udca1 The 5.0 introduces a float into the expression, the result of an expression involving a float will be a float.  If you aren't careful, you could choose 64 as the answer, which is incorrect!",
             "Video": "",
             "Difficulty": 2.5
         },
@@ -219,11 +229,12 @@
                 "precedence"
             ],
             "Code": "print(6 // 5 * 16 / 2 ** 2 ** 2)",
-            "Question": "What is the output?",
+            "Question": "What is the output of this code?",
             "Answer": "1.0",
             "Distractor1": "4096.0",
-            "Distractor2": "0.0",
+            "Distractor2": "1",
             "Distractor3": "16.0",
+            "Description": "\ud83d\udca1 This question involves an operator with right-sided binding (**).<br><br>\ud83d\udca1 With PEMDAS, we know we start with the exponentiation, but becuase of the right-sided binding, we work from right-to-left on this part --> 2 ** 2 ** 2.<br><br>\ud83d\udca1 The 2 ** 2 ** 2 simplifies to 2 ** 4, which is 16.<br><br>\ud83d\udca1 Now we have simplified to 6 // 5 * 16 / 16 which simplifies to 1.0 * 1 which is 1.0.<br><br>\n",
             "Video": "",
             "Difficulty": 2.5
         },
@@ -233,11 +244,12 @@
                 "precedence"
             ],
             "Code": "print(6 // (5 * 16) / 2 ** 2 ** 2)",
-            "Question": "What is the output?",
+            "Question": "What is the output of this code?",
             "Answer": "0.0",
             "Distractor1": "64.0",
             "Distractor2": "16.0",
             "Distractor3": "4.0",
+            "Description": "\ud83d\udca1 Follow PEMDAS --> start in the parenthesis.  (5 * 16) = 80.<br><br>\ud83d\udca1 Now we have 6 // 80 / 2 ** 2 ** 2.  Although we should work on the exponentiation, we can see that 6 // 80 will be 0, so this will make the entire expression 0.",
             "Video": "",
             "Difficulty": 2
         },
@@ -252,6 +264,7 @@
             "Distractor1": "20",
             "Distractor2": "4*5*",
             "Distractor3": "*4*5*",
+            "Description": "\ud83d\udca1 The sep argument is used to specify a string that separates the objects being printed.  In this case the objects being printed are 4 and 5.<br><br>\ud83d\udca1 The sep character only prints between objects to be printed.<br><br>\ud83d\udca1 Beware of trick question that include the sep argument with print calls on a single object like print(x, sep=\"*\").  In this case, no asterisk will print because there is only one object printed.",
             "Video": "",
             "Difficulty": 0.5
         },
@@ -266,6 +279,7 @@
             "Distractor1": "2",
             "Distractor2": "3",
             "Distractor3": "None",
+            "Description": "\ud83d\udca1 Since this question doesn't involve a function or class definition, start at the top and work your way through the code.<br><br>\nstars = 1 + 1 // 2 * 3 = 1 + 0 * 3 = 1<br>\nif stars > 0 --> True --> print *<br><br>\ud83d\udca1 The elif and else branches will not be executed becuase the if condition was True.<br><br>\ud83d\udca1 Remember an elif or else clause will only be executed when the related if and all preceding elif conditions are False.",
             "Video": "",
             "Difficulty": 1.5
         },
@@ -280,12 +294,14 @@
             "Distractor1": "the smallest number is:  10",
             "Distractor2": "the smallest number is:  12",
             "Distractor3": "This code is erroneous",
+            "Description": "\ud83d\udca1 The first if x < y is True --> The the nested if x < z is evaluated as True --> \"the smallest number is 8\" prints.<br><br>\ud83d\udca1 None of the other elif statments or the else will print since the original if condition was True.",
             "Video": "",
-            "Difficulty": 2.5
+            "Difficulty": 2
         },
         "pcep.2.1.11": {
             "Tags": [
-                "if"
+                "if",
+                "python fundamentals"
             ],
             "Code": "x = 42\ny = 42.0\n \nif x == y:\n  print('True', x+y)\nelse:\n  print('False', x-y)",
             "Question": "What is the expected output of this code?",
@@ -293,6 +309,7 @@
             "Distractor1": "True",
             "Distractor2": "False",
             "Distractor3": "False 0.0",
+            "Description": "\ud83d\udca1 The expression x == y is evaluating whether the numeric quantity of 42 and 42.0 are equal, which they are.  So x == Y evaluates to True and the code prints True 84.0.<br><br>\ud83d\udca1 The result of 42 + 42.0 is a float result.  Any time you involve a float in a numeric operation, the result will be a float.",
             "Video": "",
             "Difficulty": 1.5
         },
@@ -301,13 +318,14 @@
                 ""
             ],
             "Code": "if True == True:\n  if False == 0:\n    print('a', end=\"\")\n  else:\n    print('aa', end=\"\")\n  print('aaa', end=\"\")\n  if True < False:\n    print('aaaa', end=\"\")\n  else:\n    print('aaaaa', end=\"\")",
-            "Question": "What is the expected output?",
+            "Question": "What is the expected output of this code?",
             "Answer": "aaaaaaaaa",
             "Distractor1": "aaa",
             "Distractor2": "aaaaaaaa",
             "Distractor3": "This code is erroneous",
+            "Description": "\ud83d\udca1 Only the following print calls will be executed<br><br>\nLine 3 - print('a', end='')<br>\nLine 6 - print('aaa', end='')<br>\nLine 10 - print('aaaaa', end='')<br>",
             "Video": "",
-            "Difficulty": 2.5
+            "Difficulty": 2
         },
         "pcep.2.1.13": {
             "Tags": [
@@ -321,6 +339,7 @@
             "Distractor1": "x z",
             "Distractor2": "x y z",
             "Distractor3": "y z",
+            "Description": "\ud83d\udca1 c = 42 // 13 + 3 * 2 ** 3 = 3 + 3 * 8 = 27<br><br>\n\ud83d\udca1 c != 5 is True --> print 'x'<br><br>\n\ud83d\udca1 c > 7 is True --> print 'y'<br><br>\n\ud83d\udca1 c <= 10 is False<br><br>\n\ud83d\udca1 This prints x y because the end argument is set to a space (\" \")",
             "Video": "",
             "Difficulty": 2
         },
@@ -337,6 +356,7 @@
             "Distractor1": "8",
             "Distractor2": "7",
             "Distractor3": "6",
+            "Description": "\ud83d\udca1 On the PCEP, use the on-screen calculator for a question like this.<br><br>\ud83d\udca1 The sum(points) is 590 and 590 // 7 = 84.<br><br>\ud83d\udca1 The if/elif branch triggered is on line 6 --> elif 81 <= avg < 90.<br><br>\ud83d\udca1 grade = 9<br><br>\ud83d\udca1 No other elif/else branches can be executed --> print(9)",
             "Video": "",
             "Difficulty": 2.5
         },

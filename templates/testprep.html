@@ -8,37 +8,75 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.5/codemirror.min.css">
     <!-- Link to your custom styles -->
     <link rel="stylesheet" href="../static/css/styles.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
 </head>
 
 <body>
 
     <!-- Banner image at the top -->
     <div id="banner-container">
-        <img src="https://montanus-wecib.github.io/MPS/static/images/Web Banner.png" alt="Web Banner" alt="Web Banner" class="banner">
+        <img src="https://montanus-wecib.github.io/MPS/static/images/Web Banner.png" alt="Web Banner" class="banner">
     </div>
     
     <!-- Navigation Bar -->
     <div id="navbar">
         <!-- Entry box for the question ID -->
         <input type="text" id="key-input" placeholder="lesson code...">
-        <!-- Placeholder for displaying content, objective, difficulty and status -->
+        <!-- Placeholder for displaying content, objective, difficulty, and status -->
         <span id="question-info" style="margin-left: 20px;"></span>
         <!-- Elapsed time counter -->
         <p>  Elapsed Time: <span id="timerDisplay">00:00</span></p>
+        <!-- Icons for calculator and notepad -->
+        <button id="calculatorBtn" title="Open Calculator">
+            <i class="fas fa-calculator"></i> <!-- Font Awesome calculator icon -->
+        </button>
+        <button id="notepadBtn" title="Open Notepad">
+            <i class="fas fa-pencil-alt"></i> <!-- Font Awesome pencil icon -->
+        </button>
         <!-- Next question button -->
         <div style="float: left; margin-left: auto;">
             <button id="next-question-btn" type="button" style="display: inline;">Next Question</button>
         </div>
-
-        <!-- Logout button 
-        <div style="float: right; margin-left: auto;">
-            <span>Logged in as: {{ username }}</span>
-            <form action="/logout" method="POST" style="display:inline;">
-                <button type="submit">X</button>
-            </form>
-        </div> -->
     </div>
     
+    <!-- Calculator Modal -->
+    <div id="calculatorModal" class="calculator-modal">
+        <div class="calculator-content">
+            <button id="closeCalculator" class="close">&times;</button>
+            <div id="calculator" class="calculator">
+                <input type="text" id="calcDisplay" class="calc-display" disabled>
+                <div class="calc-buttons">
+                    <button class="calc-btn">1</button>
+                    <button class="calc-btn">2</button>
+                    <button class="calc-btn">3</button>
+                    <button class="calc-btn">+</button>
+                    <button class="calc-btn">4</button>
+                    <button class="calc-btn">5</button>
+                    <button class="calc-btn">6</button>
+                    <button class="calc-btn">-</button>
+                    <button class="calc-btn">7</button>
+                    <button class="calc-btn">8</button>
+                    <button class="calc-btn">9</button>
+                    <button class="calc-btn">/</button>
+                    <button class="calc-btn">0</button>
+                    <button class="calc-btn">.</button>
+                    <button class="calc-btn">=</button>
+                    <button class="calc-btn">*</button>
+                    <button class="calc-btn clear">C</button>
+                    <button class="calc-btn">^</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Notepad Popup Window -->
+    <div id="notepadModal" class="notepad-modal">
+        <div class="notepad-content">
+            <span class="close-notepad" id="closeNotepad">&times;</span>
+            <textarea id="notepad" class="notepad-textarea" placeholder="Type your notes here..."></textarea>
+        </div>
+    </div>
+
     <!-- Parent container for both code editor/console and Q&A window -->
     <div class="editor-question-feedback-scoring-container">
         <!-- Code editor and console container -->

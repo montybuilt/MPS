@@ -665,3 +665,111 @@ document.addEventListener("DOMContentLoaded", function() {
     }
 });
 
+//---------------------------------------------------------------------------------------
+
+// Scripts for the calculator
+
+// Get the elements
+const calculatorBtn = document.getElementById("calculatorBtn");
+const calculatorModal = document.getElementById("calculatorModal");
+const closeCalculator = document.getElementById("closeCalculator");
+const calcDisplay = document.getElementById("calcDisplay");
+const calcButtons = document.querySelectorAll(".calc-btn");
+
+// Open the calculator modal when the button is clicked
+calculatorBtn.addEventListener("click", () => {
+    calculatorModal.style.display = "flex";
+});
+
+// Close the modal when the close button is clicked or clicking outside the modal
+closeCalculator.addEventListener("click", () => {
+    calculatorModal.style.display = "none";
+});
+
+// Close the modal if the user clicks outside the modal content
+window.addEventListener("click", (event) => {
+    if (event.target === calculatorModal) {
+        calculatorModal.style.display = "none";
+    }
+});
+
+// Handle calculator button clicks
+calcButtons.forEach(button => {
+    button.addEventListener("click", () => {
+        const value = button.textContent;
+
+        if (value === "C") {
+            // Clear the display
+            calcDisplay.value = "";
+        } else if (value === "=") {
+            // Replace the '^' with '**' for exponentiation to work in JavaScript
+            try {
+                calcDisplay.value = eval(calcDisplay.value.replace("^", "**"));
+            } catch (error) {
+                calcDisplay.value = "Error";
+            }
+        } else {
+            // Add the button value to the display
+            calcDisplay.value += value;
+        }
+    });
+});
+
+//----------------------------------------------------------------------------------
+
+// Scripts for the notepad
+
+// Get the modal and button
+const notepadModal = document.getElementById('notepadModal');
+const notepadBtn = document.getElementById('notepadBtn');
+const closeNotepad = document.getElementById('closeNotepad');
+const notepadTextarea = document.getElementById('notepad');
+
+// Open the notepad window
+notepadBtn.onclick = function() {
+    notepadModal.style.display = 'block'; // Show modal
+    // Load saved notes if any
+    const savedNotes = localStorage.getItem('notepadNotes');
+    if (savedNotes) {
+        notepadTextarea.value = savedNotes; // Set the textarea value to saved notes
+    }
+};
+
+// Close the notepad window
+closeNotepad.onclick = function() {
+    notepadModal.style.display = 'none'; // Hide modal
+    // Save notes when closing
+    const notesContent = notepadTextarea.value;
+    localStorage.setItem('notepadNotes', notesContent); // Save notes
+};
+
+// Draggable functionality
+let isDragging = false;
+let offsetX, offsetY;
+
+notepadModal.onmousedown = function(e) {
+    isDragging = true;
+    offsetX = e.clientX - notepadModal.offsetLeft;
+    offsetY = e.clientY - notepadModal.offsetTop;
+    notepadModal.classList.add('draggable'); // Change cursor to move
+};
+
+document.onmousemove = function(e) {
+    if (isDragging) {
+        notepadModal.style.left = e.clientX - offsetX + 'px';
+        notepadModal.style.top = e.clientY - offsetY + 'px';
+    }
+};
+
+document.onmouseup = function() {
+    isDragging = false;
+    notepadModal.classList.remove('draggable'); // Reset cursor
+};
+
+// Close the modal if the user clicks outside of it
+window.onclick = function(event) {
+    if (event.target === notepadModal) {
+        notepadModal.style.display = 'none'; // Hide modal if clicking outside
+    }
+};
+

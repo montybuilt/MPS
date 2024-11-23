@@ -20,7 +20,7 @@ app.secret_key = secrets.token_hex(16)
 logging.basicConfig(level=logging.DEBUG, format='%(asctime)s %(levelname)s: %(message)s')
 
 # Path to content.json located in the data directory
-content_file_path = os.path.join('dev', 'content2.json')
+content_file_path = os.path.join('data', 'content.json')
 
 @app.route('/')
 def index():
@@ -156,6 +156,7 @@ def submit_question():
     # Check if the user is an admin
     app.logger.debug(f"Is admin?: {session.get('is_admin')}")
     if not session.get('username') or not session.get('is_admin'):
+        app.logger.debug("No Admin Privelege!")
         return jsonify({"error": "Unauthorized"}), 401  # JSON response instead of HTML redirect
 
     # Handle POST request
@@ -221,4 +222,4 @@ def content_data():
 #------------------------------------------------------------------------------------------#
 
 if __name__ == '__main__':
-    app.run(debug=True)
+    app.run(debug=False)
