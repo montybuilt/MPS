@@ -413,6 +413,10 @@ function nextQuestion() {
     const completedCurriculums = JSON.parse(localStorage.getItem('completedCurriculums')) || [];
     const currentQuestionId = localStorage.getItem('currentQuestionId');
 
+    // Clear the notepad contents
+    notepadTextarea.value = '';
+    localStorage.removeItem('notepadNotes');
+
     // Check if the current curriculum is complete
     const isCurriculumComplete = correctAnswers.filter(id => questionsList.includes(id)).length === questionsList.length;
 

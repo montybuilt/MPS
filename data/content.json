@@ -45,7 +45,8 @@
         },
         "pcap.1.1.4": {
             "Tags": [
-                ""
+                "modules and packages",
+                "sys.path"
             ],
             "Code": "import sys",
             "Question": "what expression will print out a list of directories where python will search for modules?",
@@ -75,7 +76,8 @@
         "pcap.1.2.1": {
             "Tags": [
                 "modules and packages",
-                "math"
+                "math",
+                "boolean expressions"
             ],
             "Code": "import math\n \nresult = math.e != math.pow(2, 4)\nprint(int(result))\n\n",
             "Question": "What is the expected output of this code?",
@@ -119,25 +121,9 @@
             "Video": "",
             "Difficulty": 0.5
         },
-        "pcep.4.3.13": {
-            "Tags": [
-                "exceptions",
-                "exception hierarchy",
-                "KeyError"
-            ],
-            "Code": "try:\n    x = {\"Spring\": 66, \"Summer\": 94}\n    y = x[\"Winter\"] * 2\n\nexcept KeyError as ke:\n    print(\"KeyError:\", ke)\n\nexcept IndexError as ie:\n    print(\"IndexError:\", ie)\n\nexcept LookupError as le:\n    print(\"LookuError:\", le)\n\nexcept:\n    print(\"An unexpected error has occurred\")",
-            "Question": "Which exception branch will handle this error?",
-            "Answer": "KeyError",
-            "Distractor1": "IndexError",
-            "Distractor2": "LookupError",
-            "Distractor3": "abstract except",
-            "Description": "\ud83d\udca1 The error is occurring on line 3 - there no key \"Winter\" in the dictionary named \"x\".<br><br>\ud83d\udca1 As a result, this line raises a KeyError and will be handled on lines 5 and 6.<br><br>\ud83d\udca1 KeyError is a subclass of LookupError - if the KeyError handler was not present, then the LookupError would have handled it.<br><br>\ud83d\udca1 IndexError is raised when using an improper index with a list, tuple, or string.",
-            "Video": "",
-            "Difficulty": 1.5
-        },
         "pcep.1.1.1": {
             "Tags": [
-                ""
+                "python fundamentals"
             ],
             "Code": "",
             "Question": "A code written in a high-level programming language is called:",
@@ -145,6 +131,7 @@
             "Distractor1": "a binary code",
             "Distractor2": "machine code",
             "Distractor3": "the ASCII code",
+            "Description": "\ud83d\udca1 Source code is the human readable code written in high-level languages such as Python, Java, and C.<br><br>\ud83d\udca1 Machine code is low-level instructions directly executed by the computer CPU.<br><br>\ud83d\udca1 Binary is not a coding language, but rather the numerical representation of the most basic bits of information in binary computing.",
             "Video": "",
             "Difficulty": 0.5
         },
@@ -179,7 +166,8 @@
         },
         "pcep.1.1.4": {
             "Tags": [
-                "operators"
+                "operators",
+                "precedence"
             ],
             "Code": "",
             "Question": "Which of the following expressions evaluate to a non-zero result?",
@@ -226,7 +214,8 @@
         "pcep.1.4.3": {
             "Tags": [
                 "operators",
-                "precedence"
+                "precedence",
+                "binding"
             ],
             "Code": "print(6 // 5 * 16 / 2 ** 2 ** 2)",
             "Question": "What is the output of this code?",
@@ -241,7 +230,8 @@
         "pcep.1.4.4": {
             "Tags": [
                 "operators",
-                "precedence"
+                "precedence",
+                "binding"
             ],
             "Code": "print(6 // (5 * 16) / 2 ** 2 ** 2)",
             "Question": "What is the output of this code?",
@@ -255,8 +245,8 @@
         },
         "pcep.1.5.1": {
             "Tags": [
-                "output",
-                "sep"
+                "input and output",
+                "python fundamentals"
             ],
             "Code": "width = 4\nheight = 5\nprint(width, height, sep=\"*\")",
             "Question": "What is the expected output?",
@@ -271,7 +261,9 @@
         "pcep.2.1.1": {
             "Tags": [
                 "if",
-                "operators"
+                "operators",
+                "boolean expressions",
+                "precedence"
             ],
             "Code": "stars = 1 + 1 // 2 * 3\n\nif stars > 0:\n  print(\"*\")\n\nelif stars > 1:\n  print(\"**\")\n  \nelse:\n  print(\"***\")",
             "Question": "How many stars will print?",
@@ -286,7 +278,9 @@
         "pcep.2.1.10": {
             "Tags": [
                 "if",
-                "nested if"
+                "nested if",
+                "boolean expressions",
+                "input and output"
             ],
             "Code": "x=8\ny=10\nz=12\n\nif x<y:\n  if x<z:\n    print(\"the smallest number is: \", x)\nelif y<x:\n  if y<z:\n    print(\"The smallest number is: \", y)\nelif z<x:\n  if z<y:\n    print(\"The smallest number is: \", z)\nelse:\n  print(\"else\")",
             "Question": "What is the expected output?",
@@ -301,7 +295,8 @@
         "pcep.2.1.11": {
             "Tags": [
                 "if",
-                "python fundamentals"
+                "python fundamentals",
+                "boolean expressions"
             ],
             "Code": "x = 42\ny = 42.0\n \nif x == y:\n  print('True', x+y)\nelse:\n  print('False', x-y)",
             "Question": "What is the expected output of this code?",
@@ -315,7 +310,10 @@
         },
         "pcep.2.1.12": {
             "Tags": [
-                ""
+                "if",
+                "boolean expressions",
+                "nested if",
+                "input and output"
             ],
             "Code": "if True == True:\n  if False == 0:\n    print('a', end=\"\")\n  else:\n    print('aa', end=\"\")\n  print('aaa', end=\"\")\n  if True < False:\n    print('aaaa', end=\"\")\n  else:\n    print('aaaaa', end=\"\")",
             "Question": "What is the expected output of this code?",
@@ -331,7 +329,8 @@
             "Tags": [
                 "operators",
                 "precedence",
-                "if"
+                "if",
+                "boolean expressions"
             ],
             "Code": "a = 42\nb = 13\nc = 42 // 13 + 3 * 2 ** 3\n\nif c != 5:\n  print ('x', end=\" \")\nif c > 7:\n  print('y', end=\" \")\nif c <= 10:\n  print('z', end=\" \")",
             "Question": "What is the expected output of this code?",
@@ -363,7 +362,8 @@
         "pcep.2.1.15": {
             "Tags": [
                 "if",
-                "boolean operators"
+                "boolean operators",
+                "boolean expressions"
             ],
             "Code": "x = True\ny = False\nz = False\n \nif not x or y:\n    print(1)\nelif not x or not y and z:\n    print(2)\nelif not x or y or not y and x:\n    print(3)\nelse:\n    print(4)",
             "Question": "What is the expected output?",
@@ -371,13 +371,15 @@
             "Distractor1": "2",
             "Distractor2": "1",
             "Distractor3": "4",
+            "Description": "\ud83d\udca1 <br><br>\ud83d\udca1 <br><br>\ud83d\udca1 <br><br>",
             "Video": "",
             "Difficulty": 1.5
         },
         "pcep.2.1.16": {
             "Tags": [
                 "if",
-                "boolean operators"
+                "boolean operators",
+                "boolean expressions"
             ],
             "Code": "x = False\ny = False\nz = True\n \nif not x or not y:\n  print(1)\nelif not x or not y and z:\n  print(2)\nelif x or y or not y and not x:\n  print(3)\nelse:\n  print(4)",
             "Question": "What is the expected output?",
@@ -385,6 +387,7 @@
             "Distractor1": "2",
             "Distractor2": "3",
             "Distractor3": "4",
+            "Description": "\ud83d\udca1 <br><br>\ud83d\udca1 <br><br>\ud83d\udca1 <br><br>",
             "Video": "",
             "Difficulty": 1.5
         },
@@ -393,7 +396,8 @@
                 "if",
                 "nested if",
                 "lists",
-                "slicing"
+                "slicing",
+                "boolean expressions"
             ],
             "Code": "x=\"None\"\n\nif x:\n    if x[1:3] == \"on\":\n        print(\"Hello\")\n    else:\n        print(\"Good Bye\")\n\nelse:\n  print(\"See ya later\")",
             "Question": "What is the expected output?",
@@ -401,6 +405,7 @@
             "Distractor1": "Good Bye",
             "Distractor2": "See ya later",
             "Distractor3": "None",
+            "Description": "\ud83d\udca1 <br><br>\ud83d\udca1 <br><br>\ud83d\udca1 <br><br>",
             "Video": "",
             "Difficulty": 2
         },
@@ -409,7 +414,10 @@
                 "if",
                 "lists",
                 "indexing",
-                "pop"
+                "pop",
+                "input and output",
+                "boolean operators",
+                "boolean expressions"
             ],
             "Code": "data = [False]\n\nprint(data[-1], end=\" \")\n\nif not data.pop():\n    print(\"Advertising\", end=\" \")\nelse:\n    print(\"Claim\")",
             "Question": "What is the output of this code?",
@@ -417,6 +425,7 @@
             "Distractor1": "Advertising",
             "Distractor2": "Claim",
             "Distractor3": "This code is erroneous",
+            "Description": "\ud83d\udca1 <br><br>\ud83d\udca1 <br><br>\ud83d\udca1 <br><br>",
             "Video": "",
             "Difficulty": 2.5
         },
@@ -425,7 +434,10 @@
                 "if",
                 "lists",
                 "indexing",
-                "pop"
+                "pop",
+                "boolean operators",
+                "boolean expressions",
+                "input and output"
             ],
             "Code": "data = [False]\n\nprint(data[1], end=\" \")\n\nif not data.pop():\n    print(\"Advertising\", end=\" \")\nelse:\n    print(\"Claim\")",
             "Question": "What is the expected output of this code?",
@@ -433,6 +445,7 @@
             "Distractor1": "False Advertising",
             "Distractor2": "Advertising",
             "Distractor3": "False Claim",
+            "Description": "\ud83d\udca1 <br><br>\ud83d\udca1 <br><br>\ud83d\udca1 <br><br>",
             "Video": "",
             "Difficulty": 2.5
         },
@@ -448,12 +461,14 @@
             "Distractor1": "Pack!",
             "Distractor2": "True",
             "Distractor3": "False",
+            "Description": "\ud83d\udca1 <br><br>\ud83d\udca1 <br><br>\ud83d\udca1 <br><br>",
             "Video": "",
             "Difficulty": 2
         },
         "pcep.2.1.20": {
             "Tags": [
-                "if"
+                "if",
+                "boolean expressions"
             ],
             "Code": "input = 3\n\nif (input == 1):\n    print(\"1\")\nelif (input == 2):\n    print(\"2\")\n\nprint(\"3\")",
             "Question": "What is the expected output of this code?",
@@ -461,6 +476,7 @@
             "Distractor1": "1",
             "Distractor2": "2",
             "Distractor3": "This code is erroneous",
+            "Description": "\ud83d\udca1 <br><br>\ud83d\udca1 <br><br>\ud83d\udca1 <br><br>",
             "Video": "",
             "Difficulty": 1
         },
@@ -469,7 +485,8 @@
                 "if",
                 "boolean expressions",
                 "boolean operators",
-                "operators"
+                "operators",
+                "input and output"
             ],
             "Code": "x = 42\n \nif x > 10 or not x >= 42:\n  print(\"Hey\", end=\"-\")\nif x > 42:\n  print(\"Hee\", end=\"-\")\nelif x >= 42:\n  print(\"Hi\", end=\"-\")\nelse:\n  print(\"Ho\", end=\"-\")",
             "Question": "What will print when this code is run?",
@@ -477,6 +494,7 @@
             "Distractor1": "Hey Hi",
             "Distractor2": "Hey-Hi",
             "Distractor3": "This code is erroneous",
+            "Description": "\ud83d\udca1 <br><br>\ud83d\udca1 <br><br>\ud83d\udca1 <br><br>",
             "Video": "",
             "Difficulty": 2
         },
@@ -484,7 +502,8 @@
             "Tags": [
                 "if",
                 "boolean expressions",
-                "boolean operators"
+                "boolean operators",
+                "input and output"
             ],
             "Code": "x = 42\n \nif x > 10 or not x >= 42:\n  print(\"Hey\", end=\"-\")\nif x > 42:\n  print(\"Hee\", end=\"-\")\nelif x =< 42:\n  print(\"Hi\", end=\"-\")\nelse:\n  print(\"Ho\", end=\"-\")",
             "Question": "What is the expected output of this code?",
@@ -492,6 +511,7 @@
             "Distractor1": "Hey-Hi-",
             "Distractor2": "Hey-Hi",
             "Distractor3": "Hey Hi",
+            "Description": "\ud83d\udca1 <br><br>\ud83d\udca1 <br><br>\ud83d\udca1 <br><br>",
             "Video": "",
             "Difficulty": 1.5
         },
@@ -499,7 +519,8 @@
             "Tags": [
                 "if",
                 "bitwise operators",
-                "boolean"
+                "boolean expressions",
+                "input and output"
             ],
             "Code": "a = 0\nb = True\nc = False\n\nif a ^ b: \n  print('x', end=\"\")\nif b or c:\n  print('y', end=\"\")\nif a and not c:\n  print('z', end=\"\")",
             "Question": "What is the expected ouput of this code?",
@@ -507,14 +528,17 @@
             "Distractor1": "xyz",
             "Distractor2": "yz",
             "Distractor3": "xz",
+            "Description": "\ud83d\udca1 <br><br>\ud83d\udca1 <br><br>\ud83d\udca1 <br><br>",
             "Video": "",
             "Difficulty": 2.5
         },
         "pcep.2.1.6": {
             "Tags": [
-                "boolean",
+                "boolean operators",
+                "boolean expressions",
                 "if",
-                "bitwise operators"
+                "bitwise operators",
+                "input and output"
             ],
             "Code": "a = 1\nb = 0\nc = False\n\nif a ^ b: \n  print('x', end=\"\")\nif b or c:\n  print('y', end=\"\")\nif a and not c:\n  print('z', end=\"\")",
             "Question": "What is the expected output?",
@@ -522,14 +546,17 @@
             "Distractor1": "xy",
             "Distractor2": "yz",
             "Distractor3": "xyz",
+            "Description": "\ud83d\udca1 <br><br>\ud83d\udca1 <br><br>\ud83d\udca1 <br><br>",
             "Video": "",
             "Difficulty": 2.5
         },
         "pcep.2.1.7": {
             "Tags": [
-                "boolean",
+                "boolean expresions",
                 "bitwise operators",
-                "if"
+                "if",
+                "nested if",
+                "casting"
             ],
             "Code": "x = 0 + True\n \nif bool(\"\") ^ bool([]):    \n  if x < 0:\n    print('Less than 0')\n  elif x > 0:\n    print('Greater than 0')\n  elif x == 0:\n    print('is 0')\nelse:\n   print('mysterious output')",
             "Question": "What is the expected output of this code?",
@@ -537,13 +564,17 @@
             "Distractor1": "This code is erroneous",
             "Distractor2": "Less than 0",
             "Distractor3": "Greater than 0",
+            "Description": "\ud83d\udca1 <br><br>\ud83d\udca1 <br><br>\ud83d\udca1 <br><br>",
             "Video": "",
             "Difficulty": 3
         },
         "pcep.2.1.8": {
             "Tags": [
                 "if",
-                "bitwise shift"
+                "nested if",
+                "bitwise shift",
+                "boolean expressions",
+                "input and output"
             ],
             "Code": "x = 52 >> 2\n\nif x != 13:\n  print(\"*\",end=',')\n  if x < 7:\n    print(\">\")\n  elif x == 20:\n    print(\">>\")\n  else:\n    print(\"+\" * 3) \nelse:\n  print(\"-2\" * 2)",
             "Question": "What is the output of this code?",
@@ -551,13 +582,15 @@
             "Distractor1": "*,>",
             "Distractor2": "*,>>",
             "Distractor3": "*,+++",
+            "Description": "\ud83d\udca1 <br><br>\ud83d\udca1 <br><br>\ud83d\udca1 <br><br>",
             "Video": "",
             "Difficulty": 3
         },
         "pcep.2.1.9": {
             "Tags": [
                 "if",
-                "casting"
+                "casting",
+                "boolean expressions"
             ],
             "Code": "priority = float(input())\n\nif (priority == 1):\n  print(\"FR\")\nelif (priority==2):\n  print(\"GR\")\nelif (priority==3):\n  print(\"EN\")\nelse:\n  print(\"None\")",
             "Question": "What is the output of this code?",
@@ -565,13 +598,15 @@
             "Distractor1": "FR",
             "Distractor2": "GR",
             "Distractor3": "EN",
+            "Description": "\ud83d\udca1 <br><br>\ud83d\udca1 <br><br>\ud83d\udca1 <br><br>",
             "Video": "",
             "Difficulty": 1.5
         },
         "pcep.2.2.1": {
             "Tags": [
                 "for",
-                "if"
+                "if",
+                "boolean expressions"
             ],
             "Code": "total = 0\n\nfor i in range(5):\n  \n  if i % 2 == 1:\n    total += 1\n    \nelse:\n  total -= 1\n  \nprint(total)\n    ",
             "Question": "What is the value of total?",
@@ -579,6 +614,7 @@
             "Distractor1": "2",
             "Distractor2": "3",
             "Distractor3": "The code enters an infinite loop",
+            "Description": "\ud83d\udca1 <br><br>\ud83d\udca1 <br><br>\ud83d\udca1 <br><br>",
             "Video": "",
             "Difficulty": 1.5
         },
@@ -596,6 +632,7 @@
             "Distractor1": "3",
             "Distractor2": "1",
             "Distractor3": "0",
+            "Description": "\ud83d\udca1 <br><br>\ud83d\udca1 <br><br>\ud83d\udca1 <br><br>",
             "Video": "",
             "Difficulty": 2
         },
@@ -604,7 +641,8 @@
                 "for",
                 "if",
                 "nested loops",
-                "break"
+                "break",
+                "boolean expressions"
             ],
             "Code": "x = 42\n\nfor i in range(2, 8, 2):\n  for j in range(-5, 2, 3):\n    if i==j:\n      x += 2\n    else:\n      break\n\nprint(x)",
             "Question": "What is the expected output of this code?",
@@ -612,6 +650,7 @@
             "Distractor1": "46",
             "Distractor2": "44",
             "Distractor3": "48",
+            "Description": "\ud83d\udca1 <br><br>\ud83d\udca1 <br><br>\ud83d\udca1 <br><br>",
             "Video": "",
             "Difficulty": 2
         },
@@ -619,7 +658,8 @@
             "Tags": [
                 "for",
                 "if",
-                "else"
+                "else",
+                "boolean expressions"
             ],
             "Code": "x = 0\n\nfor i in range(-2, 4, 2):\n  if 4 * i < 8:\n    x += 3\nelse:\n  x += 2\n    \nprint(x)",
             "Question": "What is the expected output of this code?",
@@ -627,6 +667,7 @@
             "Distractor1": "0",
             "Distractor2": "3",
             "Distractor3": "5",
+            "Description": "\ud83d\udca1 <br><br>\ud83d\udca1 <br><br>\ud83d\udca1 <br><br>",
             "Video": "",
             "Difficulty": 2
         },
@@ -641,13 +682,15 @@
             "Distractor1": "Data is not empty",
             "Distractor2": "This code raises an exception",
             "Distractor3": "This code creates an infinite loop",
+            "Description": "\ud83d\udca1 <br><br>\ud83d\udca1 <br><br>\ud83d\udca1 <br><br>",
             "Video": "",
             "Difficulty": 1.5
         },
         "pcep.2.2.14": {
             "Tags": [
                 "while",
-                "else"
+                "else",
+                "input and output"
             ],
             "Code": "x = 3\n\nwhile x != 0:\n  x //= 2\n  print('*', sep=\"\", end=\"*\")\nelse:\n  print('*', sep=\"\", end=\"*\")",
             "Question": "What is the expected output of this code?",
@@ -655,6 +698,7 @@
             "Distractor1": "***",
             "Distractor2": "**",
             "Distractor3": "****",
+            "Description": "\ud83d\udca1 <br><br>\ud83d\udca1 <br><br>\ud83d\udca1 <br><br>",
             "Video": "",
             "Difficulty": 2
         },
@@ -662,7 +706,9 @@
             "Tags": [
                 "while",
                 "if",
-                "else"
+                "else",
+                "boolean expressions",
+                "input and output"
             ],
             "Code": "x = 2\n\nwhile x < 4:\n  x += 1\n  if (x == 3):\n    continue\n  else:\n    print('*', end=\"*\")\nelse:\n  print('*')",
             "Question": "What is the expected output of this code?",
@@ -670,13 +716,15 @@
             "Distractor1": "****",
             "Distractor2": "**",
             "Distractor3": "*****",
+            "Description": "\ud83d\udca1 <br><br>\ud83d\udca1 <br><br>\ud83d\udca1 <br><br>",
             "Video": "",
             "Difficulty": 2
         },
         "pcep.2.2.16": {
             "Tags": [
                 "while",
-                "else"
+                "else",
+                "boolean expressions"
             ],
             "Code": "i = 0\n\nwhile i != 0:\n  i = i + 1\nelse:\n  i = i + 1\n    \nprint(i)",
             "Question": "What is the expected output of this code?",
@@ -684,13 +732,16 @@
             "Distractor1": "2",
             "Distractor2": "0",
             "Distractor3": "This code is erroneous",
+            "Description": "\ud83d\udca1 <br><br>\ud83d\udca1 <br><br>\ud83d\udca1 <br><br>",
             "Video": "",
             "Difficulty": 1.5
         },
         "pcep.2.2.17": {
             "Tags": [
                 "while",
-                "pass"
+                "pass",
+                "boolean expressions",
+                "len"
             ],
             "Code": "x='Rappahannok'\n\ny=0\nwhile y<len(x):\n  y+=1\n  pass\n    \nprint(\"y: \", y)",
             "Question": "What is the expected output of this code?",
@@ -698,12 +749,15 @@
             "Distractor1": "y:",
             "Distractor2": "y:  0",
             "Distractor3": "y:  10",
+            "Description": "\ud83d\udca1 <br><br>\ud83d\udca1 <br><br>\ud83d\udca1 <br><br>",
             "Video": "",
             "Difficulty": 1.5
         },
         "pcep.2.2.18": {
             "Tags": [
-                "while"
+                "while",
+                "boolean expressions",
+                "len"
             ],
             "Code": "a = 'Mavericks'\ni = 7\n\nwhile i < len(a):\n  i += 2\n    \nprint(i+1)",
             "Question": "What is the expected output of this code?",
@@ -711,6 +765,7 @@
             "Distractor1": "7",
             "Distractor2": "9",
             "Distractor3": "11",
+            "Description": "\ud83d\udca1 <br><br>\ud83d\udca1 <br><br>\ud83d\udca1 <br><br>",
             "Video": "",
             "Difficulty": 1.5
         },
@@ -719,7 +774,9 @@
                 "for",
                 "nested loops",
                 "if",
-                "continue"
+                "continue",
+                "boolean expressions",
+                "range"
             ],
             "Code": "num = 10\n\nfor i in range(10):\n  for j in range(2, 15, 3):\n    if num % 2 == 0:\n      continue\n      num += 1\n  num+=1\nelse:\n  num+=1\n    \nprint(num)",
             "Question": "What is the expected output of this code?",
@@ -727,12 +784,15 @@
             "Distractor1": "11",
             "Distractor2": "10",
             "Distractor3": "This code creates an infinite loop.",
+            "Description": "\ud83d\udca1 <br><br>\ud83d\udca1 <br><br>\ud83d\udca1 <br><br>",
             "Video": "",
             "Difficulty": 3
         },
         "pcep.2.2.2": {
             "Tags": [
-                "while"
+                "while",
+                "input and output",
+                "boolean expressions"
             ],
             "Code": "torque = 1\n\nwhile torque < 2:\n  torque *= 2\n  print(\"@\", end=\"\")\n  \nelse:\n  print(\"@\")",
             "Question": "What is the expected output of this code?",
@@ -740,6 +800,7 @@
             "Distractor1": "@",
             "Distractor2": "@@@",
             "Distractor3": "This code enters an infinite loop",
+            "Description": "\ud83d\udca1 <br><br>\ud83d\udca1 <br><br>\ud83d\udca1 <br><br>",
             "Video": "",
             "Difficulty": 1.5
         },
@@ -755,6 +816,7 @@
             "Distractor1": "judo",
             "Distractor2": "0123",
             "Distractor3": "0*1*2*3",
+            "Description": "\ud83d\udca1 <br><br>\ud83d\udca1 <br><br>\ud83d\udca1 <br><br>",
             "Video": "",
             "Difficulty": 1.5
         },
@@ -762,7 +824,8 @@
             "Tags": [
                 "while",
                 "if",
-                "break"
+                "break",
+                "boolean expressions"
             ],
             "Code": "while True:\n    \n  password = input()\n  if password == 'qwerty':\n    print(\"Ok password: \", password)\n    break\n    print(\"End\")\n  else:\n    print(\"Wrong password: \", password)",
             "Question": "What is the expected output of this code?",
@@ -770,12 +833,15 @@
             "Distractor1": "End",
             "Distractor2": "Wrong password:  qwerty",
             "Distractor3": "Ok password:  qwerty End",
+            "Description": "\ud83d\udca1 <br><br>\ud83d\udca1 <br><br>\ud83d\udca1 <br><br>",
             "Video": "",
             "Difficulty": 2
         },
         "pcep.2.2.22": {
             "Tags": [
-                "while"
+                "while",
+                "boolean expressions",
+                "input and output"
             ],
             "Code": "a = 13\nb = 42\n \nwhile a < b:\n  print(\"*\", sep=\"-\", end=\"\")\n  a += 7",
             "Question": "What is the expected output of this code?",
@@ -783,12 +849,15 @@
             "Distractor1": "*-*-*-*-*",
             "Distractor2": "****",
             "Distractor3": "*****-",
+            "Description": "\ud83d\udca1 <br><br>\ud83d\udca1 <br><br>\ud83d\udca1 <br><br>",
             "Video": "",
             "Difficulty": 2
         },
         "pcep.2.2.23": {
             "Tags": [
-                "for"
+                "for",
+                "range",
+                "input and output"
             ],
             "Code": "for i in range(-3, 3, 2):\n  print(\"*\", end=\"\")",
             "Question": "What is the expected output of this code?",
@@ -796,13 +865,15 @@
             "Distractor1": "**",
             "Distractor2": "****",
             "Distractor3": "This code is erroneous",
+            "Description": "\ud83d\udca1 <br><br>\ud83d\udca1 <br><br>\ud83d\udca1 <br><br>",
             "Video": "",
             "Difficulty": 1.5
         },
         "pcep.2.2.24": {
             "Tags": [
                 "while",
-                "break"
+                "break",
+                "boolean expressions"
             ],
             "Code": "x=42\n\nwhile x<46:\n  x+=1\n  print(x)\n  break\nelse:\n  print(\"break\")",
             "Question": "What is the expected output of this code?",
@@ -810,6 +881,7 @@
             "Distractor1": "46",
             "Distractor2": "44",
             "Distractor3": "break",
+            "Description": "\ud83d\udca1 <br><br>\ud83d\udca1 <br><br>\ud83d\udca1 <br><br>",
             "Video": "",
             "Difficulty": 2
         },
@@ -817,7 +889,9 @@
             "Tags": [
                 "for",
                 "if",
-                "break"
+                "break",
+                "else",
+                "boolean expressions"
             ],
             "Code": "x = 'State'\n\nfor char in x:\n  if char == 't':\n    break\n  print(char)\nelse:\n  print('Finished!')",
             "Question": "What is the expected output of this code?",
@@ -825,12 +899,15 @@
             "Distractor1": "t",
             "Distractor2": "Finished",
             "Distractor3": "char",
+            "Description": "\ud83d\udca1 <br><br>\ud83d\udca1 <br><br>\ud83d\udca1 <br><br>",
             "Video": "",
             "Difficulty": 1.5
         },
         "pcep.2.2.3": {
             "Tags": [
-                "for"
+                "for",
+                "nested loops",
+                "boolean expressions"
             ],
             "Code": "others = 0\n\nfor i in range(2):\n  for j in range(2):\n    if i != j:\n      others += 1\n\nelse:\n  others += 1\n  \nprint(others)\n      ",
             "Question": "What is the value of others?",
@@ -838,13 +915,16 @@
             "Distractor1": "1",
             "Distractor2": "2",
             "Distractor3": "This code is erroneous",
+            "Description": "\ud83d\udca1 <br><br>\ud83d\udca1 <br><br>\ud83d\udca1 <br><br>",
             "Video": "",
             "Difficulty": 1.5
         },
         "pcep.2.2.4": {
             "Tags": [
                 "while",
-                "continue"
+                "continue",
+                "boolean expressions",
+                "input and output"
             ],
             "Code": "power = 1\n\nwhile power != 10:\n  power *= 2\n  if power == 5:\n    continue\n  print(\"@\", end=\"\")\n  \nelse:\n  print(\"@\")",
             "Question": "What is the expected result of this code?",
@@ -852,6 +932,7 @@
             "Distractor1": "@@@",
             "Distractor2": "@@",
             "Distractor3": "@",
+            "Description": "\ud83d\udca1 <br><br>\ud83d\udca1 <br><br>\ud83d\udca1 <br><br>",
             "Video": "",
             "Difficulty": 1.5
         },
@@ -859,6 +940,7 @@
             "Tags": [
                 "tuples",
                 "slicing",
+                "indexing",
                 "for",
                 "if"
             ],
@@ -868,6 +950,7 @@
             "Distractor1": "2",
             "Distractor2": "0",
             "Distractor3": "3",
+            "Description": "\ud83d\udca1 <br><br>\ud83d\udca1 <br><br>\ud83d\udca1 <br><br>",
             "Video": "",
             "Difficulty": 1.5
         },
@@ -875,7 +958,8 @@
             "Tags": [
                 "for",
                 "if",
-                "break"
+                "break",
+                "boolean expressions"
             ],
             "Code": "tot = 0\n\nfor n in range(5):\n    if n == 3:\n        break\n    else:\n        tot += 1\nelse:\n    tot -= 1\n\nprint(tot)",
             "Question": "What is the output of this code?",
@@ -883,13 +967,15 @@
             "Distractor1": "4",
             "Distractor2": "2",
             "Distractor3": "1",
+            "Description": "\ud83d\udca1 <br><br>\ud83d\udca1 <br><br>\ud83d\udca1 <br><br>",
             "Video": "",
             "Difficulty": 3
         },
         "pcep.2.2.7": {
             "Tags": [
                 "lists",
-                "for"
+                "for",
+                "input and output"
             ],
             "Code": "sports = ['basketball', 'judo', 'tennis', 'football']\nfor sport in sports:\n  if sport != 'judo':\n    print(sport, end=',')",
             "Question": "What is the expected output of this code?",
@@ -897,12 +983,15 @@
             "Distractor1": "basketball, judo, football",
             "Distractor2": "judo",
             "Distractor3": "basketball judo tennis football",
+            "Description": "\ud83d\udca1 <br><br>\ud83d\udca1 <br><br>\ud83d\udca1 <br><br>",
             "Video": "",
             "Difficulty": 1.5
         },
         "pcep.2.2.8": {
             "Tags": [
-                "for"
+                "for",
+                "range",
+                "input and output"
             ],
             "Code": "for x in range(13, 2, -2):\n  print(x, end=\",\", sep=\" \")",
             "Question": "What is the output of this code?",
@@ -910,13 +999,15 @@
             "Distractor1": "2,4,6,8,10,11",
             "Distractor2": "13 11 9 7 5 3,",
             "Distractor3": "This code is erroneous",
+            "Description": "\ud83d\udca1 <br><br>\ud83d\udca1 <br><br>\ud83d\udca1 <br><br>",
             "Video": "",
             "Difficulty": 2
         },
         "pcep.2.2.9": {
             "Tags": [
                 "for",
-                "nested loops"
+                "nested loops",
+                "range"
             ],
             "Code": "var=0\n\nfor i in range(3):\n  for j in range(-2, -7, -2):\n    var+=1\n\nprint(var)",
             "Question": "What is the expected output of this code?",
@@ -924,12 +1015,18 @@
             "Distractor1": "15",
             "Distractor2": "10",
             "Distractor3": "5",
+            "Description": "\ud83d\udca1 <br><br>\ud83d\udca1 <br><br>\ud83d\udca1 <br><br>",
             "Video": "",
             "Difficulty": 1.5
         },
         "pcep.3.1.1": {
             "Tags": [
                 "lists",
+                "boolean expressions",
+                "index",
+                "indexing",
+                "slicing",
+                "boolean operators",
                 "boolean expressions"
             ],
             "Code": "lst = [True, 3.14, -1]\nx=-1 in lst\ny= lst.index(-1) not in lst\nz = lst[lst[-1]]==-1\nt = len(lst[0:2])==1\nprint(x, y, z, t)",
@@ -938,6 +1035,7 @@
             "Distractor1": "True False True False",
             "Distractor2": "True True False True",
             "Distractor3": "True True False False",
+            "Description": "\ud83d\udca1 <br><br>\ud83d\udca1 <br><br>\ud83d\udca1 <br><br>",
             "Video": "",
             "Difficulty": 2.5
         },
@@ -945,7 +1043,8 @@
             "Tags": [
                 "lists",
                 "slicing",
-                "indexing"
+                "indexing",
+                "input and output"
             ],
             "Code": "lst = [-1, -0.25, 0.5, 1.5]\n \nlst2 =  lst[0:5]\ny = lst[lst[0]]\n \nprint(lst2, end = \" || \")\nprint(y)",
             "Question": "What is the expected output of this code?",
@@ -953,6 +1052,7 @@
             "Distractor1": "[-1, -0.25, 0.5, 1.5] || -1",
             "Distractor2": "[-1, -0.25, 0.5, 1.5] || 0",
             "Distractor3": "An unhandled exception occurred",
+            "Description": "\ud83d\udca1 <br><br>\ud83d\udca1 <br><br>\ud83d\udca1 <br><br>",
             "Video": "",
             "Difficulty": 2.5
         },
@@ -967,6 +1067,7 @@
             "Distractor1": "['E', 'e', 't', 'o']",
             "Distractor2": "['noitcelE']",
             "Distractor3": "['n', 'o', 'i', 't', 'c', 'e', 'l', 'E']",
+            "Description": "\ud83d\udca1 <br><br>\ud83d\udca1 <br><br>\ud83d\udca1 <br><br>",
             "Video": "",
             "Difficulty": 2.5
         },
@@ -981,12 +1082,15 @@
             "Distractor1": "['Ana', 1, 4, 2, False]",
             "Distractor2": "[1, 4, 2]",
             "Distractor3": "This code is erroneous",
+            "Description": "\ud83d\udca1 <br><br>\ud83d\udca1 <br><br>\ud83d\udca1 <br><br>",
             "Video": "",
             "Difficulty": 2.5
         },
         "pcep.3.1.13": {
             "Tags": [
-                "lists"
+                "lists",
+                "indexing",
+                "item assignment"
             ],
             "Code": "lst = [3, 1, -1]\nlst[-2] = lst[1]\nprint(lst)",
             "Question": "What is the expected output of this code?",
@@ -994,6 +1098,7 @@
             "Distractor1": "False",
             "Distractor2": "True",
             "Distractor3": "[1]",
+            "Description": "\ud83d\udca1 <br><br>\ud83d\udca1 <br><br>\ud83d\udca1 <br><br>",
             "Video": "",
             "Difficulty": 2
         },
@@ -1001,7 +1106,9 @@
             "Tags": [
                 "lists",
                 "append",
-                "indexing"
+                "indexing",
+                "slicing",
+                "copying"
             ],
             "Code": "lst = [11, 42, 13]\nlst2 = lst[:]\nlst2.append(3)\nprint(lst[-1] + lst2[-1])",
             "Question": "What is the expected output of this code?",
@@ -1009,6 +1116,7 @@
             "Distractor1": "26",
             "Distractor2": "22",
             "Distractor3": "84",
+            "Description": "\ud83d\udca1 <br><br>\ud83d\udca1 <br><br>\ud83d\udca1 <br><br>",
             "Video": "",
             "Difficulty": 2
         },
@@ -1016,7 +1124,8 @@
             "Tags": [
                 "lists",
                 "append",
-                "indexing"
+                "indexing",
+                "cloning"
             ],
             "Code": "lst = [11, 42, 13]\nlst2 = lst\nlst2.append(3)\nprint(lst[-1] + lst2[-1])",
             "Question": "What is the expected output of this code?",
@@ -1024,6 +1133,7 @@
             "Distractor1": "26",
             "Distractor2": "16",
             "Distractor3": "22",
+            "Description": "\ud83d\udca1 <br><br>\ud83d\udca1 <br><br>\ud83d\udca1 <br><br>",
             "Video": "",
             "Difficulty": 2
         },
@@ -1039,13 +1149,16 @@
             "Distractor1": "[41, 42, 41, 42, 41]",
             "Distractor2": "[42, 41, 41, 41, 41]",
             "Distractor3": "[41, 41, 41, 42",
+            "Description": "\ud83d\udca1 <br><br>\ud83d\udca1 <br><br>\ud83d\udca1 <br><br>",
             "Video": "",
             "Difficulty": 3
         },
         "pcep.3.1.17": {
             "Tags": [
                 "lists",
-                "boolean operators"
+                "boolean operators",
+                "boolean expressions",
+                "input and output"
             ],
             "Code": "x = [False, True, \"42\", 3, 4, 5]\na=42 in x\nprint(a, end=\" \")\nb=0 in x\nprint(b)",
             "Question": "What is the expected output of this code?",
@@ -1053,6 +1166,7 @@
             "Distractor1": "True True",
             "Distractor2": "False False",
             "Distractor3": "True False",
+            "Description": "\ud83d\udca1 <br><br>\ud83d\udca1 <br><br>\ud83d\udca1 <br><br>",
             "Video": "",
             "Difficulty": 2
         },
@@ -1067,13 +1181,15 @@
             "Distractor1": "[2, 4, 6, 8, 10, 42]",
             "Distractor2": "[13]",
             "Distractor3": "[13, 9, 7, 5, 3, 1]",
+            "Description": "\ud83d\udca1 <br><br>\ud83d\udca1 <br><br>\ud83d\udca1 <br><br>",
             "Video": "",
             "Difficulty": 2
         },
         "pcep.3.1.19": {
             "Tags": [
                 "lists",
-                "copying"
+                "cloning",
+                "boolean expressions"
             ],
             "Code": "languages = ['English', 'Spanish', 'German']\nmore_languages = ['English', 'Spanish', 'German']\nextra_languages = more_languages\n\nx = more_languages == languages\ny = more_languages is languages\nprint(x, y)",
             "Question": "What is the expected output of this code?",
@@ -1081,6 +1197,7 @@
             "Distractor1": "True True",
             "Distractor2": "False False",
             "Distractor3": "False True",
+            "Description": "\ud83d\udca1 <br><br>\ud83d\udca1 <br><br>\ud83d\udca1 <br><br>",
             "Video": "",
             "Difficulty": 2
         },
@@ -1100,13 +1217,15 @@
             "Distractor1": "1",
             "Distractor2": "2",
             "Distractor3": "Thiis code is erroneous",
+            "Description": "\ud83d\udca1 <br><br>\ud83d\udca1 <br><br>\ud83d\udca1 <br><br>",
             "Video": "",
             "Difficulty": 1.5
         },
         "pcep.3.1.20": {
             "Tags": [
                 "lists",
-                "cloning"
+                "cloning",
+                "boolean expressions"
             ],
             "Code": "languages = ['English', 'Spanish', 'German']\nmore_languages = languages\nextra_languages = more_languages\n\nx = more_languages == languages\ny = more_languages is languages\nprint(x, y)",
             "Question": "What is the expected output of this code?",
@@ -1114,12 +1233,17 @@
             "Distractor1": "True False",
             "Distractor2": "False True",
             "Distractor3": "False False",
+            "Description": "\ud83d\udca1 <br><br>\ud83d\udca1 <br><br>\ud83d\udca1 <br><br>",
             "Video": "",
             "Difficulty": 2
         },
         "pcep.3.1.3": {
             "Tags": [
                 "lists",
+                "boolean expressions",
+                "index",
+                "indexing",
+                "slicing",
                 "boolean expressions"
             ],
             "Code": "lst = [True, 3.14, -1]\nx=-1 in lst\ny= lst.index(-1) not in lst\nz = lst[lst[-1]]==-1\nt = len(lst[0:2])==1\nprint(x, y, z, t)",
@@ -1128,6 +1252,7 @@
             "Distractor1": "True True False True",
             "Distractor2": "False True False True",
             "Distractor3": "True False True False",
+            "Description": "\ud83d\udca1 <br><br>\ud83d\udca1 <br><br>\ud83d\udca1 <br><br>",
             "Video": "",
             "Difficulty": 2.5
         },
@@ -1144,6 +1269,7 @@
             "Distractor1": "False False",
             "Distractor2": "True False",
             "Distractor3": "True True",
+            "Description": "\ud83d\udca1 <br><br>\ud83d\udca1 <br><br>\ud83d\udca1 <br><br>",
             "Video": "",
             "Difficulty": 2
         },
@@ -1160,6 +1286,7 @@
             "Distractor1": "[[1, 20, 3, 4]]",
             "Distractor2": "[1, 2, 3, 4]",
             "Distractor3": "[[10, 20, 30, 40]]",
+            "Description": "\ud83d\udca1 Code iterates over a nested list, starting with initializing `result` to 1. <br><br>\ud83d\udca1 Outer loop runs once, multiplying `result` by 10 each time.<br><br>\ud83d\udca1 Inner loop modifies first element, multiplying 1 by 10, resulting in [[10, 2, 3, 4]].<br><br>",
             "Video": "",
             "Difficulty": 2
         },
@@ -1175,6 +1302,7 @@
             "Distractor1": "False",
             "Distractor2": "[1,2,3] [1,2,3]",
             "Distractor3": "FALSE",
+            "Description": "\ud83d\udca1 <br><br>\ud83d\udca1 <br><br>\ud83d\udca1 <br><br>",
             "Video": "",
             "Difficulty": 1.5
         },
@@ -1189,6 +1317,7 @@
             "Distractor1": "5",
             "Distractor2": "7",
             "Distractor3": "3",
+            "Description": "\ud83d\udca1 <br><br>\ud83d\udca1 <br><br>\ud83d\udca1 <br><br>",
             "Video": "",
             "Difficulty": 1.5
         },
@@ -1203,6 +1332,7 @@
             "Distractor1": "[1,2,3,4,5]",
             "Distractor2": "[1,2,3,4]",
             "Distractor3": "['x', 'x', 'x', 'x', 'x']",
+            "Description": "\ud83d\udca1 <br><br>\ud83d\udca1 <br><br>\ud83d\udca1 <br><br>",
             "Video": "",
             "Difficulty": 2.5
         },
@@ -1220,6 +1350,7 @@
             "Distractor1": "3",
             "Distractor2": "0",
             "Distractor3": "1",
+            "Description": "\ud83d\udca1 <br><br>\ud83d\udca1 <br><br>\ud83d\udca1 <br><br>",
             "Video": "",
             "Difficulty": 2.5
         },
@@ -1234,6 +1365,7 @@
             "Distractor1": "10",
             "Distractor2": "('1', '2')('3', '4')",
             "Distractor3": "This code is erroneous",
+            "Description": "\ud83d\udca1 <br><br>\ud83d\udca1 <br><br>\ud83d\udca1 <br><br>",
             "Video": "",
             "Difficulty": 1.5
         },
@@ -1248,6 +1380,7 @@
             "Distractor1": "(1, 2, 3, 1, 2, 3)",
             "Distractor2": "3",
             "Distractor3": "(1, 2, 3)",
+            "Description": "\ud83d\udca1 <br><br>\ud83d\udca1 <br><br>\ud83d\udca1 <br><br>",
             "Video": "",
             "Difficulty": 2
         },
@@ -1263,6 +1396,7 @@
             "Distractor1": "(8, 16)",
             "Distractor2": "16",
             "Distractor3": "This code is erroneous",
+            "Description": "\ud83d\udca1 <br><br>\ud83d\udca1 <br><br>\ud83d\udca1 <br><br>",
             "Video": "",
             "Difficulty": 2
         },
@@ -1277,6 +1411,7 @@
             "Distractor1": "(1, 2, 'x', 'y', 84)",
             "Distractor2": "(1, 2, 'x', 'y', 42, 1, 2, 'x', 'y', 42)",
             "Distractor3": "This code raises a TypeError",
+            "Description": "\ud83d\udca1 <br><br>\ud83d\udca1 <br><br>\ud83d\udca1 <br><br>",
             "Video": "",
             "Difficulty": 2
         },
@@ -1285,7 +1420,8 @@
                 "dictionaries",
                 "for",
                 "indexing",
-                "strings"
+                "strings",
+                "input and output"
             ],
             "Code": "colors = {\"Red\": 155, \"Green\": 209, \"Blue\": 77}\n\nfor color in colors:\n  print(color[0], end=\"\")",
             "Question": "What is the expected output of this code?",
@@ -1293,20 +1429,23 @@
             "Distractor1": "127",
             "Distractor2": "RedGreenBlue",
             "Distractor3": "15520977",
+            "Description": "\ud83d\udca1 Looping through a dictionary like this sets the iterator variable to the key each time.<br><br>\ud83d\udca1 That means \"color\" is the key in each iteration (i.e., Red, Green, Blue.<br><br>\ud83d\udca1 The print statement printing the value at the first index ([0]) each time, thus \"RGB\"<br><br>",
             "Video": "",
             "Difficulty": 1.5
         },
         "pcep.3.3.2": {
             "Tags": [
                 "dictionaries",
-                "cloning"
+                "cloning",
+                "del"
             ],
-            "Code": "dict1 = {7: 'Java', 4: 'JavaScript', 3: 'Python', 1:\"C#\"}\n \ndict2 = dict1\ndel dict1\n \nprint(dict2)dict1 = {7: 'Java', 4: 'JavaScript', 3: 'Python', 1:\"C#\"}",
+            "Code": "dict1 = {7: 'Java', 4: 'JavaScript', 3: 'Python', 1:\"C#\"}\n \ndict2 = dict1\ndel dict1\n \nprint(dict2)",
             "Question": "What is the expected output of this code?",
             "Answer": "{7: 'Java', 4: 'JavaScript', 3: 'Python', 1: 'C#'}",
             "Distractor1": "{}",
             "Distractor2": "{7: 'Java', 4: 'JavaScript', 3: 'Python'}",
             "Distractor3": "This code is erroneous",
+            "Description": "\ud83d\udca1 The expression on line 2 is \"cloning\" dict1.  This means that the variables dict1 and dict2 point at the same dictionary object.<br><br>\ud83d\udca1 On line 4, del dict1 is deleting the reference to the object, not the object itself.<br><br>\ud83d\udca1 If the del keyword is applied to a specific object inside a mutable object, then it will alter the object.<br><br>",
             "Video": "",
             "Difficulty": 2.5
         },
@@ -1321,12 +1460,14 @@
             "Distractor1": "one",
             "Distractor2": "two",
             "Distractor3": "This code is erroneous",
+            "Description": "\ud83d\udca1 <br><br>\ud83d\udca1 <br><br>\ud83d\udca1 <br><br>",
             "Video": "",
             "Difficulty": 2
         },
         "pcep.3.3.4": {
             "Tags": [
                 "dictionaries",
+                "Exceptions",
                 "KeyError"
             ],
             "Code": "animals = {'Tom': 10, 'Jerry': 20}\nprint(animals[20])",
@@ -1335,12 +1476,14 @@
             "Distractor1": "This code raises IndexError",
             "Distractor2": "This code raises ValueError",
             "Distractor3": "Jerry",
+            "Description": "\ud83d\udca1 <br><br>\ud83d\udca1 <br><br>\ud83d\udca1 <br><br>",
             "Video": "",
             "Difficulty": 2
         },
         "pcep.3.3.5": {
             "Tags": [
-                "dictionaries"
+                "dictionaries",
+                "item assignment"
             ],
             "Code": "dic = {'one': 1, 'two': 7, 'three': 3}\n \ndic['two'] = 4\ndic[7] = 'seven'\n   \nprint(dic)",
             "Question": "What is the expected output of this code?",
@@ -1348,6 +1491,7 @@
             "Distractor1": "{'one': 1, 'two': 7, 'three': 3}",
             "Distractor2": "{'one': 1, 'two': 7, 'three': 3, 4: 'four'}",
             "Distractor3": "This code is erroneous",
+            "Description": "\ud83d\udca1 <br><br>\ud83d\udca1 <br><br>\ud83d\udca1 <br><br>",
             "Video": "",
             "Difficulty": 2.5
         },
@@ -1364,6 +1508,7 @@
             "Distractor1": "Petrol",
             "Distractor2": "Poooooo",
             "Distractor3": "This code is erroneous",
+            "Description": "\ud83d\udca1 <br><br>\ud83d\udca1 <br><br>\ud83d\udca1 <br><br>",
             "Video": "",
             "Difficulty": 2
         },
@@ -1371,7 +1516,8 @@
             "Tags": [
                 "dictionaries",
                 "indexing",
-                "for"
+                "for",
+                "item assignment"
             ],
             "Code": "d = {}\nd[1] = 7\nd['1'] = 8\nd[1] -= 4\n \ns = 0\n \nfor i in d:\n  s += d[i]\n \nprint(s)",
             "Question": "What is the expected output of this code?",
@@ -1379,12 +1525,14 @@
             "Distractor1": "10",
             "Distractor2": "12",
             "Distractor3": "9",
+            "Description": "\ud83d\udca1 <br><br>\ud83d\udca1 <br><br>\ud83d\udca1 <br><br>",
             "Video": "",
             "Difficulty": 2.5
         },
         "pcep.3.4.3": {
             "Tags": [
-                "dictionaries"
+                "dictionaries",
+                "item assignment"
             ],
             "Code": "data = {}\ndata[0] = 'Math'\ndata['Languages'] = ['English', 'Serbian']\nprint(data)",
             "Question": "What is the expected output of this code?",
@@ -1392,6 +1540,7 @@
             "Distractor1": "'Math'",
             "Distractor2": "['English, 'Serbian']",
             "Distractor3": "This code rises an exception as dictionaries are immutable.",
+            "Description": "\ud83d\udca1 <br><br>\ud83d\udca1 <br><br>\ud83d\udca1 <br><br>",
             "Video": "",
             "Difficulty": 2
         },
@@ -1400,7 +1549,9 @@
                 "functions",
                 "recursion",
                 "default parameters",
-                "keyword"
+                "keyword",
+                "boolean expressions",
+                "input and output"
             ],
             "Code": "def walk(stop, start=1):\n  print(start, end=\" \")\n  if start + 1 < stop:\n    walk(stop, start + 1)\n    \nwalk(3)",
             "Question": "What will be printed?",
@@ -1408,13 +1559,16 @@
             "Distractor1": "1 2 3",
             "Distractor2": "2 3",
             "Distractor3": "0 1 2 3",
+            "Description": "\ud83d\udca1 <br><br>\ud83d\udca1 <br><br>\ud83d\udca1 <br><br>",
             "Video": "",
             "Difficulty": 2
         },
         "pcep.4.1.10": {
             "Tags": [
                 "functions",
-                "return"
+                "return",
+                "if",
+                "boolean expressions"
             ],
             "Code": "def test(x):\n  return 42 if x % 3 != 0 else 13\n \nprint(test(test(100)))",
             "Question": "What is the expected output of this code?",
@@ -1422,6 +1576,7 @@
             "Distractor1": "42",
             "Distractor2": "1",
             "Distractor3": "This code is erroneous",
+            "Description": "\ud83d\udca1 test(test(100)) is equivalent to test(42).<br><br>\ud83d\udca1 test(42) is 13 because the remainder of 42/3 is 0.<br><br>\ud83d\udca1 When you have nested function calls like this, start on the inside and work outward.<br><br>",
             "Video": "",
             "Difficulty": 2
         },
@@ -1439,7 +1594,8 @@
             "Distractor2": "12",
             "Distractor3": "24",
             "Video": "",
-            "Difficulty": 3
+            "Difficulty": 3,
+            "Description": "\ud83d\udca1 <br><br>\ud83d\udca1 <br><br>\ud83d\udca1 <br><br>"
         },
         "pcep.4.1.12": {
             "Tags": [
@@ -1452,6 +1608,7 @@
             "Distractor1": "42 13",
             "Distractor2": "13 13",
             "Distractor3": "42 42",
+            "Description": "\ud83d\udca1 The result is 13 42 becuase the values of a and b are not changed in the function.<br><br>\ud83d\udca1 The a and b referred to in the function definition are local to that function.<br><br>\ud83d\udca1 If the function included the expression \"global a, b\", then the global a and b variables would have been changed.<br><br>\ud83d\udca1  This question is about scope - local vs. global.",
             "Video": "",
             "Difficulty": 1.5
         },
@@ -1468,12 +1625,15 @@
             "Distractor2": "x == 6",
             "Distractor3": "return x",
             "Video": "",
-            "Difficulty": 2
+            "Difficulty": 2,
+            "Description": "\ud83d\udca1 <br><br>\ud83d\udca1 <br><br>\ud83d\udca1 <br><br>"
         },
         "pcep.4.1.14": {
             "Tags": [
                 "functions",
-                "scope"
+                "scope",
+                "if",
+                "boolean expressions"
             ],
             "Code": "x = 17\n \ndef f():\n  if x >= 10:\n    x += 10\n\nf()\nprint(x)",
             "Question": "What is the expected output of this code?",
@@ -1481,6 +1641,7 @@
             "Distractor1": "27",
             "Distractor2": "17",
             "Distractor3": "7",
+            "Description": "\ud83d\udca1 <br><br>\ud83d\udca1 <br><br>\ud83d\udca1 <br><br>",
             "Video": "",
             "Difficulty": 2
         },
@@ -1488,7 +1649,10 @@
             "Tags": [
                 "functions",
                 "return",
-                "TypeError"
+                "TypeError",
+                "nested function call",
+                "boolean expressions",
+                "exceptions"
             ],
             "Code": "def f(x):\n  if x % 2 == 0:\n    return 1\n  else:\n    return\n \nprint(f(f(2)) + 11)",
             "Question": "What is the expected output of this code?",
@@ -1496,6 +1660,7 @@
             "Distractor1": "ValueError",
             "Distractor2": "13",
             "Distractor3": "11",
+            "Description": "\ud83d\udca1 This function raises a TypeError<br><br>\ud83d\udca1 f(f(2)) simplifies to f(1) since 2%2==0 is True.<br><br>\ud83d\udca1 F(1) simplifies to None because 1%2==0 is False, thus the function returns None (\"return\" alone returns None)<br><br>\ud83d\udca1 The TypeError occurs because the argument in the print function becomes None + 11.  You can't add an integer and a None type.",
             "Video": "",
             "Difficulty": 3
         },
@@ -1513,7 +1678,8 @@
             "Distractor2": "[1, 2, 3, 4, 5]",
             "Distractor3": "This code is erroneous",
             "Video": "",
-            "Difficulty": 2.5
+            "Difficulty": 2.5,
+            "Description": "\ud83d\udca1 <br><br>\ud83d\udca1 <br><br>\ud83d\udca1 <br><br>"
         },
         "pcep.4.1.17": {
             "Tags": [
@@ -1529,12 +1695,13 @@
             "Distractor2": "['shark']",
             "Distractor3": "['cat', 'dog', 'mouse', 'cow', 'shark']",
             "Video": "",
-            "Difficulty": 2
+            "Difficulty": 2,
+            "Description": "\ud83d\udca1 <br><br>\ud83d\udca1 <br><br>\ud83d\udca1 <br><br>"
         },
         "pcep.4.1.2": {
             "Tags": [
                 "functions",
-                "keyword"
+                "return"
             ],
             "Code": "def sample(value):\n  return value + value\n\nx = sample(value=1)\ny = sample(x)\nprint(y)",
             "Question": "What is the expected output?",
@@ -1542,6 +1709,7 @@
             "Distractor1": "2",
             "Distractor2": "1",
             "Distractor3": "This code is erroneous",
+            "Description": "\ud83d\udca1 <br><br>\ud83d\udca1 <br><br>\ud83d\udca1 <br><br>",
             "Video": "",
             "Difficulty": 1.5
         },
@@ -1550,7 +1718,9 @@
                 "functions",
                 "keyword",
                 "tuples",
-                "indexing"
+                "indexing",
+                "return",
+                "default parameters"
             ],
             "Code": "def combine(width, height=2, depth=0, is_3D=False):\n  return (is_3D, width, height, depth)\n\nprint(combine(1)[2])",
             "Question": "What is the result of this code?",
@@ -1558,13 +1728,15 @@
             "Distractor1": "1",
             "Distractor2": "False",
             "Distractor3": "This code is erroneous",
+            "Description": "\ud83d\udca1 First evaluate combine(1) --> the 1 is the \"width\" argument --> (False, 1, 2, 0) is returned.<br><br>\ud83d\udca1 Then evaluate combine(1)[2] which is the item in the return from step 1 at index position 2<br><br>\ud83d\udca1 The item in index position 2 is the 2 (the height variable that was part of the returned tuple).<br><br>",
             "Video": "",
             "Difficulty": 2
         },
         "pcep.4.1.4": {
             "Tags": [
                 "functions",
-                "return"
+                "return",
+                "nested function calls"
             ],
             "Code": "def f(x):\n    return x ** 3 - 24\n\nprint(f(f(f(3))))",
             "Question": "What is the expected output of this code?",
@@ -1572,13 +1744,15 @@
             "Distractor1": "0",
             "Distractor2": "24",
             "Distractor3": "15",
+            "Description": "\ud83d\udca1 <br><br>\ud83d\udca1 <br><br>\ud83d\udca1 <br><br>",
             "Video": "",
             "Difficulty": 1.5
         },
         "pcep.4.1.5": {
             "Tags": [
                 "functions",
-                "while"
+                "while",
+                "boolean expressions"
             ],
             "Code": "x=123\n\ndef f(y):\n  sum=0\n  while (y!=0):\n    sum+=int(y%10)\n    y=int(y/10)\n  print(sum)\n  \nf(x)",
             "Question": "What is the expected output of this code?",
@@ -1586,6 +1760,7 @@
             "Distractor1": "5",
             "Distractor2": "4",
             "Distractor3": "0",
+            "Description": "\ud83d\udca1 <br><br>\ud83d\udca1 <br><br>\ud83d\udca1 <br><br>",
             "Video": "",
             "Difficulty": 3
         },
@@ -1600,7 +1775,8 @@
             "Distractor2": "x",
             "Distractor3": "This code is erroneous",
             "Video": "",
-            "Difficulty": 1
+            "Difficulty": 1,
+            "Description": "\ud83d\udca1 <br><br>\ud83d\udca1 <br><br>\ud83d\udca1 <br><br>"
         },
         "pcep.4.1.7": {
             "Tags": [
@@ -1615,12 +1791,14 @@
             "Distractor2": "3",
             "Distractor3": "9",
             "Video": "",
-            "Difficulty": 2
+            "Difficulty": 2,
+            "Description": "\ud83d\udca1 <br><br>\ud83d\udca1 <br><br>\ud83d\udca1 <br><br>"
         },
         "pcep.4.1.8": {
             "Tags": [
                 "functions",
-                "for"
+                "for",
+                "input and output"
             ],
             "Code": "def f(x):\n  res = '*'\n  for _ in range(x):\n    res += res\n  return res\n \nfor x in f(3):\n  print(x, end='-')",
             "Question": "What is the expected output of this code?",
@@ -1628,6 +1806,7 @@
             "Distractor1": "********",
             "Distractor2": "*-*-*-",
             "Distractor3": "*-*-*-*-*-*-",
+            "Description": "\ud83d\udca1 <br><br>\ud83d\udca1 <br><br>\ud83d\udca1 <br><br>",
             "Video": "",
             "Difficulty": 3
         },
@@ -1636,7 +1815,9 @@
                 "functions",
                 "return",
                 "for",
-                "if"
+                "if",
+                "lists",
+                "boolean expressions"
             ],
             "Code": "def average_of_evens(numbers):\n    total = 0\n    count = 0\n    for num in numbers:\n        if num % 2 == 0:\n            total += num\n            count += 1\n    if count == 0:\n        return None\n    else:\n        return total / count\n \nprint(average_of_evens([1,2,3,4]))",
             "Question": "What is the expected output of this code?",
@@ -1644,6 +1825,7 @@
             "Distractor1": "5",
             "Distractor2": "3.5",
             "Distractor3": "3",
+            "Description": "\ud83d\udca1 <br><br>\ud83d\udca1 <br><br>\ud83d\udca1 <br><br>",
             "Video": "",
             "Difficulty": 3
         },
@@ -1651,7 +1833,8 @@
             "Tags": [
                 "functions",
                 "scope",
-                "global"
+                "global",
+                "input and output"
             ],
             "Code": "str = \"Hello\"\ndef f():\n    global str\n    str=str*2\n    print(str, end=\" \")\n\nf()\nprint(str)",
             "Question": "What is the expected output of this code?",
@@ -1659,13 +1842,15 @@
             "Distractor1": "Hello",
             "Distractor2": "HelloHello",
             "Distractor3": "This code is erroneous",
+            "Description": "\ud83d\udca1 <br><br>\ud83d\udca1 <br><br>\ud83d\udca1 <br><br>",
             "Video": "",
             "Difficulty": 2
         },
         "pcep.4.2.2": {
             "Tags": [
                 "functions",
-                "scope"
+                "scope",
+                "input and output"
             ],
             "Code": "msg = \"Hello\"\ndef f(msg):\n    msg=msg*2\n    print(msg, end=\" \")\n\nf(\"Goodbye\")\nprint(msg)",
             "Question": "What is the expected output of this code?",
@@ -1673,13 +1858,15 @@
             "Distractor1": "HelloHello Hello",
             "Distractor2": "HelloHello HelloHello",
             "Distractor3": "This code is erroneous",
+            "Description": "\ud83d\udca1 <br><br>\ud83d\udca1 <br><br>\ud83d\udca1 <br><br>",
             "Video": "",
             "Difficulty": 2
         },
         "pcep.4.2.3": {
             "Tags": [
                 "functions",
-                "scope"
+                "scope",
+                "input and output"
             ],
             "Code": "msg = \"Hello\"\ndef f():\n    msg=msg*2\n    print(msg, end=\" \")\n\nf()\nprint(msg)",
             "Question": "What is the expected output of this code?",
@@ -1687,6 +1874,7 @@
             "Distractor1": "HelloHello Hello",
             "Distractor2": "HelloHello HelloHello",
             "Distractor3": "msg",
+            "Description": "\ud83d\udca1 <br><br>\ud83d\udca1 <br><br>\ud83d\udca1 <br><br>",
             "Video": "",
             "Difficulty": 2
         },
@@ -1703,7 +1891,8 @@
             "Distractor2": "13 42 13",
             "Distractor3": "This code is erroneous",
             "Video": "",
-            "Difficulty": 2
+            "Difficulty": 2,
+            "Description": "\ud83d\udca1 <br><br>\ud83d\udca1 <br><br>\ud83d\udca1 <br><br>"
         },
         "pcep.4.2.5": {
             "Tags": [
@@ -1719,13 +1908,15 @@
             "Distractor2": "0",
             "Distractor3": "This code is erroneous",
             "Video": "",
-            "Difficulty": 2
+            "Difficulty": 2,
+            "Description": "\ud83d\udca1 <br><br>\ud83d\udca1 <br><br>\ud83d\udca1 <br><br>"
         },
         "pcep.4.2.6": {
             "Tags": [
                 "functions",
                 "lists",
-                "scope"
+                "scope",
+                "input and output"
             ],
             "Code": "def f(x):\n  x=['a', 'b', 'c', 'd', 'e']\n  print(x, end=\" \")\n \nx=['p','q','r']\nf(x)\nprint(x)",
             "Question": "What is the expected output of this code?",
@@ -1733,14 +1924,15 @@
             "Distractor1": "['p','q', 'r'] ['p', 'q', 'r']",
             "Distractor2": "['a', 'b', 'c', 'd', 'e'] ['a', 'b', 'c', 'd', 'e']",
             "Distractor3": "This code is erroneous",
+            "Description": "\ud83d\udca1 <br><br>\ud83d\udca1 <br><br>\ud83d\udca1 <br><br>",
             "Video": "",
             "Difficulty": 2.5
         },
         "pcep.4.2.7": {
             "Tags": [
                 "functions",
-                "default parameter values",
-                "keyword"
+                "default parameters",
+                "keyword arguments"
             ],
             "Code": "def funct(x=13, y=42, z=0):\n  x = x + y + z\n  y -= 11\n  z +=10\n  print(x, y, z)\n \nfunct(3, 2, 1)",
             "Question": "What is the expected output of this code?",
@@ -1748,6 +1940,7 @@
             "Distractor1": "55 31 10",
             "Distractor2": "6 13 11",
             "Distractor3": "16 31 10",
+            "Description": "\ud83d\udca1 <br><br>\ud83d\udca1 <br><br>\ud83d\udca1 <br><br>",
             "Video": "",
             "Difficulty": 3
         },
@@ -1764,7 +1957,8 @@
             "Distractor2": "test(a=6, c=2, d=4)",
             "Distractor3": "test(3, c=3)",
             "Video": "",
-            "Difficulty": 2.5
+            "Difficulty": 2.5,
+            "Description": "\ud83d\udca1 <br><br>\ud83d\udca1 <br><br>\ud83d\udca1 <br><br>"
         },
         "pcep.4.3.1": {
             "Tags": [
@@ -1779,7 +1973,8 @@
             "Distractor2": "This code raises an IndexError",
             "Distractor3": "[9, 15, 8, 15]",
             "Video": "",
-            "Difficulty": 3
+            "Difficulty": 3,
+            "Description": "\ud83d\udca1 <br><br>\ud83d\udca1 <br><br>\ud83d\udca1 <br><br>"
         },
         "pcep.4.3.10": {
             "Tags": [
@@ -1794,7 +1989,8 @@
             "Distractor2": "ValueError",
             "Distractor3": "abstract except",
             "Video": "",
-            "Difficulty": 1.5
+            "Difficulty": 1.5,
+            "Description": "\ud83d\udca1 <br><br>\ud83d\udca1 <br><br>\ud83d\udca1 <br><br>"
         },
         "pcep.4.3.11": {
             "Tags": [
@@ -1809,7 +2005,8 @@
             "Distractor2": "TypeError",
             "Distractor3": "abstract except",
             "Video": "",
-            "Difficulty": 1.5
+            "Difficulty": 1.5,
+            "Description": "\ud83d\udca1 <br><br>\ud83d\udca1 <br><br>\ud83d\udca1 <br><br>"
         },
         "pcep.4.3.12": {
             "Tags": [
@@ -1823,6 +2020,23 @@
             "Distractor1": "KeyError",
             "Distractor2": "LookupError",
             "Distractor3": "abstract exception",
+            "Video": "",
+            "Difficulty": 1.5,
+            "Description": "\ud83d\udca1 <br><br>\ud83d\udca1 <br><br>\ud83d\udca1 <br><br>"
+        },
+        "pcep.4.3.13": {
+            "Tags": [
+                "exceptions",
+                "exception hierarchy",
+                "KeyError"
+            ],
+            "Code": "try:\n    x = {\"Spring\": 66, \"Summer\": 94}\n    y = x[\"Winter\"] * 2\n\nexcept KeyError as ke:\n    print(\"KeyError:\", ke)\n\nexcept IndexError as ie:\n    print(\"IndexError:\", ie)\n\nexcept LookupError as le:\n    print(\"LookuError:\", le)\n\nexcept:\n    print(\"An unexpected error has occurred\")",
+            "Question": "Which exception branch will handle this error?",
+            "Answer": "KeyError",
+            "Distractor1": "IndexError",
+            "Distractor2": "LookupError",
+            "Distractor3": "abstract except",
+            "Description": "\ud83d\udca1 The error is occurring on line 3 - there no key \"Winter\" in the dictionary named \"x\".<br><br>\ud83d\udca1 As a result, this line raises a KeyError and will be handled on lines 5 and 6.<br><br>\ud83d\udca1 KeyError is a subclass of LookupError - if the KeyError handler was not present, then the LookupError would have handled it.<br><br>\ud83d\udca1 IndexError is raised when using an improper index with a list, tuple, or string.",
             "Video": "",
             "Difficulty": 1.5
         },
@@ -1839,12 +2053,13 @@
             "Distractor2": "IndexError",
             "Distractor3": "abstract except",
             "Video": "",
-            "Difficulty": 2
+            "Difficulty": 2,
+            "Description": "\ud83d\udca1 <br><br>\ud83d\udca1 <br><br>\ud83d\udca1 <br><br>"
         },
         "pcep.4.3.2": {
             "Tags": [
                 "exceptions",
-                "abstract exceptions"
+                "abstract except"
             ],
             "Code": "try:\n  print(42/0) \nexcept (ZeroDivisionError):\n  print(\"Zero division\")\nexcept: \n  print(\"You made a mistake\")\nexcept (ValueError):\n  print(\"Boo!\")",
             "Question": "What is the expected output of this code?",
@@ -1852,6 +2067,7 @@
             "Distractor1": "Zero division",
             "Distractor2": "Boo!",
             "Distractor3": "You made a mistake",
+            "Description": "\ud83d\udca1 <br><br>\ud83d\udca1 <br><br>\ud83d\udca1 <br><br>",
             "Video": "",
             "Difficulty": 3
         },
@@ -1867,7 +2083,8 @@
             "Distractor2": "False True",
             "Distractor3": "False False",
             "Video": "",
-            "Difficulty": 0.5
+            "Difficulty": 0.5,
+            "Description": "\ud83d\udca1 <br><br>\ud83d\udca1 <br><br>\ud83d\udca1 <br><br>"
         },
         "pcep.4.3.4": {
             "Tags": [
@@ -1881,7 +2098,8 @@
             "Distractor2": "n/a",
             "Distractor3": "n/a",
             "Video": "",
-            "Difficulty": 1
+            "Difficulty": 1,
+            "Description": "\ud83d\udca1 <br><br>\ud83d\udca1 <br><br>\ud83d\udca1 <br><br>"
         },
         "pcep.4.3.5": {
             "Tags": [
@@ -1895,7 +2113,8 @@
             "Distractor2": "n/a",
             "Distractor3": "n/a",
             "Video": "",
-            "Difficulty": 1
+            "Difficulty": 1,
+            "Description": "\ud83d\udca1 <br><br>\ud83d\udca1 <br><br>\ud83d\udca1 <br><br>"
         },
         "pcep.4.3.6": {
             "Tags": [
@@ -1909,7 +2128,8 @@
             "Distractor2": "An unhandled exception will occur",
             "Distractor3": "p",
             "Video": "",
-            "Difficulty": 1
+            "Difficulty": 1,
+            "Description": "\ud83d\udca1 <br><br>\ud83d\udca1 <br><br>\ud83d\udca1 <br><br>"
         },
         "pcep.4.3.7": {
             "Tags": [
@@ -1924,7 +2144,8 @@
             "Distractor2": "TypeError",
             "Distractor3": "abstract exception",
             "Video": "",
-            "Difficulty": 1.5
+            "Difficulty": 1.5,
+            "Description": "\ud83d\udca1 <br><br>\ud83d\udca1 <br><br>\ud83d\udca1 <br><br>"
         },
         "pcep.4.3.9": {
             "Tags": [
@@ -1939,7 +2160,8 @@
             "Distractor2": "TypeError",
             "Distractor3": "abstract exception",
             "Video": "",
-            "Difficulty": 1.5
+            "Difficulty": 1.5,
+            "Description": "\ud83d\udca1 <br><br>\ud83d\udca1 <br><br>\ud83d\udca1 <br><br>"
         }
     }
 }
