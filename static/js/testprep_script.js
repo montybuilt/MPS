@@ -581,6 +581,8 @@ var editor = CodeMirror.fromTextArea(document.getElementById("code"), {
     lineNumbers: true,
     mode: "python",
     theme: "dracula",
+    tabSize: 4,
+    indentUnit: 4,
     matchBrackets: true,
     viewportMargin: Infinity,
 });

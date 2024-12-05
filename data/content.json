@@ -2183,7 +2183,7 @@
                 "modules & packages",
                 "platform"
             ],
-            "Code": "import platform\n\nprint(platform.platform)",
+            "Code": "import platform\n\nprint(platform.platform())",
             "Question": "What will the output of this code be?",
             "Answer": "The name of the operating system, version and service pack number",
             "Distractor1": "The the type of CPU",
@@ -2198,7 +2198,7 @@
                 "modules & packages",
                 "platform"
             ],
-            "Code": "import platform\n\nprint(platform.???())\n\n",
+            "Code": "import platform\n\nprint(platform.???)\n\n",
             "Question": "What function from the platform module will return the system architecture?",
             "Answer": "machine()",
             "Distractor1": "system()",
@@ -2249,7 +2249,7 @@
             "Distractor1": "__init__",
             "Distractor2": "__pycache__",
             "Distractor3": "__dict__",
-            "Description": "\ud83d\udca1 The __init__.py is a file that is used to mark a directory as a Python package.<br><br>\ud83d\udca1 It can also be used to execute initialization code or define what is accessible when the package is imported (via __all).<br><br>\ud83d\udca1 In Python versions prior to 3.3 it was requred.  It is still common practice to use even in later versions of Python.",
+            "Description": "\ud83d\udca1 The __init__.py is a file that is used to mark a directory as a Python package.<br><br>\ud83d\udca1 It can also be used to execute initialization code or define what is accessible when the package is imported.<br><br>\ud83d\udca1 In Python versions prior to 3.3 it was required.  It is still common practice to use even in later versions of Python.",
             "Video": "",
             "Difficulty": 1
         },
@@ -2263,7 +2263,7 @@
             "Distractor1": "\"Sorry, something went wrong...\"",
             "Distractor2": "\"To bad...\"",
             "Distractor3": "5",
-            "Description": "\ud83d\udca1 This code raises a SyntaxError: default 'except:' must be last.<br><br>\ud83d\udca1 There will be tricky questions on the PCAP like this.  If SyntaxError is an answer choice, then specifically look for this situation.",
+            "Description": "\ud83d\udca1 This code raises a SyntaxError.<br><br>\ud83d\udca1 When unnamed \"except\" branch is used, it must be the last exception branch.<br><br>\ud83d\udca1 There will be tricky questions on the PCAP like this.  If SyntaxError is an answer choice, then specifically look for this situation.",
             "Video": "",
             "Difficulty": 1.5
         },
@@ -2278,7 +2278,7 @@
             "Distractor1": "Too bad...",
             "Distractor2": "Sorry, something went wrong...",
             "Distractor3": "5",
-            "Description": "\ud83d\udca1 This code raises an unhandled SyntaxError: 'break' outside loop.<br><br>\ud83d\udca1 Any time you see the break keyword used outside of a loop (either 'for' or 'while'), this will raise a SyntaxError.<br><br>\ud83d\udca1 On the PCAP, watch out for key words used in the wrong context.",
+            "Description": "\ud83d\udca1 This code raises an unhandled SyntaxError: 'break' outside loop.<br><br>\ud83d\udca1 Any time you see the break keyword used outside of a loop (either 'for' or 'while'), this will raise a SyntaxError.<br><br>\ud83d\udca1 On the PCAP, watch out for keywords used in the wrong context.",
             "Video": "",
             "Difficulty": 1.5
         },
@@ -2316,7 +2316,7 @@
             "Tags": [
                 ""
             ],
-            "Code": "def foo(n):\n  \tglobal m\n    m = 0\n    assert n != 0\n    try:\n        return 1/n\n    except ArithmeticError:\n        raise\n \ntry:\n    foo(0)\nexcept ArithmeticError:\n    m += 2\nexcept:\n    m += 1\n \nprint(m)",
+            "Code": "def foo(n):\n\tglobal m\n\tm = 0\n\tassert n != 0\n\ttry:\n\t\treturn 1/n\n\texcept ArithmeticError:\n\t\traise\n \ntry:\n  \tfoo(0)\nexcept ArithmeticError:\n\tm += 2\nexcept:\n\tm += 1\n \nprint(m)",
             "Question": "What is the expected output of this code?",
             "Answer": "1",
             "Distractor1": "2",
@@ -2411,6 +2411,150 @@
             "Description": "\ud83d\udca1 This code raises no error.<br><br>\ud83d\udca1 The expression '42' == 42 is allowed; however, other comparisions would have raised a TypeError - for example '42' > 42 or '42' <= 42.",
             "Video": "",
             "Difficulty": 1.5
+        },
+        "pcap.2.2.5": {
+            "Tags": [
+                "exceptions",
+                "custom exceptions"
+            ],
+            "Code": "class CustomError(LookupError):\n    pass\n\nmy_colors = ['red', 'green', 'blue', 'yellow' ]\n\ntry:\n    print(my_colors[4])\n\nexcept KeyError as ke:\n    print(\"KeyError\")\n\nexcept IndexError as ie:\n    print(\"IndexError\")\n\nexcept CustomError as ce:\n    print(\"CustomError\")",
+            "Question": "What exception, if any, will be raised?",
+            "Answer": "IndexError",
+            "Distractor1": "KeyError",
+            "Distractor2": "CustomError",
+            "Distractor3": "No exception will be raised",
+            "Description": "\ud83d\udca1 The expression on line 7 will raise an IndexError since the list my_colors does not have an index 4.<br><br>",
+            "Video": "",
+            "Difficulty": 2
+        },
+        "pcap.2.2.4": {
+            "Tags": [
+                "exceptions",
+                "exception hierarchy"
+            ],
+            "Code": "class CustomError(LookupError):\n    pass\n\nmy_colors = ['red', 'green', 'blue', 'yellow' ]\n\ntry:\n    print(my_colors[4])\n\nexcept LookupError as le:\n    print(\"LookupError\")\n\nexcept KeyError as ke:\n    print(\"KeyError\")\n\nexcept IndexError as ie:\n    print(\"IndexError\")",
+            "Question": "Which exception, if any, will be raised by this code?",
+            "Answer": "LookupError",
+            "Distractor1": "KeyError",
+            "Distractor2": "IndexError",
+            "Distractor3": "No exception is raised.",
+            "Description": "\ud83d\udca1 In this case, the specific error is IndexError.  However, an IndexError is a subclass of LookupError, so the exception is actually handled on line 9.  LookupError will print.<br><br>\ud83d\udca1 Be aware of the order of exception branches, in this case the more general exception was listed first.<br><br>\ud83d\udca1 The CustomError definition is a red herring and should be ignored.",
+            "Video": "",
+            "Difficulty": 2.5
+        },
+        "pcap.2.2.6": {
+            "Tags": [
+                "exceptions",
+                "custom exceptions",
+                "exception hierarchy"
+            ],
+            "Code": "class CustomError(LookupError):\n    pass\n\ntry:\n    raise CustomError\n\nexcept LookupError as le:\n    print(\"LookupError\")\n\nexcept CustomError as ce:\n    print(\"CustomError\")\n\nexcept:\n    print(\"An unexpected error has occured\")",
+            "Question": "What is the expected output of this code?",
+            "Answer": "LookupError",
+            "Distractor1": "CustomError",
+            "Distractor2": "An unexpected error has occurred",
+            "Distractor3": "SyntaxError: The CustomError must come first.",
+            "Description": "\ud83d\udca1 The output will be LookupError.<br><br>\ud83d\udca1 Even though a CustomError is being raised, it is handled by the LookupError branch becuase CustomError is a subclass of LookupError.<br><br>\ud83d\udca1 Remember that the first exception branch to match the raised exception or be in its hierarchy will handle the exception.",
+            "Video": "",
+            "Difficulty": 2.5
+        },
+        "pcap.2.2.7": {
+            "Tags": [
+                "exceptions",
+                "custom exceptions",
+                "raise",
+                "exception hierarchy"
+            ],
+            "Code": "class ScoreError(Exception):\n    def __init__(self, msg, score):\n        self.msg = f\"{msg} Score: {score}\"\n        super().__init__(self.msg)\n\ntry:\n\n    score = int(input(\"Enter your score\"))\n    if not 0 <= score <= 100:\n        raise ScoreError(\"The Score is out of bounds!\", score)\n\nexcept Exception as e:\n    print(e)\n\nelse:\n    print(\"Score has been registered.\")",
+            "Question": "What is the expected output of this code if the user enters 103?",
+            "Answer": "The Score is out of bounds! Score: 103",
+            "Distractor1": "The Score is out of bounds!",
+            "Distractor2": "Score has been registered",
+            "Distractor3": "An unhandled exception will occur",
+            "Description": "\ud83d\udca1 The answer is \"The Score is out of bounds! Score: 103\".<br><br>\ud83d\udca1 If the user enters 105, then the condition on line 9 will be True and a ScoreError will be raised.<br><br>\ud83d\udca1 Since ScoreError is a subclass of Exception, the exception will be handled by line 12/13.<br><br>\ud83d\udca1 Notice that ScoreError passes the self.msg when it invokes the super() constructor, so the Exception object will have the full formatted string in its args.",
+            "Video": "",
+            "Difficulty": 3
+        },
+        "pcap.2.1.9": {
+            "Tags": [
+                "exceptions",
+                "IndexError"
+            ],
+            "Code": "my_data = (5, 3, 9, 2, 1)\n\nmy_slice = my_data[2:7:2]\n\nx = my_slice[2]\n\nprint(x)",
+            "Question": "Which line of this code will raise an exception?",
+            "Answer": "Line 5 will raise an IndexError",
+            "Distractor1": "Line 3 will raise an IndexError",
+            "Distractor2": "Line 3 will raise a SyntaxError",
+            "Distractor3": "Line 5 will raise a SyntaxError",
+            "Description": "\ud83d\udca1 The code on line 5 will raise an IndexError.<br><br>\ud83d\udca1 The tuple my_slice consists of (9, 1) and therefore there is no index 2.<br><br>\ud83d\udca1 It may seem like line 3 will raise an exception since the end index is 7; however, end values out of range in slicing to not raise exceptions.",
+            "Video": "",
+            "Difficulty": 1.5
+        },
+        "pcap.2.2.8": {
+            "Tags": [
+                "exceptions",
+                "custom exceptions",
+                "raise",
+                "OOP",
+                "__str__ method",
+                "__init__ method"
+            ],
+            "Code": "class Disaster(Exception):\n    def __init__(self, message):\n        self.message = message\n    \n    def __str__(self):\n        return \"A Disaster has occurred!\"\n    \ntry:\n    print(\"We have liftoff:\", end=\" \")\n    raise Disaster(\"It's a disaster!\")\nexcept Disaster as d:\n    print(d)\nelse:\n    print(\"We are off to Mars!\")",
+            "Question": "What is the expected output of this code?",
+            "Answer": "We have liftoff: A Disaster has occurred!",
+            "Distractor1": "We have liftoff: It's a disaster!",
+            "Distractor2": "We are off to Mars!",
+            "Distractor3": "It's a disaster!",
+            "Description": "\ud83d\udca1 The print on line 9 will print \"We have liftoff\" then a Disaster exception will be raised on line 10.  This will be handled by lines 11/12.<br><br>\ud83d\udca1 When you print an object, it will print whatever the __str__ method returns - \"A Disaster has occurred!\".",
+            "Video": "",
+            "Difficulty": 3
+        },
+        "pcap.2.2.9": {
+            "Tags": [
+                "exceptions",
+                "custom exceptions",
+                "raise",
+                "__str__ method",
+                "__init__ method",
+                "OOP"
+            ],
+            "Code": "class EntryError(ValueError):\n    def __init__(self, msg):\n        self.msg = msg\n    \n    def __str__(self):\n        return f\"EntryError: {self.msg}\"\n    \ntry:\n    entry = 78\n    if entry > 75:\n        raise EntryError(f\"The value is {entry}.\")\n\nexcept ValueError as v:\n    print(v)\n\nelse:\n    print(\"The entry is valid\")",
+            "Question": "What is the expected output of this code?",
+            "Answer": "EntryError: The value is 78",
+            "Distractor1": "The entry is valid",
+            "Distractor2": "EntryError",
+            "Distractor3": "This code raises an unhandled exception",
+            "Description": "\ud83d\udca1 The condition on line 10 is True, therefore an EntryError is raised.  Since EntryError is a subclass of ValueError, it will be handled on line 13/14.<br><br>\ud83d\udca1 When the exception object v is printed, it prints whatever the __str__method returns, which is \"EntryError: The value is 78\".",
+            "Video": "",
+            "Difficulty": 3
+        },
+        "pcap.2.1.10": {
+            "Tags": [
+                ""
+            ],
+            "Code": "def checker(x):\n    assert x >= 0\n    return x ** 0.5\n\ndef intro(x):\n    try:\n        checker(x)\n    except FunctionError:\n        raise\n\ntry:\n    tot = intro(-5)\n\nexcept RuntimeError:\n    tot = 5\n\nexcept AssertionError:\n    tot = 7\n\nexcept:\n    tot = 10\n\nprint(tot)",
+            "Question": "What is the expected output of this code",
+            "Answer": "10",
+            "Distractor1": "5",
+            "Distractor2": "7",
+            "Distractor3": "An unhandled exception occurs",
+            "Description": "\ud83d\udca1 The exception that is being raised is a NameError on line 8 - FunctionError is not defined (it is not a built-in exception).<br><br>\ud83d\udca1 This causes the call of the intro function to raise an exception that will be caught by the abstract except branch on line 20.",
+            "Video": "",
+            "Difficulty": 3
+        },
+        "tutorial.1": {
+            "Tags": [
+                "intro"
+            ],
+            "Code": "# Python code will appear here\n\nprint(\"Hello Test Prepper!\")\n\n'''\n\nAfter you answer a question, you can run this code\nby clicking the \"Run Code\" button to the right\nof this window.\n\nYou can also change this code an re-run it to see\nwhat affect your changes had.  Do this frequently\nas this will help you better understand the code!\n\n'''",
+            "Question": "Here will be a question - it could be a question about the code in the window to the left, or a stand-along question",
+            "Answer": "This will be an answer choice \"choose me!\"",
+            "Distractor1": "This will be another choice",
+            "Distractor2": "This will be another choice",
+            "Distractor3": "This will be another choice",
+            "Description": "\ud83d\udca1 After a question is answered, a description of the solution will appear here.<br><br>\ud83d\udca1 To the right, you will find XP scores and a % accuracy for the current curriculum.<br><br>\ud83d\udca1 In the navbar at the top, you will find information about the curriculum, the question, the status, and a timer.  There are also buttons for a scratch pad and a calculator.<br><br>\ud83d\udca1 When you want to move on, just press the \"Next Question\" button.",
+            "Video": "",
+            "Difficulty": 0.1
         }
     }
 }

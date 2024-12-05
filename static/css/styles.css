@@ -129,7 +129,7 @@ nav a:hover {
     border-radius: 1px;
     font-family: monospace;
     /*width: 50%;*/
-    height: 356px; /* Fixed height */
+    height: 365px; /* Fixed height */
     margin-bottom: 1px;
 }
 
@@ -137,7 +137,7 @@ nav a:hover {
 #console {
     border: 1px solid #007bff;
     border-radius: 1px;
-    height: 182px;
+    height: 173px;
     overflow-y: auto;
     padding: 5px; /* controls the distance from the edge to the output */
     background-color: #ffffff;
