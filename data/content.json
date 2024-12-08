@@ -810,11 +810,11 @@
                 "indexing",
                 "len"
             ],
-            "Code": "sport=\"judo\"\n\nfor i in range (0, len(sport)):\n  print(sport[i])",
+            "Code": "sport=\"judo\"\n\nfor i in range (0, len(sport)):\n  print(sport[i], end=\"*\", sep=\"-\")",
             "Question": "What is the expected output of this code?",
-            "Answer": "j*u*d*o",
-            "Distractor1": "judo",
-            "Distractor2": "0123",
+            "Answer": "j*u*d*o*",
+            "Distractor1": "j-u-d-o*",
+            "Distractor2": "0-1-2-3",
             "Distractor3": "0*1*2*3",
             "Description": "\ud83d\udca1 <br><br>\ud83d\udca1 <br><br>\ud83d\udca1 <br><br>",
             "Video": "",
@@ -1988,9 +1988,9 @@
             "Distractor1": "ZeroDivisionError",
             "Distractor2": "ValueError",
             "Distractor3": "abstract except",
+            "Description": "\ud83d\udca1 On line 2, dividing 10 by a string will raise a TypeError<br><br>\ud83d\udca1 <br><br>\ud83d\udca1 <br><br>",
             "Video": "",
-            "Difficulty": 1.5,
-            "Description": "\ud83d\udca1 <br><br>\ud83d\udca1 <br><br>\ud83d\udca1 <br><br>"
+            "Difficulty": 1.5
         },
         "pcep.4.3.11": {
             "Tags": [
@@ -2004,9 +2004,9 @@
             "Distractor1": "ArithmeticError",
             "Distractor2": "TypeError",
             "Distractor3": "abstract except",
+            "Description": "\ud83d\udca1 On line 2, passing a string with non-digits is inappropriate for the float() function, this raises a ValueError.<br><br>\ud83d\udca1 <br><br>\ud83d\udca1 <br><br>",
             "Video": "",
-            "Difficulty": 1.5,
-            "Description": "\ud83d\udca1 <br><br>\ud83d\udca1 <br><br>\ud83d\udca1 <br><br>"
+            "Difficulty": 1.5
         },
         "pcep.4.3.12": {
             "Tags": [
@@ -2020,9 +2020,9 @@
             "Distractor1": "KeyError",
             "Distractor2": "LookupError",
             "Distractor3": "abstract exception",
+            "Description": "\ud83d\udca1 On line 3, the equation attempts to access the list x at index 3; however, x only has indexes 0, 1, 2 - an IndexError is raised.<br><br>\ud83d\udca1 Remember, errors indexing lists, tuples, and strings raises an IndexError.  Alternatively, errors accessing incorrect keys in dictionaries will raise a KeyError<br><br>\ud83d\udca1 Both KeyError and IndexError are subclasses of LookupError.<br><br>",
             "Video": "",
-            "Difficulty": 1.5,
-            "Description": "\ud83d\udca1 <br><br>\ud83d\udca1 <br><br>\ud83d\udca1 <br><br>"
+            "Difficulty": 1.5
         },
         "pcep.4.3.13": {
             "Tags": [
@@ -2052,9 +2052,9 @@
             "Distractor1": "KeyError",
             "Distractor2": "IndexError",
             "Distractor3": "abstract except",
+            "Description": "\ud83d\udca1 A KeyError is raised on line 3.  Since KeyError is a subclass of LookupError, this exception is handled on line 5/6 since it appears before KeyError<br><br>\ud83d\udca1 Remember, the first matching exception branch will handle the error.<br><br>\ud83d\udca1 This exception handling is not optimal since a more general branch (LookupError) precedes a more specific branch (KeyError, IndexError.  The LookupError branch is not needed in this code.<br><br>",
             "Video": "",
-            "Difficulty": 2,
-            "Description": "\ud83d\udca1 <br><br>\ud83d\udca1 <br><br>\ud83d\udca1 <br><br>"
+            "Difficulty": 2
         },
         "pcep.4.3.2": {
             "Tags": [
@@ -2067,7 +2067,7 @@
             "Distractor1": "Zero division",
             "Distractor2": "Boo!",
             "Distractor3": "You made a mistake",
-            "Description": "\ud83d\udca1 <br><br>\ud83d\udca1 <br><br>\ud83d\udca1 <br><br>",
+            "Description": "\ud83d\udca1 Because the abstract \"except\" branch is not last, this code raises an unhandled SyntaxError.<br><br>\ud83d\udca1 Beware of this type of question on the exam - the \"except\" must come last.<br><br>\ud83d\udca1 <br><br>",
             "Video": "",
             "Difficulty": 3
         },
@@ -2082,9 +2082,9 @@
             "Distractor1": "True False",
             "Distractor2": "False True",
             "Distractor3": "False False",
+            "Description": "\ud83d\udca1 All concrete exceptions are a subclass of Exception.<br><br>\ud83d\udca1 All exceptions, including Exception are subclasses of BaseException.<br><br>\ud83d\udca1 <br><br>",
             "Video": "",
-            "Difficulty": 0.5,
-            "Description": "\ud83d\udca1 <br><br>\ud83d\udca1 <br><br>\ud83d\udca1 <br><br>"
+            "Difficulty": 0.5
         },
         "pcep.4.3.4": {
             "Tags": [
@@ -2127,9 +2127,9 @@
             "Distractor1": "A type error has occurred",
             "Distractor2": "An unhandled exception will occur",
             "Distractor3": "p",
+            "Description": "\ud83d\udca1 Line 2 raises a ValueError since a non-digit string is inappropriate for the int() function.<br><br>\ud83d\udca1 There is no specific ValueError branch, so this is handled by the abstract \"except\" branch.<br><br>\ud83d\udca1 <br><br>",
             "Video": "",
-            "Difficulty": 1,
-            "Description": "\ud83d\udca1 <br><br>\ud83d\udca1 <br><br>\ud83d\udca1 <br><br>"
+            "Difficulty": 1
         },
         "pcep.4.3.7": {
             "Tags": [
@@ -2143,9 +2143,9 @@
             "Distractor1": "ValueError",
             "Distractor2": "TypeError",
             "Distractor3": "abstract exception",
+            "Description": "\ud83d\udca1 Line 2 will raise a ZeroDivisionError<br><br>\ud83d\udca1 Since there is no specific ZeroDivisionError branch, it will be handed by ArithmeticError.<br><br>\ud83d\udca1 ZeroDivisionError is a subclass of ArithmeticError.",
             "Video": "",
-            "Difficulty": 1.5,
-            "Description": "\ud83d\udca1 <br><br>\ud83d\udca1 <br><br>\ud83d\udca1 <br><br>"
+            "Difficulty": 1.5
         },
         "pcep.4.3.9": {
             "Tags": [
@@ -2159,9 +2159,9 @@
             "Distractor1": "ValueError",
             "Distractor2": "TypeError",
             "Distractor3": "abstract exception",
+            "Description": "\ud83d\udca1 Line 2 raises a ZeroDivisionError, which is handled by the ZeroDivisionError branch on line 7/8.<br><br>\ud83d\udca1 <br><br>\ud83d\udca1 <br><br>",
             "Video": "",
-            "Difficulty": 1.5,
-            "Description": "\ud83d\udca1 <br><br>\ud83d\udca1 <br><br>\ud83d\udca1 <br><br>"
+            "Difficulty": 1.5
         },
         "pcap.1.2.2": {
             "Tags": [
