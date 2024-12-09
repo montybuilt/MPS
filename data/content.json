@@ -371,7 +371,7 @@
             "Distractor1": "2",
             "Distractor2": "1",
             "Distractor3": "4",
-            "Description": "\ud83d\udca1 <br><br>\ud83d\udca1 <br><br>\ud83d\udca1 <br><br>",
+            "Description": "\ud83d\udca1 The first True condition is on line 9 - Break it down like this:<br><br>Expression: not x or y or not y and x<br><br>1) not y and x --> Not False and True ==> True<br><br>2) not x --> not True ==> False<br><br>3) False or y or True --> False or False or True ==> True",
             "Video": "",
             "Difficulty": 1.5
         },
@@ -387,7 +387,7 @@
             "Distractor1": "2",
             "Distractor2": "3",
             "Distractor3": "4",
-            "Description": "\ud83d\udca1 <br><br>\ud83d\udca1 <br><br>\ud83d\udca1 <br><br>",
+            "Description": "\ud83d\udca1 The first True condition is on line 5 - Break it down like this:<br><br>Expression: not x or not y<br><br>1) not x --> not False ==> True<br><br>2) not y --> not False ==> True<br><br>3) True or True ==> True",
             "Video": "",
             "Difficulty": 1.5
         },
@@ -405,7 +405,7 @@
             "Distractor1": "Good Bye",
             "Distractor2": "See ya later",
             "Distractor3": "None",
-            "Description": "\ud83d\udca1 <br><br>\ud83d\udca1 <br><br>\ud83d\udca1 <br><br>",
+            "Description": "\ud83d\udca1 Since x is a non-empty string, the condition on line 3 is True so the outer if is entered.<br><br>\ud83d\udca1 The expression x[1:3] slices the two letters at indexes 1 and 2 which is \"on\"<br><br>\ud83d\udca1 The condition on line 4 is true and the if branch is excecuted, printing \"Hello\".<br><br>",
             "Video": "",
             "Difficulty": 2
         },
@@ -425,7 +425,7 @@
             "Distractor1": "Advertising",
             "Distractor2": "Claim",
             "Distractor3": "This code is erroneous",
-            "Description": "\ud83d\udca1 <br><br>\ud83d\udca1 <br><br>\ud83d\udca1 <br><br>",
+            "Description": "\ud83d\udca1 The print on line 3 prints the last item from the list \"data\", which is the boolean False.<br><br>\ud83d\udca1 The condition on line 5 reads as if not False, which is True and the if branch is entered.<br><br>\ud83d\udca1 The code in the if branch on line 6 prints \"Advertising \"<br><br>\ud83d\udca1 Both print statements have end=\" \" so both printed objects are followed by a space.",
             "Video": "",
             "Difficulty": 2.5
         },
@@ -445,7 +445,7 @@
             "Distractor1": "False Advertising",
             "Distractor2": "Advertising",
             "Distractor3": "False Claim",
-            "Description": "\ud83d\udca1 <br><br>\ud83d\udca1 <br><br>\ud83d\udca1 <br><br>",
+            "Description": "\ud83d\udca1 On line 3, the expression data[1] will raise an IndexError since the list \"data\" only has one item.<br><br>\ud83d\udca1 This exception will go unhandled and the code will stop.",
             "Video": "",
             "Difficulty": 2.5
         },
@@ -456,12 +456,12 @@
                 "boolean operators"
             ],
             "Code": "a = 13\nb = 42\n \nc = a < 30 or b > a and b > 50 and a < b\n\nif c:\n  print(\"Wolf!\")\n  \nelse:\n  print(\"Pack!\")",
-            "Question": "What is the value of c?",
+            "Question": "What is the expected output of this code?",
             "Answer": "Wolf!",
             "Distractor1": "Pack!",
             "Distractor2": "True",
             "Distractor3": "False",
-            "Description": "\ud83d\udca1 <br><br>\ud83d\udca1 <br><br>\ud83d\udca1 <br><br>",
+            "Description": "\ud83d\udca1 The value of c is True, thus the if branch on line 6 will be entered.  Break the expression down like this:<br><br>1) b > a and b > 50 --> True and False ==> False<br><br>2) b > a and b > 50 and a < b --> False and True ==> False<br><br>3) a < 30 or False --> True or False ==> True<br><br>\ud83d\udca1 print on line 7 is executed ==> \"Wolf!\"",
             "Video": "",
             "Difficulty": 2
         },
