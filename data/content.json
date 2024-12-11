@@ -476,7 +476,7 @@
             "Distractor1": "1",
             "Distractor2": "2",
             "Distractor3": "This code is erroneous",
-            "Description": "\ud83d\udca1 <br><br>\ud83d\udca1 <br><br>\ud83d\udca1 <br><br>",
+            "Description": "\ud83d\udca1 Neither of the conditions on lines 3 and 5 are True.  Therefore the code on line 8 is executed and \"3\" prints.<br><br>\ud83d\udca1 Code that is part of an if or elif branch will only be executed if the condition is True.<br><br>\ud83d\udca1 Code that is not indented (such as line 8) is not part of a routine and will be executed.",
             "Video": "",
             "Difficulty": 1
         },
@@ -494,7 +494,7 @@
             "Distractor1": "Hey Hi",
             "Distractor2": "Hey-Hi",
             "Distractor3": "This code is erroneous",
-            "Description": "\ud83d\udca1 <br><br>\ud83d\udca1 <br><br>\ud83d\udca1 <br><br>",
+            "Description": "\ud83d\udca1 The condition on line 3 is True since x > 10 is True.  \"Hey-\" prints with no new line.<br><br>\ud83d\udca1 The condition on line 5 is False.<br><br>\ud83d\udca1 The condition on line 7 is True so \"Hi-\" prints on the same line<br><br>\ud83d\udca1 The result is \"Hey-Hi-\"",
             "Video": "",
             "Difficulty": 2
         },
@@ -511,7 +511,7 @@
             "Distractor1": "Hey-Hi-",
             "Distractor2": "Hey-Hi",
             "Distractor3": "Hey Hi",
-            "Description": "\ud83d\udca1 <br><br>\ud83d\udca1 <br><br>\ud83d\udca1 <br><br>",
+            "Description": "\ud83d\udca1 There is a SyntaxError on line 7. <br><br>\ud83d\udca1 Python interprets this as assigning x to be equal to <, which raises a SyntaxError.<br><br>\ud83d\udca1 The correct expression would be: elif x <= 42:",
             "Video": "",
             "Difficulty": 1.5
         },
@@ -528,7 +528,7 @@
             "Distractor1": "xyz",
             "Distractor2": "yz",
             "Distractor3": "xz",
-            "Description": "\ud83d\udca1 <br><br>\ud83d\udca1 <br><br>\ud83d\udca1 <br><br>",
+            "Description": "\ud83d\udca1 The condition on line 5 is True, \"x\" prints with no new line.<br><br>\ud83d\udca1 The condition on line 7 is True, \"y\" prints on the same line.<br><br>\ud83d\udca1 The condition on line 9 is False.<br><br>\ud83d\udca1 The operator on line 5 \"^\" is the bitwise XOR, if the binary values of the operands are different, it returns 1 or True.",
             "Video": "",
             "Difficulty": 2.5
         },
@@ -546,7 +546,7 @@
             "Distractor1": "xy",
             "Distractor2": "yz",
             "Distractor3": "xyz",
-            "Description": "\ud83d\udca1 <br><br>\ud83d\udca1 <br><br>\ud83d\udca1 <br><br>",
+            "Description": "\ud83d\udca1 The condition on line 5 is True, \"x\" prints with no new line.<br><br>\ud83d\udca1 The condition on line 7 is False.<br><br>\ud83d\udca1 The condition on line 9 is True, \"z\" prints on the same line ==> \"xz\".<br><br>\ud83d\udca1 The operator on line 5 \"^\" is the bitwise XOR, if the binary values of the operands are different, it returns 1 or True.",
             "Video": "",
             "Difficulty": 2.5
         },
@@ -2555,6 +2555,23 @@
             "Description": "\ud83d\udca1 After a question is answered, a description of the solution will appear here.<br><br>\ud83d\udca1 To the right, you will find XP scores and a % accuracy for the current curriculum.<br><br>\ud83d\udca1 In the navbar at the top, you will find information about the curriculum, the question, the status, and a timer.  There are also buttons for a scratch pad and a calculator.<br><br>\ud83d\udca1 When you want to move on, just press the \"Next Question\" button.",
             "Video": "",
             "Difficulty": 0.1
+        },
+        "pcap.5.1.1": {
+            "Tags": [
+                "lists",
+                "nested lists",
+                "functions",
+                "nested loops"
+            ],
+            "Code": "x = [[[1, 2], [3, 4]], [[5, 6], [7, 8]]]\n \ndef func(data):\n    res = data[0][0]\n    for da in data:\n        for d in da:\n            if res < d:\n                res = d\n    return res\n \nprint(func(x[0]))",
+            "Question": "That is the expected output of this code?",
+            "Answer": "4",
+            "Distractor1": "5",
+            "Distractor2": "3",
+            "Distractor3": "7",
+            "Description": "",
+            "Video": "",
+            "Difficulty": 3
         }
     }
 }
