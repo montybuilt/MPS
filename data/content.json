@@ -564,7 +564,7 @@
             "Distractor1": "This code is erroneous",
             "Distractor2": "Less than 0",
             "Distractor3": "Greater than 0",
-            "Description": "\ud83d\udca1 <br><br>\ud83d\udca1 <br><br>\ud83d\udca1 <br><br>",
+            "Description": "\ud83d\udca1 The condition on line 3 is False, therefore the <code>if</code> branch is ignored and the <code>else</code> branch prints \"mysterious output\".<br><br>\ud83d\udca1 In general, empty collections have boolean values of False - both bool(\"\") and bool([]) are false.<br><br>\ud83d\udca1 Since both expressions are False, the result of the bitwise XOR (\"^\") is 0 or False - recall XOR returns 1 if bits are different, else 0.<br><br>",
             "Video": "",
             "Difficulty": 3
         },
@@ -582,7 +582,7 @@
             "Distractor1": "*,>",
             "Distractor2": "*,>>",
             "Distractor3": "*,+++",
-            "Description": "\ud83d\udca1 <br><br>\ud83d\udca1 <br><br>\ud83d\udca1 <br><br>",
+            "Description": "\ud83d\udca1 The condition on line 3 is False, therefore the <code>if</code> branch is ignored and the <code>else</code> branch is executed, printing -2-2.<br><br>\ud83d\udca1 The condition is False because <code>52 >> 2</code> is equal to 13.  There are two ways to solve this bitwise shift:<br><br> This: <code>52 // 2<sup>2</sup> = 13 or ...</code>.<br><br>1: Convert to Binary --> 52<sub>10</sub> = 110101<sub>2</sub><br>2: Drop the  right 2 digits --> 110101<sub>2</sub> >> 2 = 1101<sub>2</sub><br>3: Convert back to base-10 --> 1101<sub>2</sub> = 13<sub>10</sub>.",
             "Video": "",
             "Difficulty": 3
         },
@@ -592,13 +592,13 @@
                 "casting",
                 "boolean expressions"
             ],
-            "Code": "priority = float(input())\n\nif (priority == 1):\n  print(\"FR\")\nelif (priority==2):\n  print(\"GR\")\nelif (priority==3):\n  print(\"EN\")\nelse:\n  print(\"None\")",
-            "Question": "What is the output of this code?",
-            "Answer": "None",
-            "Distractor1": "FR",
-            "Distractor2": "GR",
-            "Distractor3": "EN",
-            "Description": "\ud83d\udca1 <br><br>\ud83d\udca1 <br><br>\ud83d\udca1 <br><br>",
+            "Code": "country = float(\"3.4\")\n\nif type(country) != int:\n    if country >= 3:\n        print(\"France\")\n    elif country >= 2:\n        print(\"Germany\")\n    elif country >= 1:\n        print(\"England\")\n\nelse:\n    print(\"Elsewhere\")",
+            "Question": "What is the expected output of this code?",
+            "Answer": "France",
+            "Distractor1": "Elsewhere",
+            "Distractor2": "Germany",
+            "Distractor3": "England",
+            "Description": "\ud83d\udca1 The condition on line 3 is True, the outer <code>if</code> branch is entered.<br><br>\ud83d\udca1 The condition on line 4 is True, the code on line 5 is executed, printing \"France\".<br><br>\ud83d\udca1 All other <code>elif/else</code> branches are ignored.<br><br>",
             "Video": "",
             "Difficulty": 1.5
         },
@@ -614,7 +614,7 @@
             "Distractor1": "2",
             "Distractor2": "3",
             "Distractor3": "The code enters an infinite loop",
-            "Description": "\ud83d\udca1 <br><br>\ud83d\udca1 <br><br>\ud83d\udca1 <br><br>",
+            "Description": "\ud83d\udca1 The <code>for</code> loop created on line 3 creates 5 iterations of i with values from 0 to 4.<br><br>\ud83d\udca1  The <code>if</code> on line 5/6 increments total only when i is 1 and 3 - those are the only times when the condition <code>i % 2 == 1</code> is True.<br><br>\ud83d\udca1  So total is 2 after the loop completes, then the <code>else</code> branch on line 8/9 decrements total by 1 - the final value of total is 1.<br><br>\ud83d\udca1 Remember, an else branch executes as long as the loop finishes naturally.",
             "Video": "",
             "Difficulty": 1.5
         },
