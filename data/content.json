@@ -632,7 +632,7 @@
             "Distractor1": "3",
             "Distractor2": "1",
             "Distractor3": "0",
-            "Description": "\ud83d\udca1 <br><br>\ud83d\udca1 <br><br>\ud83d\udca1 <br><br>",
+            "Description": "\ud83d\udca1 The expression <code>y = x[:]</code> on line 2 sets y equal to a copy of x.<br><br>\ud83d\udca1 The loop in lines 5-7 simply counts the number of True in the slice <code>y[2:]</code> which is <code>[True, False, True]</code><br><br>\ud83d\udca1 Since there are two True values, the value of i increments to 2<br><br>",
             "Video": "",
             "Difficulty": 2
         },
@@ -650,7 +650,7 @@
             "Distractor1": "46",
             "Distractor2": "44",
             "Distractor3": "48",
-            "Description": "\ud83d\udca1 <br><br>\ud83d\udca1 <br><br>\ud83d\udca1 <br><br>",
+            "Description": "\ud83d\udca1 The outer loop creates the sequence 2, 4, 6 while the inner loop creates the sequence -5, -2, 1.<br><br>\ud83d\udca1 The <code>if</code> branch on lines 5-8 will increment x by 2 if i and j are equal.<br><br>\ud83d\udca1 However, i and j will never be equal and in the very first iteration i=2 and j=-5 which causes the loop to break without ever incrementing x.  So x remains unchanged at 42.",
             "Video": "",
             "Difficulty": 2
         },
@@ -667,7 +667,7 @@
             "Distractor1": "0",
             "Distractor2": "3",
             "Distractor3": "5",
-            "Description": "\ud83d\udca1 <br><br>\ud83d\udca1 <br><br>\ud83d\udca1 <br><br>",
+            "Description": "\ud83d\udca1 The loop on line 3 creates the sequence for i = -2, 0, 2.<br><br>\ud83d\udca1 The condition on line 4 will be true for values of i of -2 and 0 so x will be incremented by 3 twice to become 6.<br><br>\ud83d\udca1 When the loop completes x is 6 and then gets incremented by 2 in the <code>else</code> clause to reach 8.",
             "Video": "",
             "Difficulty": 2
         },
@@ -682,9 +682,9 @@
             "Distractor1": "Data is not empty",
             "Distractor2": "This code raises an exception",
             "Distractor3": "This code creates an infinite loop",
-            "Description": "\ud83d\udca1 <br><br>\ud83d\udca1 <br><br>\ud83d\udca1 <br><br>",
+            "Description": "\ud83d\udca1 The condition on line 3 is <code>false</code>, so the <code>while</code> loop ends immediately.<br><br>\ud83d\udca1 The <code>else</code> branch on lines 5-6 prints \"Data is empty\".<br><br>\ud83d\udca1 Remember, the <code>else</code> branch runs if the <code>while</code> loop ends naturally.  In this case the loop ended naturally even though it didn't do anything.",
             "Video": "",
-            "Difficulty": 1.5
+            "Difficulty": 0.5
         },
         "pcep.2.2.14": {
             "Tags": [
@@ -698,7 +698,7 @@
             "Distractor1": "***",
             "Distractor2": "**",
             "Distractor3": "****",
-            "Description": "\ud83d\udca1 <br><br>\ud83d\udca1 <br><br>\ud83d\udca1 <br><br>",
+            "Description": "\ud83d\udca1 Each time the <code>while</code> loop runs, the code will print ** with no new line.<br><br>\ud83d\udca1 The loop will run twice - once when x is 3, then again when x is 1.<br><br>\ud83d\udca1 After the loop completes, the <code>else</code> branch will print another **<br><br>\ud83d\udca1 So in the loop ** and ** print, then in the else ** prints - all on the same line so ****** prints.",
             "Video": "",
             "Difficulty": 2
         },
@@ -716,7 +716,7 @@
             "Distractor1": "****",
             "Distractor2": "**",
             "Distractor3": "*****",
-            "Description": "\ud83d\udca1 <br><br>\ud83d\udca1 <br><br>\ud83d\udca1 <br><br>",
+            "Description": "\ud83d\udca1 The first time through the loop, x gets incremented to 3 making the <code>if</code> conditional <code>True</code>.  This causes the loop to continue to the next iteration.<br><br>\ud83d\udca1 On the next iteration, x gets incremented to 4 and the <code>else</code> branch executes, printing ** - the loop is complete.<br><br>\ud83d\udca1 Next, the <code>else</code> branch on lines 9-10 executes since the loop completed naturally and prints *<br><br>\ud83d\udca1 *** is printed together since no new lines were printed.",
             "Video": "",
             "Difficulty": 2
         },

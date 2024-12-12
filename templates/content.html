@@ -45,6 +45,10 @@
             width: 50%;
         }
 
+        #description {
+        height: 150px;
+        }
+
         textarea {
             width: 100%;
         }
@@ -95,6 +99,9 @@
 
             <label for="tags">Tags (comma separated):</label>
             <input type="text" id="tags">
+            
+            <label for="description">Description:</label>
+            <textarea id="description"></textarea>
         </div>
 
         <!-- Right Column: Additional Fields -->
@@ -113,9 +120,6 @@
 
             <label for="distractor3">Distractor 3:</label>
             <input type="text" id="distractor3" required>
-
-            <label for="description">Description:</label>
-            <textarea id="description"></textarea>
 
             <label for="videoURL">Video URL:</label>
             <input type="url" id="videoURL">
