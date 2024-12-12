@@ -2569,9 +2569,59 @@
             "Distractor1": "5",
             "Distractor2": "3",
             "Distractor3": "7",
-            "Description": "",
+            "Description": "\ud83d\udca1<code>res=data[0][0]</code> sets the value of res to 1 initially.<br><br>\ud83d\udca1 The outer loop will loop through the list <code>[[1,2],[3,4]]</code> - this comes from the function argument <code>x[0]</code>.<br><br>\ud83d\udca1 The inner loop loops through each digit in each list and sets <code>res</code> equal to the digit if it is greater than res.  Effectively <code>res</code> gets set to the highest digit in the lists, which is 4.",
             "Video": "",
             "Difficulty": 3
+        },
+        "pcap.3.1.1": {
+            "Tags": [
+                "strings",
+                "chr",
+                "ord",
+                "code points",
+                "unicode",
+                "ascii"
+            ],
+            "Code": "",
+            "Question": "Which of the following expressions evaluate to True?",
+            "Answer": "ord(\"z\") - ord(\"Z\") == ord(\" \")",
+            "Distractor1": "ord(\"A\") - ord(\"a\") >= 0",
+            "Distractor2": "ord(\" \") != 32",
+            "Distractor3": "chr(ord(\"F\") + 3) == \"K\"",
+            "Description": "\ud83d\udca1 The codepoints of lower-case english letters are exactly 32 greater than their upper-case counterparts and the codepoint of the space (\" \") is 32.  So the expression:<br><br><code>ord(\"z\") - ord(\"Z\") == ord(\" \")</code><br><br> is true.",
+            "Video": "",
+            "Difficulty": 0.75
+        },
+        "pcap.3.1.2": {
+            "Tags": [
+                "strings",
+                "escape codes",
+                "concatenation"
+            ],
+            "Code": "a = \"What's up doc?\"\n\nb = 'Be vewy quiet, I\\'m hunting wabbits!'\n\nc = a + \" \" + b\n\nprint(c)",
+            "Question": "What is the expected output of this code?",
+            "Answer": "What's up doc? Be vewy quiet, I'm hunting wabbits!",
+            "Distractor1": "What's up doc? Be vewy quiet, Im hunting wabbits",
+            "Distractor2": "This code will raise an unhandled exception.",
+            "Distractor3": "What's up doc? Be vewy quiet, I'\\m hunting wabbits",
+            "Description": "\ud83d\udca1 The \"\\'\" escapes the \"'\" taking away its property of beginning or ending a string.  Thus it just becomes a regular apostrophe and prints as such.",
+            "Video": "",
+            "Difficulty": 1.5
+        },
+        "pcap.3.1.3": {
+            "Tags": [
+                "strings",
+                "escape sequences"
+            ],
+            "Code": "text = \"Once upon a time\\nThere was a giant turtle\\n\"\n\nprint(text, \"His name was Edward\")",
+            "Question": "How many lines will print?",
+            "Answer": "3",
+            "Distractor1": "2",
+            "Distractor2": "1",
+            "Distractor3": "This code is erroneous.",
+            "Description": "\ud83d\udca1 This code prints on three lines - the string \"text\", when printed, will print on two lines and ends with an extra new-line escape sequence (\"\\n\") to create a third line.<br><br>\ud83d\udca1 The string \"His name was Edward\" prints on the third line.",
+            "Video": "",
+            "Difficulty": 1
         }
     }
 }
