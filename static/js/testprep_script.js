@@ -555,6 +555,21 @@ function updateAnswerStatus(questionId, status) {
 
 //---------------------------------------------------------------------------------------------
 
+// This is the function to display the console output
+function displayOutput(output) {
+  let consoleDiv = document.getElementById('console');
+  // Replace newlines with <br> for proper formatting
+  let formattedOutput = output.replace(/\n/g, '<br>');
+  
+  // Optional: Colorize errors or warnings
+  formattedOutput = formattedOutput.replace(/Error/g, '<span style="color: red;">Error</span>');
+  
+  // Update the console div with the formatted output
+  consoleDiv.innerHTML = formattedOutput;
+}
+
+//---------------------------------------------------------------------------------------------
+
 document.getElementById("key-input").addEventListener("keypress", function(event) {
     if (event.key === "Enter") {
         const keyInput = event.target.value.toLowerCase();
@@ -595,19 +610,47 @@ document.getElementById("run").onclick = function() {
 
     console.log("Code output is being requested");
 
-    // Send code to Flask server
+    // Prepare inputs (you can ask for them before running the code)
+    let inputs = [];  // Store inputs here
+    let modifiedCode = code;  // Start with the raw code
+
+    // Find all input calls in the code
+    let inputMatches = (code.match(/input\([^\)]*\)/g) || []);
+    
+    // Loop over each input match and replace it with user-provided input
+    inputMatches.forEach((match, index) => {
+        // Extract the prompt message inside the input() call (if it exists)
+        let promptMessage = null;
+        let matchResult = match.match(/input\(([^)]+)\)/);
+        if (matchResult && matchResult[1]) {
+            // If a prompt is present, clean it up
+            promptMessage = matchResult[1].replace(/['"]/g, '').trim();
+        } else {
+            // If no prompt is provided, use a default message
+            promptMessage = "Please provide input:";
+        }
+
+        // Prompt user for input with the actual prompt message
+        let userInput = prompt(promptMessage);  
+        inputs.push(userInput);  // Save the input
+
+        // Replace the first instance of input() with the user-provided input
+        modifiedCode = modifiedCode.replace(match, `"${userInput}"`);
+    });
+
+    // Send the modified code (with inputs replaced) to the server for execution
     fetch('/run_code', {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json'
         },
-        body: JSON.stringify({ code: code })
+        body: JSON.stringify({ code: modifiedCode })
     })
     .then(response => response.json())
     .then(data => {
         // Display the output in the console div
         console.log("Code output has been received:", data.output);
-        document.getElementById("console").textContent = data.output;
+        displayOutput(data.output);
     })
     .catch((error) => {
         console.error('Error:', error);

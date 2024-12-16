@@ -138,9 +138,10 @@ nav a:hover {
     border: 1px solid #007bff;
     border-radius: 1px;
     height: 173px;
-    overflow-y: auto;
+    overflow-y: scroll;
     padding: 5px; /* controls the distance from the edge to the output */
     background-color: #ffffff;
+    font-family: monospace;
 }
 
 /* Question and feedback sub-container styles */
