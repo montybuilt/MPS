@@ -2,6 +2,7 @@
 /dev/
 /system/
 /utilities/
+/testing/
 
 # Ignore Python bytecode files and folders
 *.pyc
