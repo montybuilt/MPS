@@ -94,6 +94,24 @@ def test_request():
     response.headers['Content-Type'] = 'application/json; charset=UTF-8'
     return response
 
+@app.route('/get_curriculum', methods=['POST'])
+def get_curriculum():
+    '''This function gets the curriculum content based on the user's key-input'''
+    
+    app.logger.debug(request.is_json)
+    #Extract the key input from the request
+    data = request.get_json()
+    curriculum_id = data.get('key-input').lower()
+    
+    # Log the value and type of question_id
+    app.logger.debug(f"Curriculum ID: {curriculum_id}, Type: {type(curriculum_id)}")
+    
+    # create a question object that retrieves the question data as an attribute
+    curriculum_data = Curriculum(curriculum_id).data
+    
+    # Respond to the request by returning the data as a json
+    return jsonify(curriculum_data)
+
 @app.route('/run_code', methods=['POST'])
 def run_code():
     data = request.get_json()
