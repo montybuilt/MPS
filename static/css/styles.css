@@ -395,6 +395,7 @@ button.clear:hover {
 .notepad-modal.draggable {
     cursor: move;
 }
+/* ---------------------------------------------------------------------------------------*/
 
 /* Input Modal Styles */
 #inputModal {
@@ -430,7 +431,6 @@ button.clear:hover {
     font-size: 16px;
 }
 
-/* Modal content styling */
 .close {
     color: #aaa;
     float: right;
@@ -472,7 +472,7 @@ button.clear:hover {
 .result-dialog {
     display: none; /* Hidden by default */
     position: fixed;
-    top: 30%; /* Position in the middle of the screen */
+    top: 20%; /* Position near the submit button */
     left: 50%;
     transform: translateX(-50%);
     z-index: 1000;

@@ -674,17 +674,48 @@ function showInputModal(promptMessage) {
 
 //------------------------------------------------------------------------------------------------------------------
 
-// Function to show the results bubble dialog --> gets called in 
+// Preload images
+function preloadImages(imagePaths) {
+    imagePaths.forEach((path) => {
+        const img = new Image();
+        img.src = path;
+    });
+}
+
+// List of images to preload
+const resultImages = [
+    '/static/images/correct.png',
+    '/static/images/incorrect.png',
+    '/static/images/tooslow.png'
+];
+
+// Preload the images when the window loads
+window.addEventListener('load', () => {
+    preloadImages(resultImages);
+});
+
+//------------------------------------------------------------------------------------------------------------------
+
+// Function to show the results bubble dialog --> gets called in
 function showResultDialog(isCorrect, dXP) {
     const resultDialog = document.getElementById('resultDialog');
     const resultImage = document.getElementById('resultImage');
     const dXPValue = document.getElementById('dXPValue');
 
-    // Set the correct or incorrect image
-    resultImage.src = isCorrect ? '/static/images/correct.png' : '/static/images/incorrect.png';
+    // Adjust isCorrect to treat 'late' as true for display logic
+    const isAnswerCorrect = (isCorrect === 'late' || isCorrect);
 
-    // Set the dXP value to overlay on the image
-    dXPValue.textContent = (isCorrect ? '+' : '') + dXP.toFixed(2); // Ensure it's a nice number format
+    // Determine which image to display
+    let imageSrc = '';
+    if (isCorrect === 'late') {
+        imageSrc = '/static/images/tooslow.png';
+    } else {
+        imageSrc = isCorrect ? '/static/images/correct.png' : '/static/images/incorrect.png';
+    }
+
+    // Set the appropriate image and dXP value
+    resultImage.src = imageSrc;
+    dXPValue.textContent = (isAnswerCorrect ? '+' : '') + dXP.toFixed(2); // Ensure nice number format
 
     // Show the dialog with animation
     resultDialog.style.display = 'block';
@@ -697,20 +728,33 @@ function showResultDialog(isCorrect, dXP) {
 
     // Apply upward floating effect for 3 seconds
     setTimeout(() => {
-        resultDialog.style.transition = 'transform 3s ease, opacity 1s ease';  // Transition for 3s floating + 1s fade out
-        resultDialog.style.transform = 'translateX(-50%) translateY(-30px)'; // End position (move upwards)
+        resultDialog.style.transition = 'transform 3s ease, opacity 1s ease';  // Transition for floating + fade out
+        resultDialog.style.transform = 'translateX(-50%) translateY(-18px)'; // End position (move upwards)
     }, 0); // Start the transition immediately
 
-    // Fade out in the last second and hide the dialog after 4 seconds
+    // Fade out the image and dXP value in the last second
     setTimeout(() => {
-        resultDialog.style.opacity = 0; // Fade out
-    }, 3000); // Start fading out after 3 seconds
+        resultImage.style.transition = 'opacity 1s ease'; // Transition for fading out the image
+        dXPValue.style.transition = 'opacity 1s ease';    // Transition for fading out the dXP text
+        resultImage.style.opacity = 0;  // Fade out the image
+        dXPValue.style.opacity = 0;    // Fade out the dXP text
+    }, 1250); // Start fading out just before the dialog starts fading
 
-    // Hide the dialog completely after 4 seconds
+    // Fade out the whole dialog after 3 seconds
+    setTimeout(() => {
+        resultDialog.style.transition = 'opacity 1s ease'; // Transition for fading out the dialog
+        resultDialog.style.opacity = 0; // Fade out the dialog
+    }, 1500); // Start fading out the dialog after 1.5 seconds
+
+    // Hide the dialog completely after 4 seconds (after the fade-out)
     setTimeout(() => {
         resultDialog.style.display = 'none';
         resultDialog.style.transition = ''; // Reset transition properties
-    }, 4000); // Dialog disappears after 4 seconds
+        resultImage.style.transition = ''; // Reset transition for the image
+        dXPValue.style.transition = ''; // Reset transition for the dXP text
+        resultImage.style.opacity = ''; // Reset opacity
+        dXPValue.style.opacity = ''; // Reset opacity
+    }, 3000); // Dialog disappears after 3 seconds
 }
 
 //------------------------------------------------------------------------------------------------------------------
@@ -736,7 +780,7 @@ document.getElementById("submit-answer").onclick = function() {
                 updateAnswerStatus(currentQuestionId, "correct");
             } else {
                 // Handle case where correct answer is given but not within time limit
-                alert("Correct answer, but you were too slow. No XP earned.");
+                showResultDialog("late", 0);
             }
             
             updateNavbarData(currentQuestionId);
