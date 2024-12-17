@@ -674,6 +674,47 @@ function showInputModal(promptMessage) {
 
 //------------------------------------------------------------------------------------------------------------------
 
+// Function to show the results bubble dialog --> gets called in 
+function showResultDialog(isCorrect, dXP) {
+    const resultDialog = document.getElementById('resultDialog');
+    const resultImage = document.getElementById('resultImage');
+    const dXPValue = document.getElementById('dXPValue');
+
+    // Set the correct or incorrect image
+    resultImage.src = isCorrect ? '/static/images/correct.png' : '/static/images/incorrect.png';
+
+    // Set the dXP value to overlay on the image
+    dXPValue.textContent = (isCorrect ? '+' : '') + dXP.toFixed(2); // Ensure it's a nice number format
+
+    // Show the dialog with animation
+    resultDialog.style.display = 'block';
+    resultDialog.style.opacity = 1;
+    resultDialog.style.transform = 'translateX(-50%) translateY(20px)'; // Start position (slightly below)
+
+    // Play sound effect (you can replace with your actual sound file)
+    const audio = new Audio('/static/sounds/success.mp3');
+    audio.play();
+
+    // Apply upward floating effect for 3 seconds
+    setTimeout(() => {
+        resultDialog.style.transition = 'transform 3s ease, opacity 1s ease';  // Transition for 3s floating + 1s fade out
+        resultDialog.style.transform = 'translateX(-50%) translateY(-30px)'; // End position (move upwards)
+    }, 0); // Start the transition immediately
+
+    // Fade out in the last second and hide the dialog after 4 seconds
+    setTimeout(() => {
+        resultDialog.style.opacity = 0; // Fade out
+    }, 3000); // Start fading out after 3 seconds
+
+    // Hide the dialog completely after 4 seconds
+    setTimeout(() => {
+        resultDialog.style.display = 'none';
+        resultDialog.style.transition = ''; // Reset transition properties
+    }, 4000); // Dialog disappears after 4 seconds
+}
+
+//------------------------------------------------------------------------------------------------------------------
+
 // Handling the Submit Answer button click
 document.getElementById("submit-answer").onclick = function() {
     stopTimer();  // Stop the question timer
@@ -690,7 +731,8 @@ document.getElementById("submit-answer").onclick = function() {
             if (answeredOnTime) {
                 // Update XP and show alert for correct answer within time limit
                 dXP = updateXP(currentQuestionId, content, subject, difficulty, 'correct');
-                alert("Correct answer! You earned " + dXP.toFixed(2) + " XP.");
+                showResultDialog(true, dXP);
+                //alert("Correct answer! You earned " + dXP.toFixed(2) + " XP.");
                 updateAnswerStatus(currentQuestionId, "correct");
             } else {
                 // Handle case where correct answer is given but not within time limit
@@ -702,7 +744,7 @@ document.getElementById("submit-answer").onclick = function() {
         } else {
             // Incorrect answer handling (timing doesn't matter)
             dXP = updateXP(currentQuestionId, content, subject, difficulty, 'incorrect');
-            alert("Incorrect. You earned " + dXP.toFixed(2) + " XP.");
+            showResultDialog(false, dXP);
             
             updateAnswerStatus(currentQuestionId, "incorrect");
             document.getElementById("submit-answer").disabled = true;

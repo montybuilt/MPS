@@ -467,3 +467,39 @@ button.clear:hover {
 #submitInput:hover {
     background-color: #0056b3;
 }
+
+/* styling for the result bubble dialog */
+.result-dialog {
+    display: none; /* Hidden by default */
+    position: fixed;
+    top: 30%; /* Position in the middle of the screen */
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 1000;
+    text-align: center;
+    opacity: 0;
+    transition: opacity 1s ease, transform 1s ease; /* Fade in/out + move up */
+}
+
+.result-content {
+    position: relative;
+    display: inline-block;
+}
+
+.result-image {
+    width: 450px; /* Adjust size of the image */
+    height: 180px;
+}
+
+.dXP-value {
+    position: absolute;
+    top: 50%;
+    left: 85%;
+    transform: translate(-50%, -50%);
+    font-size: 24px; /* Font size for the XP change */
+    color: white; /* Ensure the text stands out on the image */
+    font-weight: bold;
+    background-color: rgba(0, 0, 0, 0.5); /* Optional background for legibility */
+    padding: 5px;
+    border-radius: 5px;
+}
