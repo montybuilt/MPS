@@ -595,7 +595,7 @@ window.onload = function() {
 var editor = CodeMirror.fromTextArea(document.getElementById("code"), {
     lineNumbers: true,
     mode: "python",
-    theme: "dracula",
+    //theme: "dracula",
     tabSize: 4,
     indentUnit: 4,
     matchBrackets: true,
@@ -604,7 +604,6 @@ var editor = CodeMirror.fromTextArea(document.getElementById("code"), {
 
 //------------------------------------------------------------------------------------------------------------------
 
-// Handling the Run Code button click
 document.getElementById("run").onclick = function() {
     var code = editor.getValue();
 
@@ -617,45 +616,61 @@ document.getElementById("run").onclick = function() {
     // Find all input calls in the code
     let inputMatches = (code.match(/input\([^\)]*\)/g) || []);
     
-    // Loop over each input match and replace it with user-provided input
-    inputMatches.forEach((match, index) => {
-        // Extract the prompt message inside the input() call (if it exists)
-        let promptMessage = null;
-        let matchResult = match.match(/input\(([^)]+)\)/);
-        if (matchResult && matchResult[1]) {
-            // If a prompt is present, clean it up
-            promptMessage = matchResult[1].replace(/['"]/g, '').trim();
-        } else {
-            // If no prompt is provided, use a default message
-            promptMessage = "Please provide input:";
+    // Handle each input match asynchronously
+    (async () => {
+        for (let match of inputMatches) {
+            let promptMessage = "Please provide input:";
+            let matchResult = match.match(/input\(([^)]+)\)/);
+            if (matchResult && matchResult[1]) {
+                promptMessage = matchResult[1].replace(/['"]/g, '').trim();
+            }
+
+            // Show custom input modal dialog and get user input
+            let userInput = await showInputModal(promptMessage);
+            inputs.push(userInput);
+
+            // Replace the first instance of input() with the user-provided input
+            modifiedCode = modifiedCode.replace(match, `"${userInput}"`);
         }
 
-        // Prompt user for input with the actual prompt message
-        let userInput = prompt(promptMessage);  
-        inputs.push(userInput);  // Save the input
-
-        // Replace the first instance of input() with the user-provided input
-        modifiedCode = modifiedCode.replace(match, `"${userInput}"`);
-    });
-
-    // Send the modified code (with inputs replaced) to the server for execution
-    fetch('/run_code', {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({ code: modifiedCode })
-    })
-    .then(response => response.json())
-    .then(data => {
-        // Display the output in the console div
-        console.log("Code output has been received:", data.output);
-        displayOutput(data.output);
-    })
-    .catch((error) => {
-        console.error('Error:', error);
-    });
+        // Send the modified code (with inputs replaced) to the server for execution
+        fetch('/run_code', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({ code: modifiedCode })
+        })
+        .then(response => response.json())
+        .then(data => {
+            // Display the output in the console div
+            console.log("Code output has been received:", data.output);
+            displayOutput(data.output);
+        })
+        .catch((error) => {
+            console.error('Error:', error);
+        });
+    })();
 };
+
+// Function to show the custom input modal and return input value
+function showInputModal(promptMessage) {
+    return new Promise((resolve) => {
+        document.getElementById("inputModalPromptMessage").textContent = promptMessage;
+        document.getElementById("inputModal").style.display = "block";
+
+        document.getElementById("submitInput").onclick = function() {
+            let userInput = document.getElementById("userInput").value;
+            document.getElementById("inputModal").style.display = "none";
+            resolve(userInput);
+        };
+
+        document.getElementById("closeInputModal").onclick = function() {
+            document.getElementById("inputModal").style.display = "none";
+            resolve("");  // Resolve with an empty string if closed without input
+        };
+    });
+}
 
 //------------------------------------------------------------------------------------------------------------------
 

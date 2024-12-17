@@ -396,5 +396,74 @@ button.clear:hover {
     cursor: move;
 }
 
+/* Input Modal Styles */
+#inputModal {
+    display: none;  /* Hidden by default */
+    position: fixed;
+    z-index: 9999;  /* Ensure the modal is on top of other content */
+    left: 50%;
+    top: 50%;
+    transform: translate(-50%, -50%);  /* Center the modal */
+    width: 400px;  /* You can adjust the width as per your preference */
+    background-color: rgba(255, 255, 255, 1); /* Slight transparency */
+    border-radius: 10px;  /* Rounded corners for the modal */
+    box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.2);  /* Soft shadow around the modal */
+    padding: 20px;
+    border: 2px solid #007bff; /* Blue border around the modal */
+    box-sizing: border-box;
+}
 
+.modal-header {
+    display: flex; /* This makes the image and text sit side by side */
+    align-items: center; /* Vertically centers the items */
+    justify-content: flex-start; /* Ensures the items are aligned to the left */
+}
 
+.input-icon {
+    width: 30px;           /* Adjust width and height to make the image visible */
+    height: 30px;          /* Adjust height as needed */
+    margin-right: 10px;    /* Space it from other elements */
+}
+
+#inputModalPromptMessage {
+    margin: 0;
+    font-size: 16px;
+}
+
+/* Modal content styling */
+.close {
+    color: #aaa;
+    float: right;
+    font-size: 28px;
+    font-weight: bold;
+    cursor: pointer;
+}
+
+.close:hover,
+.close:focus {
+    color: black;
+    text-decoration: none;
+    cursor: pointer;
+}
+
+/* Styling for the input field and submit button */
+#userInput {
+    width: 80%;  /* Adjust width as needed */
+    padding: 10px;
+    margin: 10px 0;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+}
+
+#submitInput {
+    background-color: #007bff;
+    color: white;
+    padding: 10px 20px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+}
+
+#submitInput:hover {
+    background-color: #0056b3;
+}
