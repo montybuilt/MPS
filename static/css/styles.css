@@ -503,3 +503,73 @@ button.clear:hover {
     padding: 5px;
     border-radius: 5px;
 }
+
+/* styling for the progress bar */
+
+#progress-container {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-top: 20px; /* Ensure there's some space between elements */
+}
+
+
+#progress-percentage {
+    font-size: 16px;
+    font-weight: bold;
+}
+
+#progress-bar {
+    display: flex;
+    gap: 3px; /* Space between progress boxes */
+    flex-grow: 1; /* Ensure the progress bar stretches */
+    height: 10px; /* Define height */
+    background-color: #e0e0e0; /* Light gray for the background of the progress bar */
+    border-radius: 5px; /* Rounded corners for the bar */
+    position: relative; /* Required for positioning the arrow indicator */
+}
+
+.progress-box {
+    width: 20px; /* Width for each box in the progress bar */
+    height: 100%; /* Full height of the progress bar */
+    background-color: gray; /* Default gray for unanswered questions */
+    display: inline-block;
+    cursor: pointer;
+}
+
+/* Color classes */
+.progress-box.correct {
+    background-color: green; /* Green for correct answers */
+}
+
+.progress-box.incorrect {
+    background-color: red; /* Red for incorrect answers */
+}
+
+.progress-box.yellow {
+    background-color: yellow; /* Yellow for both correct and incorrect */
+}
+
+.progress-box.grey {
+    background-color: grey; /* Grey for unanswered questions */
+}
+
+/* Arrow Container */
+#arrow-container {
+    position: absolute;
+    width: 100%; /* Ensures the container takes the full width of the progress bar */
+}
+
+/* Arrow Indicator */
+#arrow-indicator {
+    position: absolute;
+    width: 0;
+    height: 0;
+    border-left: 10px solid transparent;
+    border-right: 10px solid transparent;
+    border-top: 10px solid white; /* Triangle pointing up */
+    top: -15px; /* Positioned above the progress bar */
+    transition: left 0.3s ease; /* Smooth transition */
+    pointer-events: none; /* Prevents the arrow from blocking clicks */
+    z-index: 10; /* Ensures the arrow is above other elements */
+}

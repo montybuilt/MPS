@@ -334,8 +334,153 @@ function updateXPDisplay(content) {
     }
 }
 
+//---------------------------------------------------------------------------------------------------
+
+function updateArrowIndicator(currentIndex) {
+    const progressBar = document.getElementById('progress-bar');
+    const progressBoxes = progressBar.getElementsByClassName('progress-box');
+    let arrowContainer = document.getElementById('arrow-container');
+
+    // Create the arrow container if it doesn't exist
+    if (!arrowContainer) {
+        arrowContainer = document.createElement('div');
+        arrowContainer.id = 'arrow-container';
+        progressBar.parentElement.appendChild(arrowContainer);
+    }
+
+    // Check if we have valid boxes and index
+    const currentBox = progressBoxes[currentIndex];
+    if (currentBox) {
+        const boxLeft = currentBox.offsetLeft + currentBox.offsetWidth / 2;
+        const boxTop = currentBox.offsetTop; // Get the top position of the box
+
+        console.log("Arrow Position - boxLeft:", boxLeft, "boxTop:", boxTop); // Debugging line
+
+        // Create the arrow inside the container if it doesn't exist
+        let arrowIndicator = document.getElementById('arrow-indicator');
+        if (!arrowIndicator) {
+            arrowIndicator = document.createElement('div');
+            arrowIndicator.id = 'arrow-indicator';
+            arrowContainer.appendChild(arrowIndicator); // Append the arrow to the arrow container
+        }
+
+        // Position the arrow
+        arrowIndicator.style.left = `${boxLeft}px`; // Adjust to center the arrow
+        arrowIndicator.style.top = `${boxTop - 18}px`; // Adjust the top positioning
+        arrowIndicator.style.display = "block"; // Ensure the arrow is visible
+    } else {
+        console.error("No progress box found for index:", currentIndex); // Debugging line
+        arrowIndicator.style.display = "none"; // Hide the arrow if box is not found
+    }
+}
+
+//-------------------------------------------------------------------------------------------------------
+
+function loadProgressBar() {
+    // Retrieve data from localStorage
+    const currentCurriculum = localStorage.getItem('currentCurriculum');
+    const questionsList = localStorage.getItem('questionsList');
+    const correctAnswers = localStorage.getItem('correctAnswers');
+    const incorrectAnswers = localStorage.getItem('incorrectAnswers');
+    const currentQuestionId = localStorage.getItem('currentQuestionId');
+        
+    console.log("loadProgressBar function has been called!!");
+    console.log("currentCurriculum:", currentCurriculum);
+    console.log("questionsList:", questionsList);
+    console.log("correctAnswers:", correctAnswers);
+    console.log("incorrectAnswers:", incorrectAnswers);
+    console.log("currentQuestionId:", currentQuestionId);
+
+    // Parse JSON data safely (use empty arrays as default if parsing fails)
+    let parsedQuestionsList = [], parsedCorrectAnswers = [], parsedIncorrectAnswers = [];
+    
+    try {
+        parsedQuestionsList = JSON.parse(questionsList) || [];
+    } catch (e) {
+        console.error("Error parsing 'questionsList' from localStorage:", e);
+    }
+
+    try {
+        parsedCorrectAnswers = JSON.parse(correctAnswers) || [];
+    } catch (e) {
+        console.error("Error parsing 'correctAnswers' from localStorage:", e);
+    }
+
+    try {
+        parsedIncorrectAnswers = JSON.parse(incorrectAnswers) || [];
+    } catch (e) {
+        console.error("Error parsing 'incorrectAnswers' from localStorage:", e);
+    }
+
+    // Check if we have a valid current curriculum
+    if (!currentCurriculum || !parsedQuestionsList || parsedQuestionsList.length === 0) {
+        console.error("No valid curriculum or question data available");
+        return; // If no valid data, don't proceed
+    }
+
+    // Set curriculum name and progress percentage
+    const curriculumNameElement = document.getElementById('curriculum-name');
+    const progressPercentageElement = document.getElementById('progress-percentage');
+    //curriculumNameElement.textContent = currentCurriculum;
+
+    const totalQuestions = parsedQuestionsList.length;
+
+    // Count only the attempted questions in the current curriculum
+    const totalAttempted = parsedQuestionsList.filter((questionId) => 
+        parsedCorrectAnswers.includes(questionId) || parsedIncorrectAnswers.includes(questionId)
+    ).length;
+
+    const progressPercentage = (totalAttempted / totalQuestions) * 100;
+    //progressPercentageElement.textContent = `${Math.round(progressPercentage)}%`;
+
+    // Get the progress bar container and clear any old content
+    const progressBarContainer = document.getElementById('progress-bar');
+    progressBarContainer.innerHTML = ''; // Clear previous progress boxes
+
+    // If no correct or incorrect answers, initialize all progress boxes as grey
+    if (totalAttempted === 0) {
+        // Initialize all progress boxes as grey if no questions have been answered yet
+        parsedQuestionsList.forEach(() => {
+            const progressBox = document.createElement('div');
+            progressBox.classList.add('progress-box', 'grey');
+            progressBarContainer.appendChild(progressBox);
+        });
+        return; // Exit early as we don't need further processing if no questions have been attempted
+    }
+
+    // Iterate over questions in the current curriculum to generate the progress boxes
+    parsedQuestionsList.forEach((questionId, index) => {
+        const progressBox = document.createElement('div');
+        progressBox.classList.add('progress-box'); // Default box class
+    
+        // Determine the correct color based on answer status
+        if (parsedCorrectAnswers.includes(questionId) && parsedIncorrectAnswers.includes(questionId)) {
+            progressBox.classList.add('yellow'); // Both correct and incorrect
+        } else if (parsedCorrectAnswers.includes(questionId)) {
+            progressBox.classList.add('correct'); // Correct answer
+        } else if (parsedIncorrectAnswers.includes(questionId)) {
+            progressBox.classList.add('incorrect'); // Incorrect answer
+        } else {
+            progressBox.classList.add('grey'); // Unanswered question
+        }
+    
+        // Add click event listener to navigate to the specific question
+        progressBox.addEventListener('click', () => {
+            const nextQuestionId = parsedQuestionsList[index]; // Look up questionId by index
+            loadQuestion(nextQuestionId); // Fetch and load the clicked question
+        });
+    
+        // Append the progress box to the progress bar container
+        progressBarContainer.appendChild(progressBox);
+        
+    });
+    const currentIndex = parsedQuestionsList.indexOf(currentQuestionId);
+    console.log("Current Index:", currentIndex);
+    updateArrowIndicator(currentIndex);
+}
 
 //--------------------------------------------------------------------------------------
+
 
 // Function to update the page with question data
 function updatePage(data) {
@@ -402,6 +547,44 @@ function updatePage(data) {
 //--------------------------------------------------------------------------------------------
 
 // Function to advance to the next question in the curriculum
+function loadQuestion(questionId) {
+    // Stop the timer
+    stopTimer();
+
+    // Retrieve data from local storage
+    const curriculumKey = localStorage.getItem('currentCurriculum');
+    const questionsList = JSON.parse(localStorage.getItem('questionsList')) || [];
+    const correctAnswers = JSON.parse(localStorage.getItem('correctAnswers')) || [];
+    const completedCurriculums = JSON.parse(localStorage.getItem('completedCurriculums')) || [];
+    const currentQuestionId = localStorage.getItem('currentQuestionId');
+
+    // Clear notepad
+    notepadTextarea.value = '';
+    localStorage.removeItem('notepadNotes');
+
+    // Update the current question ID and fetch the next question
+    localStorage.setItem('currentQuestionId', questionId);
+    fetchAndUpdateQuestion(questionId);
+
+    // Check if all questions have been answered
+    const allQuestionsAnswered = questionsList.every(id => correctAnswers.includes(id));
+
+    if (allQuestionsAnswered && !completedCurriculums.includes(curriculumKey)) {
+        // Mark the curriculum as complete
+        completedCurriculums.push(curriculumKey);
+        localStorage.setItem('completedCurriculums', JSON.stringify(completedCurriculums));
+        alert("Congratulations! You've completed the curriculum!");
+    }
+
+    // Update the curriculum score display
+    document.getElementById('curriculumScore').textContent = curriculumScore + '%';
+    // update progress bar
+    loadProgressBar();
+}
+
+//--------------------------------------------------------------------------------------------
+
+// Function to advance to the next question in the curriculum
 function nextQuestion() {
     // Stop the timer
     stopTimer();
@@ -440,6 +623,9 @@ function nextQuestion() {
 
     // Update the curriculum score display
     document.getElementById('curriculumScore').textContent = curriculumScore + '%';
+    // update progress bar
+    console.log("Updating progress bar on Next Question")
+    loadProgressBar();
 }
 
 //--------------------------------------------------------------------------------------
@@ -472,7 +658,6 @@ async function fetchCurriculum(keyInput) {
         alert("An error occurred while loading the curriculum. Please try again.");
     }
 }
-
 
 //--------------------------------------------------------------------------------------
 
@@ -556,7 +741,9 @@ function displayOutput(output) {
 document.getElementById("key-input").addEventListener("keypress", function(event) {
     if (event.key === "Enter") {
         const keyInput = event.target.value.toLowerCase();
-        fetchCurriculum(keyInput);  // Fetch curriculum data and load the next question
+        fetchCurriculum(keyInput).then(() => {
+            loadProgressBar();
+        });
     }
 });
 
@@ -570,6 +757,8 @@ window.onload = function() {
         // Fetch and update the question using the stored ID
         fetchAndUpdateQuestion(currentQuestionId);
     }
+    // Initialize the progress bar
+    loadProgressBar();
 };
 
 //---------------------------------------------------------------------------------------------
@@ -635,6 +824,8 @@ document.getElementById("run").onclick = function() {
         });
     })();
 };
+
+//------------------------------------------------------------------------------------------------------------------
 
 // Function to show the custom input modal and return input value
 function showInputModal(promptMessage) {
@@ -706,8 +897,8 @@ function showResultDialog(isCorrect, dXP) {
     resultDialog.style.transform = 'translateX(-50%) translateY(30px)'; // Start position (slightly below)
 
     // Play sound effect (you can replace with your actual sound file)
-    const audio = new Audio('/static/sounds/success.mp3');
-    audio.play();
+    //const audio = new Audio('/static/sounds/success.mp3');
+    //audio.play();
 
     // Apply upward floating effect for 3 seconds
     setTimeout(() => {
@@ -781,6 +972,9 @@ document.getElementById("submit-answer").onclick = function() {
         // Display the description and the video button
         updateDescription();
         
+        // Call this function to load the progress bar when the question is answered
+        loadProgressBar();
+        
     } else {
         alert("Please select an answer.");
     }
@@ -797,6 +991,7 @@ document.addEventListener("DOMContentLoaded", function() {
         nextButton.addEventListener("click", nextQuestion);
     }
 });
+
 
 //---------------------------------------------------------------------------------------
 
