@@ -401,63 +401,46 @@ function updatePage(data) {
 
 //--------------------------------------------------------------------------------------------
 
-// Function to identify and load the next unanswered question or advance through the curriculum
+// Function to advance to the next question in the curriculum
 function nextQuestion() {
-    // Stop any active timer before fetching the next question
+    // Stop the timer
     stopTimer();
 
-    // Retrieve the current curriculum, questions list, and answers from local storage
+    // Retrieve data from local storage
     const curriculumKey = localStorage.getItem('currentCurriculum');
     const questionsList = JSON.parse(localStorage.getItem('questionsList')) || [];
     const correctAnswers = JSON.parse(localStorage.getItem('correctAnswers')) || [];
     const completedCurriculums = JSON.parse(localStorage.getItem('completedCurriculums')) || [];
     const currentQuestionId = localStorage.getItem('currentQuestionId');
 
-    // Clear the notepad contents
+    // Clear notepad
     notepadTextarea.value = '';
     localStorage.removeItem('notepadNotes');
 
-    // Check if the current curriculum is complete
-    const isCurriculumComplete = correctAnswers.filter(id => questionsList.includes(id)).length === questionsList.length;
+    // Determine the index of the current question
+    let currentIndex = questionsList.indexOf(currentQuestionId);
 
-    if (isCurriculumComplete) {
-        // If this curriculum is complete and not already marked as completed, alert the user and add it to completedCurriculums
-        if (!completedCurriculums.includes(curriculumKey)) {
-            alert("Congratulations! You've completed the curriculum. Returning to the first question.");
-            completedCurriculums.push(curriculumKey); // Add the completed curriculum to the list
-            localStorage.setItem('completedCurriculums', JSON.stringify(completedCurriculums));
-        }
+    // Move to the next question, wrapping back to the start if needed
+    let nextIndex = (currentIndex + 1) % questionsList.length;
+    const nextQuestionId = questionsList[nextIndex];
 
-        // Loop back to the start or proceed through all questions as usual
-        let currentQuestionIndex = questionsList.indexOf(currentQuestionId);
+    // Update the current question ID and fetch the next question
+    localStorage.setItem('currentQuestionId', nextQuestionId);
+    fetchAndUpdateQuestion(nextQuestionId);
 
-        // If we are at the last question, loop back to the first question
-        currentQuestionIndex = (currentQuestionIndex === questionsList.length - 1) ? 0 : currentQuestionIndex + 1;
+    // Check if all questions have been answered
+    const allQuestionsAnswered = questionsList.every(id => correctAnswers.includes(id));
 
-        // Set the ID of the next question and fetch it
-        const nextQuestionId = questionsList[currentQuestionIndex];
-        localStorage.setItem('currentQuestionId', nextQuestionId);
-        fetchAndUpdateQuestion(nextQuestionId);
-
-        // Update the curriculum score display
-        document.getElementById('curriculumScore').textContent = curriculumScore + '%';
-
-    } else {
-        // Find the next unanswered question that is not the current question
-        const nextUnansweredQuestionId = questionsList.find(id => !correctAnswers.includes(id) && id !== currentQuestionId);
-
-        if (nextUnansweredQuestionId) {
-            // Set the next unanswered question in local storage and fetch it
-            localStorage.setItem('currentQuestionId', nextUnansweredQuestionId);
-            fetchAndUpdateQuestion(nextUnansweredQuestionId);
-        } else {
-            // If no other unanswered questions are found, reload the current question as a fallback
-            alert("No other unanswered questions available. Reloading the current question.");
-            fetchAndUpdateQuestion(currentQuestionId);
-        }
+    if (allQuestionsAnswered && !completedCurriculums.includes(curriculumKey)) {
+        // Mark the curriculum as complete
+        completedCurriculums.push(curriculumKey);
+        localStorage.setItem('completedCurriculums', JSON.stringify(completedCurriculums));
+        alert("Congratulations! You've completed the curriculum!");
     }
-}
 
+    // Update the curriculum score display
+    document.getElementById('curriculumScore').textContent = curriculumScore + '%';
+}
 
 //--------------------------------------------------------------------------------------
 
