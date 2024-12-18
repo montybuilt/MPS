@@ -720,7 +720,7 @@ function showResultDialog(isCorrect, dXP) {
     // Show the dialog with animation
     resultDialog.style.display = 'block';
     resultDialog.style.opacity = 1;
-    resultDialog.style.transform = 'translateX(-50%) translateY(20px)'; // Start position (slightly below)
+    resultDialog.style.transform = 'translateX(-50%) translateY(30px)'; // Start position (slightly below)
 
     // Play sound effect (you can replace with your actual sound file)
     const audio = new Audio('/static/sounds/success.mp3');
@@ -728,17 +728,17 @@ function showResultDialog(isCorrect, dXP) {
 
     // Apply upward floating effect for 3 seconds
     setTimeout(() => {
-        resultDialog.style.transition = 'transform 3s ease, opacity 1s ease';  // Transition for floating + fade out
-        resultDialog.style.transform = 'translateX(-50%) translateY(-18px)'; // End position (move upwards)
+        resultDialog.style.transition = 'transform 1.5s ease, opacity 1s ease';  // Transition for floating + fade out
+        resultDialog.style.transform = 'translateX(-50%) translateY(-10px)'; // End position (move upwards)
     }, 0); // Start the transition immediately
 
     // Fade out the image and dXP value in the last second
     setTimeout(() => {
-        resultImage.style.transition = 'opacity 1s ease'; // Transition for fading out the image
-        dXPValue.style.transition = 'opacity 1s ease';    // Transition for fading out the dXP text
+        resultImage.style.transition = 'opacity 1.5s ease'; // Transition for fading out the image
+        dXPValue.style.transition = 'opacity 1.5s ease';    // Transition for fading out the dXP text
         resultImage.style.opacity = 0;  // Fade out the image
         dXPValue.style.opacity = 0;    // Fade out the dXP text
-    }, 1250); // Start fading out just before the dialog starts fading
+    }, 1499); // Start fading out just before the dialog starts fading
 
     // Fade out the whole dialog after 3 seconds
     setTimeout(() => {
