@@ -283,7 +283,7 @@ function updateNavbarData(questionId) {
     
     // Update the navbar with category/objective/difficulty
     const questionInfo = `Content:${content}  |  Objective:${subject}.${objective}  |  Difficulty:${difficulty}  | Status: <span class="${statusClass}">${isCompleted}</span>  | `;
-    console.log("Question Info:", questionInfo);
+    //console.log("Question Info:", questionInfo);
     document.getElementById('question-info').innerHTML = questionInfo;
 }
 
@@ -365,7 +365,7 @@ function updateArrowIndicator(currentIndex) {
         }
 
         // Position the arrow
-        arrowIndicator.style.left = `${boxLeft}px`; // Adjust to center the arrow
+        arrowIndicator.style.left = `${boxLeft - 10}px`; // Adjust to center the arrow
         arrowIndicator.style.top = `${boxTop - 18}px`; // Adjust the top positioning
         arrowIndicator.style.display = "block"; // Ensure the arrow is visible
     } else {
@@ -383,13 +383,6 @@ function loadProgressBar() {
     const correctAnswers = localStorage.getItem('correctAnswers');
     const incorrectAnswers = localStorage.getItem('incorrectAnswers');
     const currentQuestionId = localStorage.getItem('currentQuestionId');
-        
-    console.log("loadProgressBar function has been called!!");
-    console.log("currentCurriculum:", currentCurriculum);
-    console.log("questionsList:", questionsList);
-    console.log("correctAnswers:", correctAnswers);
-    console.log("incorrectAnswers:", incorrectAnswers);
-    console.log("currentQuestionId:", currentQuestionId);
 
     // Parse JSON data safely (use empty arrays as default if parsing fails)
     let parsedQuestionsList = [], parsedCorrectAnswers = [], parsedIncorrectAnswers = [];
@@ -475,7 +468,6 @@ function loadProgressBar() {
         
     });
     const currentIndex = parsedQuestionsList.indexOf(currentQuestionId);
-    console.log("Current Index:", currentIndex);
     updateArrowIndicator(currentIndex);
 }
 
@@ -484,7 +476,7 @@ function loadProgressBar() {
 
 // Function to update the page with question data
 function updatePage(data) {
-    console.log(data);
+    //console.log(data);
     // Access the currentQuestionId
     const currentQuestionId = localStorage.getItem('currentQuestionId');
     
@@ -624,7 +616,6 @@ function nextQuestion() {
     // Update the curriculum score display
     document.getElementById('curriculumScore').textContent = curriculumScore + '%';
     // update progress bar
-    console.log("Updating progress bar on Next Question")
     loadProgressBar();
 }
 
@@ -751,7 +742,6 @@ document.getElementById("key-input").addEventListener("keypress", function(event
 
 // Load the current question on page refresh
 window.onload = function() {
-    console.log("Window loaded, check currentQuestionId");
     const currentQuestionId = localStorage.getItem('currentQuestionId');
     if (currentQuestionId) {
         // Fetch and update the question using the stored ID
