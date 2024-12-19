@@ -15,6 +15,13 @@ let video;
 
 //--------------------------------------------------------------------------------------
 
+function pause(milliseconds) {
+    return new Promise(resolve => setTimeout(resolve, milliseconds));
+}
+
+
+//--------------------------------------------------------------------------------------
+
 // Function to start the timer
 function startTimer() {
     const startTime = Date.now();  // Capture the current time when the question is loaded
@@ -365,8 +372,8 @@ function updateArrowIndicator(currentIndex) {
         }
 
         // Position the arrow
-        arrowIndicator.style.left = `${boxLeft - 10}px`; // Adjust to center the arrow
-        arrowIndicator.style.top = `${boxTop - 18}px`; // Adjust the top positioning
+        arrowIndicator.style.left = `${boxLeft-9}px`; // Adjust to center the arrow +3 +2
+        arrowIndicator.style.top = `${boxTop-9}px`; // Adjust the top positioning -4
         arrowIndicator.style.display = "block"; // Ensure the arrow is visible
     } else {
         console.error("No progress box found for index:", currentIndex); // Debugging line
@@ -860,11 +867,22 @@ window.addEventListener('load', () => {
 
 //------------------------------------------------------------------------------------------------------------------
 
+//------------------------------------------------------------------------------------------------------------------
+
 // Function to show the results bubble dialog --> gets called in
 function showResultDialog(isCorrect, dXP) {
     const resultDialog = document.getElementById('resultDialog');
     const resultImage = document.getElementById('resultImage');
     const dXPValue = document.getElementById('dXPValue');
+    
+    // Play sound effect (you can replace with your actual sound file)
+    const audio = new Audio('/static/sounds/bubble.mp3');
+    audio.play();
+    
+    pause(500).then(() => {
+        console.log('Pausing');
+    });
+
 
     // Adjust isCorrect to treat 'late' as true for display logic
     const isAnswerCorrect = (isCorrect === 'late' || isCorrect);
@@ -876,6 +894,7 @@ function showResultDialog(isCorrect, dXP) {
     } else {
         imageSrc = isCorrect ? '/static/images/correct.png' : '/static/images/incorrect.png';
     }
+    
 
     // Set the appropriate image and dXP value
     resultImage.src = imageSrc;
@@ -885,10 +904,6 @@ function showResultDialog(isCorrect, dXP) {
     resultDialog.style.display = 'block';
     resultDialog.style.opacity = 1;
     resultDialog.style.transform = 'translateX(-50%) translateY(30px)'; // Start position (slightly below)
-
-    // Play sound effect (you can replace with your actual sound file)
-    //const audio = new Audio('/static/sounds/success.mp3');
-    //audio.play();
 
     // Apply upward floating effect for 3 seconds
     setTimeout(() => {
@@ -940,11 +955,11 @@ document.getElementById("submit-answer").onclick = function() {
                 // Update XP and show alert for correct answer within time limit
                 dXP = updateXP(currentQuestionId, content, subject, difficulty, 'correct');
                 showResultDialog(true, dXP);
-                //alert("Correct answer! You earned " + dXP.toFixed(2) + " XP.");
                 updateAnswerStatus(currentQuestionId, "correct");
             } else {
                 // Handle case where correct answer is given but not within time limit
-                showResultDialog("late", 0);
+                dXP = updateXP(currentQuestionId, content, subject, 0, 'correct');
+                showResultDialog("late", dXP);
             }
             
             updateNavbarData(currentQuestionId);

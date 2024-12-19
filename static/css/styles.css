@@ -7,6 +7,7 @@
     padding: 0px;                /* Padding around the navbar */
     border-top: 1px solid #ccc;
     border-bottom: 1px solid #ccc; /* Optional bottom border */
+    margin-bottom: 0;
 }
 
 #navbar button,
@@ -507,17 +508,16 @@ button.clear:hover {
 /* styling for the progress bar */
 
 #progress-container {
+    margin-top: 1px; /* Space below the navbar */
+    margin-bottom: 1px; /* Space above the main content */
     display: flex;
-    align-items: center;
-    gap: 10px;
-    margin-top: 20px; /* Ensure there's some space between elements */
+    align-items: center; /* Keep everything vertically centered */
+    justify-content: center; /* Center horizontally if needed */
+    width: calc(100% - 10px); /* Stretch to fit the page width */
+    padding: 5px; /* Add some padding if necessary */
+    background-color: #f9f9f9; /* Optional background for visibility */
 }
 
-
-#progress-percentage {
-    font-size: 16px;
-    font-weight: bold;
-}
 
 #progress-bar {
     display: flex;
@@ -530,7 +530,7 @@ button.clear:hover {
 }
 
 .progress-box {
-    width: 20px; /* Width for each box in the progress bar */
+    width: 40px; /* Width for each box in the progress bar */
     height: 100%; /* Full height of the progress bar */
     background-color: gray; /* Default gray for unanswered questions */
     display: inline-block;
@@ -561,15 +561,26 @@ button.clear:hover {
 }
 
 /* Arrow Indicator */
-#arrow-indicator {
+#temp-indicator {
     position: absolute;
     width: 0;
     height: 0;
     border-left: 10px solid transparent;
     border-right: 10px solid transparent;
-    border-top: 10px solid white; /* Triangle pointing up */
-    top: -15px; /* Positioned above the progress bar */
+    border-top: 10px solid cyan; /* Triangle pointing down */
+    top: -15px; /* Positioned inside the progress blocks */
     transition: left 0.3s ease; /* Smooth transition */
     pointer-events: none; /* Prevents the arrow from blocking clicks */
     z-index: 10; /* Ensures the arrow is above other elements */
 }
+
+#arrow-indicator {
+    position: absolute;
+    width: 36px;
+    height: 10px;
+    background-color: transparent;
+    border: 4px solid black;    
+    /*transform: rotate(45deg); /* Rotates the square to form a diamond */
+    z-index: 10; /* Ensures it appears above other elements */
+}
+
