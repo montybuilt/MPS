@@ -92,12 +92,6 @@ function clearItems() {
 
 //--------------------------------------------------------------------------------------
 
-function getCurrentIndex(parsedQuestionsList, currentQuestionId) {
-    return parsedQuestionsList.indexOf(currentQuestionId);
-}
-
-//--------------------------------------------------------------------------------------
-
 // This section handles video loading
 
 function updateVideo() {
@@ -219,7 +213,7 @@ function updateContentScores(contentId, XP_earned, XP_possible) {
 // Function to calculate the XP change and update the XP storage
 
 function updateXP(questionId, content, subject, difficulty, status) {
-    console.log("Updating XP");
+    console.log("XP 1: ", "Cont", content, "Subj:", subject, "Diff:", difficulty);
     // Get the list of correct and incorrect answers from localStorage
     let correctAnswers = JSON.parse(localStorage.getItem('correctAnswers')) || [];
     let incorrectAnswers = JSON.parse(localStorage.getItem('incorrectAnswers')) || [];
@@ -286,7 +280,7 @@ function updateXP(questionId, content, subject, difficulty, status) {
 
 function updateNavbarData(questionId) {
 
-    console.log("Updating Navbar Data:")
+    console.log("Updating Navbar Data:", questionId)
 
     // Get the completion status of the current question
     const isCompleted = checkQuestionStatus(questionId) ? "Completed" : "Not Completed";
@@ -296,6 +290,7 @@ function updateNavbarData(questionId) {
     
     // Update the navbar with category/objective/difficulty
     const questionInfo = `Content:${content}  |  Objective:${subject}.${objective}  |  Difficulty:${difficulty}  | Status: <span class="${statusClass}">${isCompleted}</span>  | `;
+    //console.log("Question Info:", questionInfo);
     document.getElementById('question-info').innerHTML = questionInfo;
 }
 
@@ -348,7 +343,43 @@ function updateXPDisplay(content) {
 
 //---------------------------------------------------------------------------------------------------
 
+function updateArrowIndicator(currentIndex) {
+    const progressBar = document.getElementById('progress-bar');
+    const progressBoxes = progressBar.getElementsByClassName('progress-box');
+    let arrowContainer = document.getElementById('arrow-container');
 
+    // Create the arrow container if it doesn't exist
+    if (!arrowContainer) {
+        arrowContainer = document.createElement('div');
+        arrowContainer.id = 'arrow-container';
+        progressBar.parentElement.appendChild(arrowContainer);
+    }
+
+    // Check if we have valid boxes and index
+    const currentBox = progressBoxes[currentIndex];
+    if (currentBox) {
+        const boxLeft = currentBox.offsetLeft + currentBox.offsetWidth / 2;
+        const boxTop = currentBox.offsetTop; // Get the top position of the box
+
+        console.log("Arrow Position - boxLeft:", boxLeft, "boxTop:", boxTop); // Debugging line
+
+        // Create the arrow inside the container if it doesn't exist
+        let arrowIndicator = document.getElementById('arrow-indicator');
+        if (!arrowIndicator) {
+            arrowIndicator = document.createElement('div');
+            arrowIndicator.id = 'arrow-indicator';
+            arrowContainer.appendChild(arrowIndicator); // Append the arrow to the arrow container
+        }
+
+        // Position the arrow
+        arrowIndicator.style.left = `${boxLeft-9}px`; // Adjust to center the arrow +3 +2
+        arrowIndicator.style.top = `${boxTop-9}px`; // Adjust the top positioning -4
+        arrowIndicator.style.display = "block"; // Ensure the arrow is visible
+    } else {
+        console.error("No progress box found for index:", currentIndex); // Debugging line
+        arrowIndicator.style.display = "none"; // Hide the arrow if box is not found
+    }
+}
 
 //-------------------------------------------------------------------------------------------------------
 
@@ -434,34 +465,17 @@ function loadProgressBar() {
         }
     
         // Add click event listener to navigate to the specific question
-       progressBox.addEventListener('click', () => {
+        progressBox.addEventListener('click', () => {
             const nextQuestionId = parsedQuestionsList[index]; // Look up questionId by index
-        
-            // Add the 'selected' class to the clicked box
-            // Remove 'selected' class from all boxes first
-            const allProgressBoxes = progressBarContainer.getElementsByClassName('progress-box');
-            Array.from(allProgressBoxes).forEach(box => {
-                box.classList.remove('selected');
-            });
-        
-            // Add the 'selected' class to the clicked box
-            progressBox.classList.add('selected');
-        
-            // Now load the selected question
             loadQuestion(nextQuestionId); // Fetch and load the clicked question
         });
-
     
         // Append the progress box to the progress bar container
         progressBarContainer.appendChild(progressBox);
+        
     });
-    
-    // After loading the boxes, apply the highlight to the currently selected box
     const currentIndex = parsedQuestionsList.indexOf(currentQuestionId);
-    if (currentIndex >= 0) {
-        const selectedBox = progressBarContainer.getElementsByClassName('progress-box')[currentIndex];
-        selectedBox.classList.add('selected');
-    }
+    updateArrowIndicator(currentIndex);
 }
 
 //--------------------------------------------------------------------------------------
@@ -469,6 +483,7 @@ function loadProgressBar() {
 
 // Function to update the page with question data
 function updatePage(data) {
+    //console.log(data);
     // Access the currentQuestionId
     const currentQuestionId = localStorage.getItem('currentQuestionId');
     
@@ -628,7 +643,7 @@ async function fetchCurriculum(keyInput) {
         if (!response.ok) throw new Error("Network response was not ok");
 
         const questionsList = await response.json();  // The list of question IDs returned by Flask
-        console.log("Received questions list");
+        console.log("Received questions list:", questionsList);
 
         // Save the questions list and curriculum name to local storage
         localStorage.setItem("questionsList", JSON.stringify(questionsList));
@@ -798,7 +813,7 @@ document.getElementById("run").onclick = function() {
         .then(response => response.json())
         .then(data => {
             // Display the output in the console div
-            console.log("Code output has been received");
+            console.log("Code output has been received:", data.output);
             displayOutput(data.output);
         })
         .catch((error) => {

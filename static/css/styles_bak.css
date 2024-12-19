@@ -447,8 +447,6 @@ button.clear:hover {
     cursor: pointer;
 }
 
-/*---------------------------------------------------------------------------------------*/
-
 /* Styling for the input field and submit button */
 #userInput {
     width: 80%;  /* Adjust width as needed */
@@ -507,50 +505,36 @@ button.clear:hover {
     border-radius: 5px;
 }
 
-/*---------------------------------------------------------------------------------------*/
-
 /* styling for the progress bar */
 
 #progress-container {
     margin-top: 1px; /* Space below the navbar */
     margin-bottom: 1px; /* Space above the main content */
     display: flex;
-    align-items: center; /* Vertically centers the contents */
-    justify-content: center; /* Horizontally centers the contents */
-    width: calc(100% - 10px); /* Stretch to fit the page width, considering padding */
-    padding: 5px; /* Padding around the container */
-    background-color: #f9f9f9; /* Optional background */
+    align-items: center; /* Keep everything vertically centered */
+    justify-content: center; /* Center horizontally if needed */
+    width: calc(100% - 10px); /* Stretch to fit the page width */
+    padding: 5px; /* Add some padding if necessary */
+    background-color: #f9f9f9; /* Optional background for visibility */
 }
 
 
 #progress-bar {
     display: flex;
-    align-items: center; /* Vertically center the progress boxes */
-    justify-content: flex-start; /* Align boxes to the left */
-    gap: 3px; /* Space between the boxes */
-    flex-grow: 1; /* Ensure progress bar stretches */
-    height: 10px; /* Height of the progress bar */
-    background-color: #e0e0e0; /* Light gray background for the progress bar */
-    border-radius: 5px; /* Rounded corners for the progress bar */
+    gap: 3px; /* Space between progress boxes */
+    flex-grow: 1; /* Ensure the progress bar stretches */
+    height: 10px; /* Define height */
+    background-color: #e0e0e0; /* Light gray for the background of the progress bar */
+    border-radius: 5px; /* Rounded corners for the bar */
     position: relative; /* Required for positioning the arrow indicator */
 }
 
-/* Progress box base styling */
 .progress-box {
-    width: calc(100% / 1); /* Dynamic width to fill the bar */
+    width: 40px; /* Width for each box in the progress bar */
     height: 100%; /* Full height of the progress bar */
-    background-color: gray; /* Default color for unanswered questions */
-    display: flex; /* Flex to center content inside the box */
-    /*justify-content: center; /* Horizontally center content */
-    align-items: center; /* Vertically center content */
+    background-color: gray; /* Default gray for unanswered questions */
+    display: inline-block;
     cursor: pointer;
-    box-sizing: content-box; /* Border included in size calculation */
-    border: 0px solid transparent; /* Transparent border initially */
-}
-
-/* Selected progress-box styling */
-.progress-box.selected {
-    border: 3px solid black; /* Add a black border around the selected question */
 }
 
 /* Color classes */
@@ -570,8 +554,33 @@ button.clear:hover {
     background-color: grey; /* Grey for unanswered questions */
 }
 
+/* Arrow Container */
+#arrow-container {
+    position: absolute;
+    width: 100%; /* Ensures the container takes the full width of the progress bar */
+}
 
+/* Arrow Indicator */
+#temp-indicator {
+    position: absolute;
+    width: 0;
+    height: 0;
+    border-left: 10px solid transparent;
+    border-right: 10px solid transparent;
+    border-top: 10px solid cyan; /* Triangle pointing down */
+    top: -15px; /* Positioned inside the progress blocks */
+    transition: left 0.3s ease; /* Smooth transition */
+    pointer-events: none; /* Prevents the arrow from blocking clicks */
+    z-index: 10; /* Ensures the arrow is above other elements */
+}
 
-
-
+#arrow-indicator {
+    position: absolute;
+    width: 36px;
+    height: 10px;
+    background-color: transparent;
+    border: 4px solid black;    
+    /*transform: rotate(45deg); /* Rotates the square to form a diamond */
+    z-index: 10; /* Ensures it appears above other elements */
+}
 
