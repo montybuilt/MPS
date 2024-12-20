@@ -346,10 +346,6 @@ function updateXPDisplay(content) {
     }
 }
 
-//---------------------------------------------------------------------------------------------------
-
-
-
 //-------------------------------------------------------------------------------------------------------
 
 function loadProgressBar() {
@@ -842,15 +838,14 @@ function preloadImages(imagePaths) {
 const resultImages = [
     '/static/images/correct.png',
     '/static/images/incorrect.png',
-    '/static/images/tooslow.png'
+    '/static/images/tooslow.png',
+    '/static/images/reset.png'
 ];
 
 // Preload the images when the window loads
-window.addEventListener('load', () => {
-    preloadImages(resultImages);
-});
-
-//------------------------------------------------------------------------------------------------------------------
+//window.addEventListener('load', () => {
+//    preloadImages(resultImages);
+//});
 
 //------------------------------------------------------------------------------------------------------------------
 
@@ -879,6 +874,8 @@ function showResultDialog(isCorrect, dXP) {
     } else {
         imageSrc = isCorrect ? '/static/images/correct.png' : '/static/images/incorrect.png';
     }
+    
+    resultImage.src = '/static/images/reset.png'
     
 
     // Set the appropriate image and dXP value
@@ -918,7 +915,8 @@ function showResultDialog(isCorrect, dXP) {
         dXPValue.style.transition = ''; // Reset transition for the dXP text
         resultImage.style.opacity = ''; // Reset opacity
         dXPValue.style.opacity = ''; // Reset opacity
-    }, 3000); // Dialog disappears after 3 seconds
+    }, 2500); // Dialog disappears after 3 seconds
+    
 }
 
 //------------------------------------------------------------------------------------------------------------------
