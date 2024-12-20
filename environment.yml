@@ -9,4 +9,6 @@ dependencies:
   - python=3.10.16
   - flask=3.0.3
   - requests=2.32.3
+  - flask-migrate=4.0.7
+  - flask-sqlalchemy=3.1.1
 
