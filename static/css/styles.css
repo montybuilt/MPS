@@ -174,7 +174,7 @@ nav a:hover {
 .button {
     width: 30%;
     margin-top: auto;
-    background-color: #007bff;
+    background-color: green; /*#007bff;*/
     color: #ffffff;
     border: none;
     border-radius: 4px;
