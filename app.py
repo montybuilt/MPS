@@ -1,11 +1,9 @@
 # Import packages
-from flask import Flask, render_template, request, jsonify, session, redirect, url_for, Response
+from flask import Flask, render_template, request, jsonify, session, redirect, url_for
 from modules.helpers import Question, Curriculum, verify, login_required
-import subprocess
-import logging
-import secrets
-import os
-import json
+from modules.models import db
+from flask_migrate import Migrate
+import subprocess, logging, secrets, os, json, bcrypt
 
 # Create the flask object
 app = Flask(__name__)
@@ -18,6 +16,16 @@ app.secret_key = secrets.token_hex(16)
 
 # Set up logging
 logging.basicConfig(level=logging.DEBUG, format='%(asctime)s %(levelname)s: %(message)s')
+
+# Set the database configurations
+app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///db.sqlite'
+app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
+
+# Initialize the app with db object
+db.init_app(app)
+
+# Initialize flask-migrate
+migrate = Migrate(app, db)
 
 # Path to content.json located in the data directory
 content_file_path = os.path.join('data', 'content.json')
@@ -38,25 +46,18 @@ def index():
 
 @app.route('/login', methods=['POST'])
 def login():
-    
-    # get the username and password form the form post
     username = request.form['username']
     password = request.form['password']
-    is_electron = request.form.get('isElectron', 'false') == 'true'
-    app.logger.debug(f"Electron Environment? {is_electron}")
-    
-    # Call the verify function to check credentials
-    if verify(username, password):
-        # Store the username and admin status in the session
+
+    result = verify(username, password)
+
+    if result is True:  # If the verification was successful, redirect
         session['username'] = username
         session['is_admin'] = username in ['amontanus']
-        
-        # Redirect to the index page
         return redirect(url_for('index'))
-    
-    else:
-        # Handle invalid login
-        return render_template('index.html', error="Invalid username or password")
+
+    # If result is not True, it will contain an error message to display
+    return render_template('index.html', error=result)
 
 @app.route('/logout', methods=['POST'])
 def logout():

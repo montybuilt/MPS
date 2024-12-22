@@ -1,14 +1,32 @@
 # Import packages
-import requests
-import json
-import os
+import requests, json, os, bcrypt, logging
 from flask import session, redirect, url_for
+from modules.models import User
+
+# Set up logging
+logger = logging.getLogger(__name__)
 
 # Collections of remote file urls
 users = "https://raw.githubusercontent.com/montanus-wecib/MPS/refs/heads/main/data/users.json"
 
-
 def verify(username, password):
+    """Verify username and password"""
+    try:
+        user = User.query.filter_by(username=username).first()
+
+        if user is None:
+            return "Username not found"  # Return a user-friendly message
+
+        # Check if the password matches
+        if bcrypt.checkpw(password.encode('utf-8'), user.password_hash.encode('utf-8')):
+            return True  # Return True if the password matches
+
+        return "Invalid password"  # Return a message for invalid password
+
+    except Exception as e:
+        return f"Error verifying user: {e}"  # General error message
+
+def verify2(username, password):
     """Verify username and password"""
     url = users
     
