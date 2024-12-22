@@ -3,6 +3,8 @@
 /system/
 /utilities/
 /testing/
+/admin/
+/instance/
 
 # Ignore Python bytecode files and folders
 *.pyc

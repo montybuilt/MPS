@@ -1,9 +1,8 @@
 # Import packages
 from flask import Flask, render_template, request, jsonify, session, redirect, url_for
-from modules.helpers import Question, Curriculum, verify, login_required
-from modules.models import db
+from modules import Question, Curriculum, verify, login_required, db
 from flask_migrate import Migrate
-import subprocess, logging, secrets, os, json, bcrypt
+import subprocess, logging, secrets, os, json
 
 # Create the flask object
 app = Flask(__name__)
