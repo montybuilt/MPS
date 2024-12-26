@@ -49,6 +49,7 @@ def login():
     password = request.form['password']
 
     result = verify(username, password)
+    app.logger.debug(result)
 
     if result is True:  # If the verification was successful, redirect
         session['username'] = username
@@ -213,11 +214,6 @@ def content_data():
     response = jsonify(question_data)
     response.headers['Content-Type'] = 'application/json; charset=UTF-8'
     return response
-   
-
-
-
-
 
 #------------------------------------------------------------------------------------------#
 

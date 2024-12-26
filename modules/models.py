@@ -4,6 +4,9 @@ from datetime import datetime
 # Initialize SQLAlchemy object here to avoid circular imports
 db = SQLAlchemy()
 
+def testo():
+    return "Merry Christmas"
+
 class User(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     username = db.Column(db.String(120), unique=True, nullable=False, index=True)
