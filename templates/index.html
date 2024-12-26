@@ -14,8 +14,8 @@
     </div>
     <!-- Navbar with login form -->
     <div id="navbar">
-        {% if username %}
-            <p>Logged in as: <strong>{{ username }}</strong></p>
+        {% if session['username'] %}
+            <p>Logged in as: <strong>{{ session['username'] }}</strong></p>
             <form action="/logout" method="POST" id="logout-form">
                 <button type="submit">Logout</button> <!-- Logout button -->
             </form>
@@ -24,8 +24,6 @@
                 <input type="text" name="username" placeholder="Username" required>
                 <input type="password" name="password" placeholder="Password" required>
                 <button type="submit">Login</button>
-                <!-- Hidden input for isElectron -->
-                <input type="hidden" id="isElectron" name="isElectron" value="">
             </form>
         {% endif %}
     </div>
@@ -36,7 +34,7 @@
         <ul>
             <li><a href="/testprep">Go to Test Preparation</a></li>
             <!-- Admin link displayed only if user is an admin -->
-            {% if is_admin %}
+            {% if session['is_admin'] %}
                 <li><a href="/content">Create New Question</a></li>
             {% endif %}
         </ul>
@@ -46,4 +44,3 @@
     <script src="../static/js/index_script.js"></script>
 </body>
 </html>
-

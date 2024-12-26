@@ -1,26 +1,40 @@
-let isElectron;
-
-// Detect if running in Electron or a web environment
-(function detectEnvironment() {
-    isElectron = typeof window !== 'undefined' && window.process && window.process.versions.electron;
-    console.log("Operating Environment", isElectron);
-})();
-
 document.addEventListener("DOMContentLoaded", function() {
-    // Set the hidden input field for isElectron
-    const isElectronInput = document.getElementById("isElectron");
-    if (isElectronInput) {
-        isElectronInput.value = isElectron; // Set the hidden field to true/false
-    }
-
-    // Attach the function to the login form submission
     const loginForm = document.getElementById("login-form");
     if (loginForm) {
         loginForm.addEventListener("submit", function(event) {
-            // No encryption needed, send raw password
-            // You can perform additional checks here if needed before submitting the form
+            event.preventDefault();  // Prevent default form submission
+
+            const formData = new FormData(loginForm);
+            const data = new URLSearchParams(formData);
+
+            fetch('/login', {
+                method: 'POST',
+                body: data
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.error) {
+                    alert(data.error);  // Display error message
+                } else {
+                    // Set sessionStorage with session data
+                    const sessionData = data.session_data;
+                    for (const key in sessionData) {
+                        if (sessionData.hasOwnProperty(key)) {
+                            const value = sessionData[key];
+                            if (Array.isArray(value)) {
+                                sessionStorage.setItem(key, JSON.stringify(value));
+                            } else if (typeof value === 'object' && value !== null) {
+                                sessionStorage.setItem(key, JSON.stringify(value));
+                            } else {
+                                sessionStorage.setItem(key, value);
+                            }
+                        }
+                    }
+                    // Redirect to index page
+                    window.location.href = '/';
+                }
+            })
+            .catch(error => console.error('Error:', error));
         });
     }
 });
-
-

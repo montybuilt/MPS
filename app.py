@@ -1,6 +1,6 @@
 # Import packages
 from flask import Flask, render_template, request, jsonify, session, redirect, url_for
-from modules import Question, Curriculum, verify, login_required, db
+from modules import Question, Curriculum, verify, login_required, db, initialize_user_session_data
 from flask_migrate import Migrate
 import subprocess, logging, secrets, os, json
 
@@ -45,19 +45,31 @@ def index():
 
 @app.route('/login', methods=['POST'])
 def login():
-    username = request.form['username']
-    password = request.form['password']
+    app.logger.debug("Beginning the process")
+    
+    try:
+        username = request.form['username']
+        app.logger.debug("I have the username, getting password")
+        password = request.form['password']
+        app.logger.debug(f"Username: {username} - Password: {password}")
 
-    result = verify(username, password)
-    app.logger.debug(result)
+        result = verify(username, password)
+        app.logger.debug(result)
 
-    if result is True:  # If the verification was successful, redirect
-        session['username'] = username
-        session['is_admin'] = username in ['amontanus']
-        return redirect(url_for('index'))
+        if result is True:  # If the verification was successful
+            session['username'] = username
+            session['is_admin'] = username in ['amontanus']
+            session_data = initialize_user_session_data(username)
+            app.logger.debug(f"Initialize: {session_data}")
 
-    # If result is not True, it will contain an error message to display
-    return render_template('index.html', error=result)
+            return jsonify({'message': 'Login successful', 'session_data': session_data}), 200
+
+        # If result is not True, it will contain an error message to display
+        return jsonify({'error': result}), 401
+    
+    except Exception as e:
+        app.logger.error(f"Error during login: {e}")
+        return jsonify({'error': 'An unexpected error occurred'}), 500
 
 @app.route('/logout', methods=['POST'])
 def logout():
@@ -149,7 +161,6 @@ def content_keys():
     except Exception as e:
         app.logger.error(f"Error loading keys: {e}")
         return jsonify({"error": "Failed to load keys"}), 500
-
 
 # Content creation route (only for admins)
 @app.route('/submit_question', methods=['POST'])
