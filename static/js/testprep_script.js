@@ -165,6 +165,39 @@ function rickRoll() {
 
 //--------------------------------------------------------------------------------------
 
+function updateSessionData() {
+    const sessionData = {
+        completedCurriculums: JSON.parse(sessionStorage.getItem('completedCurriculums')),
+        contentScores: JSON.parse(sessionStorage.getItem('contentScores')),
+        correctAnswers: JSON.parse(sessionStorage.getItem('correctAnswers')),
+        currentCurriculum: sessionStorage.getItem('currentCurriculum'),
+        currentQuestionId: sessionStorage.getItem('currentQuestionId'),
+        curriculumScores: JSON.parse(sessionStorage.getItem('curriculumScores')),
+        incorrectAnswers: JSON.parse(sessionStorage.getItem('incorrectAnswers')),
+        xp: JSON.parse(sessionStorage.getItem('xp')),
+        updatedAt: new Date().toISOString()
+    };
+
+    fetch('/update_session', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(sessionData)
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.error) {
+            console.error('Error updating session data:', data.error);
+        } else {
+            console.log('Session data updated successfully:', data);
+        }
+    })
+    .catch(error => console.error('Error:', error));
+}
+
+//--------------------------------------------------------------------------------------
+
 // This function checks to see if the question has been previously answered successfully
 
 function checkQuestionStatus(questionId) {
@@ -727,6 +760,7 @@ document.getElementById("key-input").addEventListener("keypress", function(event
     if (event.key === "Enter") {
         const keyInput = event.target.value.toLowerCase();
         fetchCurriculum(keyInput).then(() => {
+            updateSessionData();
             loadProgressBar();
         });
     }
@@ -982,6 +1016,12 @@ document.addEventListener("DOMContentLoaded", function() {
     }
 });
 
+//---------------------------------------------------------------------------------------
+
+// Add the beforeunload event listener to call updateSessionData()
+
+window.addEventListener('beforeunload', function(event) { 
+    updateSessionData(); });
 
 //---------------------------------------------------------------------------------------
 

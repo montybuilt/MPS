@@ -1,6 +1,6 @@
 # Import packages
 from flask import Flask, render_template, request, jsonify, session, redirect, url_for
-from modules import Question, Curriculum, verify, login_required, db, initialize_user_session_data
+from modules import Question, Curriculum, verify, login_required, db, initialize_user_session_data, update_user_session_data
 from flask_migrate import Migrate
 import subprocess, logging, secrets, os, json
 
@@ -45,22 +45,17 @@ def index():
 
 @app.route('/login', methods=['POST'])
 def login():
-    app.logger.debug("Beginning the process")
-    
+    '''Verify login and initialize session data'''
     try:
         username = request.form['username']
-        app.logger.debug("I have the username, getting password")
         password = request.form['password']
-        app.logger.debug(f"Username: {username} - Password: {password}")
 
         result = verify(username, password)
-        app.logger.debug(result)
 
         if result is True:  # If the verification was successful
             session['username'] = username
             session['is_admin'] = username in ['amontanus']
             session_data = initialize_user_session_data(username)
-            app.logger.debug(f"Initialize: {session_data}")
 
             return jsonify({'message': 'Login successful', 'session_data': session_data}), 200
 
@@ -68,14 +63,35 @@ def login():
         return jsonify({'error': result}), 401
     
     except Exception as e:
-        app.logger.error(f"Error during login: {e}")
-        return jsonify({'error': 'An unexpected error occurred'}), 500
+        return jsonify({'error': f'An unexpected error occurred {e}'}), 500
 
 @app.route('/logout', methods=['POST'])
 def logout():
     session.clear()
     return redirect(url_for('index'))  # Redirect back to the home page
 
+@app.route('/update_session', methods=['POST'])
+def update_session():
+    '''Route to update the database with sessionStorate'''
+    # Extract the session data from the request
+    session_data = request.get_json()
+    app.logger.debug(f"Session Data: {type(session_data)}")
+    
+    # Get the username
+    username = session.get('username')
+    app.logger.debug(f"Username: {username}")
+    
+    # Print the session data in the logger
+    app.logger.debug(f"Session Data: {session_data}")
+    
+    # Write the session data to the database
+    try:
+        update_user_session_data(username, session_data)
+    except Exception as e:
+        app.logger.debug(f"Update Session Error: {e}")
+        return jsonify({"message": "Session Update Error"}), 400
+    
+    return jsonify({"message": "Session data submitted successfully"}), 200
 
 @app.route('/testprep')
 @login_required
@@ -92,15 +108,9 @@ def test_request():
     data = request.get_json()
     question_id = data.get('key-input').lower()
     
-    # Log the value and type of question_id
-    app.logger.debug(f"Question ID: {question_id}, Type: {type(question_id)}")
-    
     # create a question object that retrieves the question data as an attribute
     question_data = Question(question_id)
     question_data = question_data.data
-    
-    # Log the problematic description
-    app.logger.debug(f"Description to send: {question_data['Description']}")
     
     # Respond to the request by returning the data as a json
     response = jsonify(question_data)
@@ -111,13 +121,9 @@ def test_request():
 def get_curriculum():
     '''This function gets the curriculum content based on the user's key-input'''
     
-    app.logger.debug(request.is_json)
     #Extract the key input from the request
     data = request.get_json()
     curriculum_id = data.get('key-input').lower()
-    
-    # Log the value and type of question_id
-    app.logger.debug(f"Curriculum ID: {curriculum_id}, Type: {type(curriculum_id)}")
     
     # create a question object that retrieves the question data as an attribute
     curriculum_data = Curriculum(curriculum_id).data
@@ -127,17 +133,17 @@ def get_curriculum():
 
 @app.route('/run_code', methods=['POST'])
 def run_code():
+    '''Function to execute code from the CodeMirror'''
+    
+    # Extract the code
     data = request.get_json()
     code = data.get('code', '')
     
-    app.logger.debug(f"The modified code: {code}")
-
     try:
         # Run the code with subprocess
         result = subprocess.run(['python', '-c', code], capture_output=True, text=True)
-        app.logger.debug(f"Code output: {result}")
-
         output = result.stdout if result.returncode == 0 else result.stderr
+    
     except Exception as e:
         output = str(e)
         
@@ -159,21 +165,19 @@ def content_keys():
             content = json.load(file)
         return jsonify({"keys": list(content.get('questions', {}).keys())})
     except Exception as e:
-        app.logger.error(f"Error loading keys: {e}")
         return jsonify({"error": "Failed to load keys"}), 500
 
 # Content creation route (only for admins)
 @app.route('/submit_question', methods=['POST'])
 def submit_question():
+    ''' Saves new question in content.json'''
+    ''' Future upgrade, write to database'''
     # Check if the user is an admin
-    app.logger.debug(f"Is admin?: {session.get('is_admin')}")
     if not session.get('username') or not session.get('is_admin'):
-        app.logger.debug("No Admin Privelege!")
         return jsonify({"error": "Unauthorized"}), 401  # JSON response instead of HTML redirect
 
-    # Handle POST request
+    # Extract question data from request
     question_data = request.get_json()
-    app.logger.debug(question_data)
 
     # The questionKey (ID) from the data
     question_key = question_data['key']
@@ -200,8 +204,6 @@ def submit_question():
         'Video': question_data['videoURL'],
         'Difficulty': question_data['difficulty']
     }
-    
-    app.logger.debug(content)
 
     # Write the updated content back to content.json
     with open(content_file_path, 'w') as file:
