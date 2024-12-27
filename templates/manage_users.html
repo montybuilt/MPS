@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>User Management</title>
+    <script>
+        function onUserChange() {
+            const username = document.getElementById('user-select').value;
+            if (username === 'new_user') {
+                document.getElementById('user-form').action = '/new_user';
+                document.getElementById('password').required = true;
+                clearForm();
+            } else {
+                document.getElementById('user-form').action = '/edit_user';
+                document.getElementById('password').required = false;
+                fetch(`/get_user/${username}`)
+                    .then(response => response.json())
+                    .then(data => populateForm(data));
+            }
+        }
+
+        function clearForm() {
+            document.getElementById('user-form').reset();
+        }
+
+        function populateForm(data) {
+            document.getElementById('username').value = data.username;
+            document.getElementById('email').value = data.email;
+            document.getElementById('assigned_curriculums').value = data.assigned_curriculums;
+            document.getElementById('completed_curriculums').value = data.completed_curriculums;
+            document.getElementById('content_scores').value = data.content_scores;
+            document.getElementById('correct_answers').value = data.correct_answers;
+            document.getElementById('current_curriculum').value = data.current_curriculum;
+            document.getElementById('current_question').value = data.current_question;
+            document.getElementById('curriculum_scores').value = data.curriculum_scores;
+            document.getElementById('incorrect_answers').value = data.incorrect_answers;
+            document.getElementById('xp').value = data.xp;
+            document.getElementById('updated_at').value = data.updated_at;
+            document.getElementById('assigned_content').value = data.assigned_content;
+        }
+    </script>
+</head>
+<body>
+    <h1>User Management</h1>
+    <form id="user-form" method="post" action="/new_user">
+        <label for="user-select">Select User:</label>
+        <select id="user-select" name="user-select" onchange="onUserChange()">
+            <option value="new_user">New User</option>
+            <!-- Existing users will be populated here dynamically -->
+        </select><br>
+
+        <label for="username">Username:</label>
+        <input type="text" id="username" name="username" required><br>
+
+        <label for="password">Password:</label>
+        <input type="password" id="password" name="password"><br>
+
+        <label for="email">Email:</label>
+        <input type="email" id="email" name="email" required><br>
+
+        <label for="assigned_curriculums">Assigned Curriculums:</label>
+        <input type="text" id="assigned_curriculums" name="assigned_curriculums"><br>
+
+        <label for="completed_curriculums">Completed Curriculums:</label>
+        <input type="text" id="completed_curriculums" name="completed_curriculums"><br>
+
+        <label for="content_scores">Content Scores:</label>
+        <input type="text" id="content_scores" name="content_scores"><br>
+
+        <label for="correct_answers">Correct Answers:</label>
+        <input type="text" id="correct_answers" name="correct_answers"><br>
+
+        <label for="current_curriculum">Current Curriculum:</label>
+        <input type="text" id="current_curriculum" name="current_curriculum"><br>
+
+        <label for="current_question">Current Question:</label>
+        <input type="text" id="current_question" name="current_question"><br>
+
+        <label for="curriculum_scores">Curriculum Scores:</label>
+        <input type="text" id="curriculum_scores" name="curriculum_scores"><br>
+
+        <label for="incorrect_answers">Incorrect Answers:</label>
+        <input type="text" id="incorrect_answers" name="incorrect_answers"><br>
+
+        <label for="xp">XP:</label>
+        <input type="text" id="xp" name="xp"><br>
+
+        <label for="updated_at">Updated At:</label>
+        <input type="text" id="updated_at" name="updated_at"><br>
+
+        <label for="assigned_content">Assigned Content:</label>
+        <input type="text" id="assigned_content" name="assigned_content"><br>
+
+        <input type="submit" value="Submit">
+    </form>
+</body>
+</html>

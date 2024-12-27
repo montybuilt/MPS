@@ -1,6 +1,8 @@
 # Import packages
 import json, os, logging
 from flask import session, redirect, url_for
+import bcrypt
+from functools import wraps
 
 # Set up logging
 logger = logging.getLogger(__name__)
@@ -9,8 +11,13 @@ logger = logging.getLogger(__name__)
 users = "https://raw.githubusercontent.com/montanus-wecib/MPS/refs/heads/main/data/users.json"
 
 
+def hashit(password):
+    '''function to hash+salt a raw password'''
+    return bcrypt.hashpw(password.encode('utf-8'), bcrypt.gensalt())
+    
 def login_required(f):
     """Decorator to check if user is logged in."""
+    @wraps(f)
     def decorated_function(*args, **kwargs):
         if 'username' not in session:  # Check if the username is in the session
             return redirect(url_for('index'))  # Redirect if not logged in

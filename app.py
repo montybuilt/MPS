@@ -1,6 +1,7 @@
 # Import packages
 from flask import Flask, render_template, request, jsonify, session, redirect, url_for
-from modules import Question, Curriculum, verify, login_required, db, initialize_user_session_data, update_user_session_data
+from modules import Question, Curriculum, verify, login_required, hashit, fetch_usernames
+from modules import db, initialize_user_session_data, update_user_session_data, create_new_user
 from flask_migrate import Migrate
 import subprocess, logging, secrets, os, json
 
@@ -70,28 +71,76 @@ def logout():
     session.clear()
     return redirect(url_for('index'))  # Redirect back to the home page
 
+@app.route('/admin', methods=['GET'])
+@login_required
+def admin():
+    '''Admin dashboard route'''
+
+    # Get username
+    username = session.get('username')
+
+    if session.get('is_admin'):
+        return render_template('admin.html', username=username, is_admin=True)
+    else:
+        return redirect(url_for('index'))
+
 @app.route('/update_session', methods=['POST'])
 def update_session():
     '''Route to update the database with sessionStorate'''
     # Extract the session data from the request
     session_data = request.get_json()
-    app.logger.debug(f"Session Data: {type(session_data)}")
     
     # Get the username
     username = session.get('username')
-    app.logger.debug(f"Username: {username}")
-    
-    # Print the session data in the logger
-    app.logger.debug(f"Session Data: {session_data}")
     
     # Write the session data to the database
     try:
-        update_user_session_data(username, session_data)
+        update_user_session_data(username, session_data, app.logger)
     except Exception as e:
         app.logger.debug(f"Update Session Error: {e}")
         return jsonify({"message": "Session Update Error"}), 400
     
     return jsonify({"message": "Session data submitted successfully"}), 200
+
+@app.route('/new_user', methods=['GET', 'POST'])
+@login_required
+def new_user():
+    '''This route handles creation of new users'''
+    
+    if request.method == 'POST':
+        # Extract request data
+        username = request.form['username']
+        password = hashit(request.form['password'])
+        email = request.form['email']
+        
+        # Invoke the create_new_user function from data_helpers
+        try:
+            new_user = create_new_user(username, password, email)
+            return redirect(url_for('index'))
+        except Exception as e:
+            app.logger.debug(f"Error creating user {username}: {e}")
+            return redirect(url_for('new_user_error', username=new_user))
+            
+    return render_template('new_user.html')
+
+@app.route('/new_user_error/<username>')
+def user_created(username):
+    return f"Something went wrong ... User {username} not created successfully"
+
+@app.route('/user_data', methods=['GET'])
+@login_required
+def user_data():
+    return render_template('user_data.html')
+
+@app.route('/get_users', methods=['GET'])
+@login_required
+def get_users():
+    try:
+        users = fetch_usernames()
+        return jsonify([user.username for user in users])
+    except Exception as e:
+        app.logger.debug(f"Error fetching usernames: {e}")
+        return jsonify({'message': 'Error fetching usernames'}), 500
 
 @app.route('/testprep')
 @login_required

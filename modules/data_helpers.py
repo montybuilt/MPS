@@ -57,7 +57,7 @@ def verify(username, password):
             return "Username not found"  # Return a user-friendly message
 
         # Check if the password matches
-        if bcrypt.checkpw(password.encode('utf-8'), user.password_hash.encode('utf-8')):
+        if bcrypt.checkpw(password.encode('utf-8'), user.password_hash):
             return True  # Return True if the password matches
 
         return "Invalid password"  # Return a message for invalid password
@@ -91,40 +91,77 @@ def initialize_user_session_data(username):
     except Exception as e:
         return f"Error retrieving data: {e}"  # General error message
 
-def update_user_session_data(username, session_data):
+def update_user_session_data(username, session_data, logger=None):
     '''Function to update database with user session data'''
     
     try:
         user_crud = CRUDHelper(User)
         user = user_crud.read(username=username)[0]
-    
-        map = {"completedCurriculums": "completed_curriculums",
-               "contentScores": "content_scores",
-               "correctAnswers": "correct_answers",
-               "currentCurriculum": "current_curriculum",
-               "currentQuestionId": "current_question",
-               "curriculumScores": "curriculum_scores",
-               "incorrectAnswers": "incorrect_answers",
-               "xp": "xp",
-               "updatedAt": "updated_at"}
         
-        for key, value in session_data.items():
-            if key in map:
-                if key == "updatedAt":
-                    try:
-                        value = datetime.strptime(value, "%Y-%m-%dT%H:%M:%S.%fZ")
-                    except ValueError:
-                        value = datetime.strptime(value, "%Y-%m-%dT%H:%M:%S")  # Fallback format
-                setattr(user, map[key], value)
-                
-        # Commit the changes
-        db.session.commit()
+        # Pre-process the updatedAt field
+        if "updatedAt" in session_data:
+            try:
+                session_data["updatedAt"] = datetime.strptime(session_data["updatedAt"], "%Y-%m-%dT%H:%M:%S.%fZ")
+            except ValueError:
+                session_data["updatedAt"] = datetime.strptime(session_data["updatedAt"], "%Y-%m-%dT%H:%M:%S")
+        
+        # Prepare the data for update
+        update_map = {
+            "completedCurriculums": "completed_curriculums",
+            "contentScores": "content_scores",
+            "correctAnswers": "correct_answers",
+            "currentCurriculum": "current_curriculum",
+            "currentQuestionId": "current_question",
+            "curriculumScores": "curriculum_scores",
+            "incorrectAnswers": "incorrect_answers",
+            "xp": "xp",
+            "updatedAt": "updated_at"
+        }
+        update_data = {update_map[key]: value for key, value in session_data.items() if key in update_map}
+        
+        # Use the update method of CRUDHelper
+        user_crud.update(user.id, **update_data)
         
     except SQLAlchemyError as se:
         db.session.rollback()
+        if logger:
+            logger.error(f"SQLAlchemyError: {se}")
         raise se
         
     except Exception as e:
         db.session.rollback()
-        app.logger.error(f"Unexpected error: {e}")
+        if logger:
+            logger.error(f"Unexpected error: {e}")
         raise e
+        
+def create_new_user(username, password, email):
+    '''This function does the CRUD for a new user'''
+    
+    try:
+        user_crud = CRUDHelper(User)
+        now = datetime.utcnow()
+        
+        new_user = user_crud.create(
+            username=username,
+            password_hash=password,
+            email=email,
+            assigned_curriculums=['intro'],
+            content_scores = {"tutorial":{"Earned":0, "Possible":0}},
+            curriculum_scores = {"intro":{"Earned":0, "Possible":0}},
+            xp = {"overallXP": 0.0, "certifications": {"tutorial": {"xp_1": 0}}},
+            updated_at = now
+            )
+        
+        return new_user.username
+    
+    except Exception as e:
+        raise e
+
+def fetch_usernames():
+    '''Function to fetch all usernames'''
+    return User.query.all()
+
+
+        
+
+

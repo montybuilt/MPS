@@ -2542,7 +2542,7 @@
             "Video": "",
             "Difficulty": 3
         },
-        "tutorial.1": {
+        "tutorial.1.1": {
             "Tags": [
                 "intro"
             ],
@@ -2690,6 +2690,34 @@
             "Description": "\ud83d\udca1 In the cases of <code>randrange</code> and <code>randint</code>, these functions are used to generate an index at random which is used to select an item from \"names\".<br><br>\ud83d\udca1 The range of indexes that randrange(1, len(names)) will return is from 1 to 6 - so the value at index 0 or \"Dan\" will never be randomly selected.<br><br>\ud83d\udca1 <code>sample(names, 1)[0]</code> works because when you sample from a list, a list is returned.  Since there is only one element in the list, the index [0] will retrieve it.",
             "Video": "",
             "Difficulty": 2.5
+        },
+        "tutorial.1.2": {
+            "Tags": [
+                ""
+            ],
+            "Code": "# Here is some example code\n\nname = \"Your Name\"\n\ngreeting = f\"Hello, my name is {name} and I am glad to see you!\"\n\nprint(greeting)\n\n",
+            "Question": "How and when can you write and execute code in the code editor?",
+            "Answer": "Using the \"Run Code\" button after you have answered a question.",
+            "Distractor1": "You can't run the code, ever!",
+            "Distractor2": "By doing 50 pushups.",
+            "Distractor3": "Do 50 pushups, now, I'm not joking.",
+            "Description": "\ud83d\udca1 As you answer questions, the Run Code button becomes available.<br><br>\ud83d\udca1 Make sure you experiment with the code after you answer questions, try changing values or adding new code to see what happens.<br><br>\ud83d\udca1 This way you will gain a deeper understanding of Python.",
+            "Video": "",
+            "Difficulty": 0
+        },
+        "tutorial.1.3": {
+            "Tags": [
+                ""
+            ],
+            "Code": "from random import random, choice\n\ndifficulties = [0.5, 1, 1.5, 2, 2.5, 3]\n\nxp = 0\n\nfor n in range(30):\n  draw = 0\n  if random() <= 0.7:\n    draw = 1\n  xp += draw * choice(difficulties)\n  \nprint(f\"Your XP is: {xp:.2f}\")\n\n",
+            "Question": "What does XP measure?",
+            "Answer": "Your overall Python coding skill",
+            "Distractor1": "The liklihood of a thunderstorm.",
+            "Distractor2": "The time left in the day.",
+            "Distractor3": "The time you spend on TikTok.",
+            "Description": "\ud83d\udca1 XP is a a measure of your overall Python coding skill.<br><br>\ud83d\udca1 As you successfully answer questions and complete tasks, your XP goes up.<br><br>\ud83d\udca1 When you get questions or tasks wrong, your XP goes down.",
+            "Video": "",
+            "Difficulty": 0
         }
     }
 }

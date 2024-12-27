@@ -1,3 +1,4 @@
+# Import packages
 from flask_sqlalchemy import SQLAlchemy 
 from datetime import datetime
 
@@ -7,13 +8,13 @@ db = SQLAlchemy()
 class User(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     username = db.Column(db.String(120), unique=True, nullable=False, index=True)
-    password_hash = db.Column(db.String(120), nullable=False)
+    password_hash = db.Column(db.LargeBinary, nullable=False)
     email = db.Column(db.String(254), unique=True, nullable=True, index=True)
     assigned_curriculums = db.Column(db.JSON, default=[], index=True)
     assigned_content = db.Column(db.JSON, default=[], index=True)
     completed_curriculums = db.Column(db.JSON, default=[])
-    content_scores = db.Column(db.JSON, default={})
-    correct_answers = db.Column(db.JSON, default={})
+    content_scores = db.Column(db.JSON, default=[])
+    correct_answers = db.Column(db.JSON, default=[])
     current_curriculum = db.Column(db.String(120))
     current_question = db.Column(db.String(120))
     curriculum_scores = db.Column(db.JSON, default={})
@@ -69,4 +70,7 @@ class Questions(db.Model):
     
     def __repr__(self):
         return f'Question: {self.question_key}'
+    
+if __name__ == "__main__":
+    print(XP_D)
 

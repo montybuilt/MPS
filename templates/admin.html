@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Dashboard</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}">
+</head>
+<body>
+    <!-- Banner image at the top -->
+    <div id="banner-container">
+        <img src="{{ url_for('static', filename='images/Web Banner.png') }}" alt="Web Banner" class="banner">
+    </div>
+    <!-- Navbar with admin buttons -->
+    <div id="navbar">
+        <p>Logged in as: <strong>{{ username }}</strong></p>
+        <form action="/logout" method="POST" id="logout-form">
+            <button type="submit">Logout</button> <!-- Logout button -->
+        </form>
+    </div>
+
+    <h2>Welcome to the Admin Dashboard, {{ username }}!</h2>
+
+    <nav>
+        <ul>
+            <li><a href="/new_user">Add New User</a></li>
+            <li><a href="/content">Create New Question</a></li>
+        </ul>
+    </nav>
+    
+    <!-- Include the script file -->
+    <script src="{{ url_for('static', filename='js/index_script.js') }}"></script>
+</body>
+</html>

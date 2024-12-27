@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>User Data</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+        }
+        h1 {
+            color: #333;
+        }
+        form {
+            max-width: 500px;
+            margin: auto;
+        }
+        label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+        }
+        input[type="text"],
+        input[type="password"],
+        input[type="email"],
+        input[type="submit"],
+        select {
+            width: 100%;
+            padding: 10px;
+            margin-bottom: 10px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+        }
+        input[type="submit"] {
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            cursor: pointer;
+        }
+        input[type="submit"]:hover {
+            background-color: #45a049;
+        }
+    </style>
+</head>
+<body>
+    <h1>User Data</h1>
+    <form id="user-data-form" method="post" action="/update_user">
+        <label for="username">Select User:</label>
+        <select id="username" name="username" onchange="fetchUserData()">
+            <option value="">Select a user</option>
+            {% for user in users %}
+                <option value="{{ user.username }}">{{ user.username }}</option>
+            {% endfor %}
+        </select>
+
+        <label for="email">Email:</label>
+        <input type="email" id="email" name="email"><br>
+
+        <label for="assigned_curriculums">Assigned Curriculums:</label>
+        <input type="text" id="assigned_curriculums" name="assigned_curriculums"><br>
+
+        <label for="completed_curriculums">Completed Curriculums:</label>
+        <input type="text" id="completed_curriculums" name="completed_curriculums"><br>
+
+        <label for="content_scores">Content Scores:</label>
+        <input type="text" id="content_scores" name="content_scores"><br>
+
+        <label for="correct_answers">Correct Answers:</label>
+        <input type="text" id="correct_answers" name="correct_answers"><br>
+
+        <label for="current_curriculum">Current Curriculum:</label>
+        <input type="text" id="current_curriculum" name="current_curriculum"><br>
+
+        <label for="current_question">Current Question:</label>
+        <input type="text" id="current_question" name="current_question"><br>
+
+        <label for="curriculum_scores">Curriculum Scores:</label>
+        <input type="text" id="curriculum_scores" name="curriculum_scores"><br>
+
+        <label for="incorrect_answers">Incorrect Answers:</label>
+        <input type="text" id="incorrect_answers" name="incorrect_answers"><br>
+
+        <label for="xp">XP:</label>
+        <input type="text" id="xp" name="xp"><br>
+
+        <label for="assigned_content">Assigned Content:</label>
+        <input type="text" id="assigned_content" name="assigned_content"><br>
+
+        <input type="submit" value="Update User">
+    </form>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            fetch('/get_users')
+                .then(response => response.json())
+                .then(users => {
+                    var dropdown = document.getElementById('username');
+                    users.forEach(username => {
+                        var option = document.createElement('option');
+                        option.value = username;
+                        option.text = username;
+                        dropdown.appendChild(option);
+                    });
+                })
+                .catch(error => console.error('Error fetching usernames:', error));
+        });
+    
+        function fetchUserData() {
+            var username = document.getElementById('username').value;
+            if (username) {
+                fetch('/get_user_data?username=' + username)
+                .then(response => response.json())
+                .then(data => {
+                    document.getElementById('email').value = data.email || '';
+                    document.getElementById('assigned_curriculums').value = data.assigned_curriculums || '';
+                    document.getElementById('completed_curriculums').value = data.completed_curriculums || '';
+                    document.getElementById('content_scores').value = data.content_scores || '';
+                    document.getElementById('correct_answers').value = data.correct_answers || '';
+                    document.getElementById('current_curriculum').value = data.current_curriculum || '';
+                    document.getElementById('current_question').value = data.current_question || '';
+                    document.getElementById('curriculum_scores').value = data.curriculum_scores || '';
+                    document.getElementById('incorrect_answers').value = data.incorrect_answers || '';
+                    document.getElementById('xp').value = data.xp || '';
+                    document.getElementById('assigned_content').value = data.assigned_content || '';
+                })
+                .catch(error => console.error('Error fetching user data:', error));
+            }
+        }
+    </script>
+
+</body>
+</html>
