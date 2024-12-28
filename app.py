@@ -1,7 +1,7 @@
 # Import packages
 from flask import Flask, render_template, request, jsonify, session, redirect, url_for
-from modules import Question, Curriculum, verify, login_required, hashit, fetch_usernames
-from modules import db, initialize_user_session_data, update_user_session_data, create_new_user
+from modules import Question, Curriculum, verify, login_required, hashit, fetch_usernames, fetch_user_data
+from modules import db, initialize_user_session_data, update_user_session_data, create_new_user, update_user_data
 from flask_migrate import Migrate
 import subprocess, logging, secrets, os, json
 
@@ -130,17 +130,62 @@ def user_created(username):
 @app.route('/user_data', methods=['GET'])
 @login_required
 def user_data():
-    return render_template('user_data.html')
+    # Check to make sure user is admin
+    if session.get('is_admin'):
+        return render_template('user_data.html')
 
 @app.route('/get_users', methods=['GET'])
 @login_required
 def get_users():
     try:
         users = fetch_usernames()
-        return jsonify([user.username for user in users])
+        sorted_users = sorted([user.username for user in users])
+        return jsonify(sorted_users)
     except Exception as e:
         app.logger.debug(f"Error fetching usernames: {e}")
         return jsonify({'message': 'Error fetching usernames'}), 500
+
+@app.route('/get_user_data', methods=['GET'])
+@login_required
+def get_user_data():
+    '''Route to fetch user data'''
+    
+    # Check to make sure user is admin
+    if session.get('is_admin'):
+    
+        username = request.args.get('username')
+        try:
+            user_data = fetch_user_data(username)
+            if user_data:
+                return jsonify(user_data)
+            else:
+                return jsonify({'message': 'User not found'}), 404
+        except Exception as e:
+            app.logger.debug(f"Error fetching user data for {username}: {e}")
+            return jsonify({'message': 'Error fetching user data'}), 500
+
+@app.route('/update_user', methods=['POST'])
+@login_required
+def update_user():
+    '''Route to update user data'''
+    
+    # Check to make sure user is admin
+    if session.get('is_admin'):
+        
+        changes = request.json
+        
+        username = changes.pop('username', None)  # Extract username from changes
+        
+        if not username:
+            return jsonify({'message': 'Username is required'}), 400
+    
+        try:
+            update_user_data(username, changes, app.logger)
+            return jsonify({'message': 'User data updated successfully'}), 200
+        except Exception as e:
+            app.logger.debug(f"Error updating user data for {username}: {e}")
+            return jsonify({'message': 'Error updating user data'}), 500
+
 
 @app.route('/testprep')
 @login_required

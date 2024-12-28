@@ -1,8 +1,16 @@
 # Import packages
 import bcrypt
-from modules.models import db, User, XP
+from modules.models import db, User
 from sqlalchemy.exc import SQLAlchemyError
 from datetime import datetime
+
+# Create data defaults
+defaults = {
+                "assigned_curriculums" : ['intro'],
+                "content_scores" : {"tutorial":{"Earned":0, "Possible":0}},
+                "curriculum_scores" : {"intro":{"Earned":0, "Possible":0}},
+                "xp" : {"overallXP": 0.0, "certifications": {"tutorial": {"xp_1": 0}}}
+            }
 
 class CRUDHelper:
     ''' Generalized Class for database operations '''
@@ -145,10 +153,10 @@ def create_new_user(username, password, email):
             username=username,
             password_hash=password,
             email=email,
-            assigned_curriculums=['intro'],
-            content_scores = {"tutorial":{"Earned":0, "Possible":0}},
-            curriculum_scores = {"intro":{"Earned":0, "Possible":0}},
-            xp = {"overallXP": 0.0, "certifications": {"tutorial": {"xp_1": 0}}},
+            assigned_curriculums=defaults["assigned_curriculums"],
+            content_scores = defaults["contet_scores"],
+            curriculum_scores = defaults["curriculum_scores"],
+            xp = defaults["xp"],
             updated_at = now
             )
         
@@ -161,7 +169,57 @@ def fetch_usernames():
     '''Function to fetch all usernames'''
     return User.query.all()
 
+def fetch_user_data(username):
+    '''Function to fetch user data by username'''
+    user = User.query.filter_by(username=username).first()
+    if user:
+        user_data = {
+            'email': user.email,
+            'assigned_curriculums': user.assigned_curriculums,
+            'completed_curriculums': user.completed_curriculums,
+            'content_scores': user.content_scores,
+            'correct_answers': user.correct_answers,
+            'current_curriculum': user.current_curriculum,
+            'current_question': user.current_question,
+            'curriculum_scores': user.curriculum_scores,
+            'incorrect_answers': user.incorrect_answers,
+            'xp': user.xp,
+            'assigned_content': user.assigned_content
+        }
+        return user_data
+    else:
+        return None
 
-        
+def update_user_data(username, changes, logger):
+    '''Function to update user data'''
+    helper = CRUDHelper(User)
+    user = helper.read(username=username)[0]  # Retrieve user by username
+    now = datetime.utcnow()
+
+    if not user:
+        raise Exception("User not found")
+
+    updates = {}
+    for key, value in changes.items():
+        if key == 'password' and value:  # Special handling for password field
+            key = 'password_hash'
+            value = bcrypt.hashpw(value.encode('utf-8'), bcrypt.gensalt())
+            
+        if key in defaults and not value:
+            value = defaults[key]
+
+        if key in user.__dict__ and getattr(user, key) != value:
+            updates[key] = value
+            
+        updates["updated_at"] = now
+
+    if updates:
+        try:
+            helper.update(user.id, **updates)
+        except Exception as e:
+            logger.debug(f"Error updating user {username}: {e}")
+            raise e
+
+
 
 

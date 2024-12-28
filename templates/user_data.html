@@ -43,7 +43,8 @@
 </head>
 <body>
     <h1>User Data</h1>
-    <form id="user-data-form" method="post" action="/update_user">
+    <!--<form id="user-data-form" method="post" action="/update_user">-->
+    <form id="user-data-form" onsubmit="submitForm(); return false;">
         <label for="username">Select User:</label>
         <select id="username" name="username" onchange="fetchUserData()">
             <option value="">Select a user</option>
@@ -51,39 +52,56 @@
                 <option value="{{ user.username }}">{{ user.username }}</option>
             {% endfor %}
         </select>
+        
+        <label for="email">Password:</label>
+        <input type="text" id="password" name="password"><br>
 
         <label for="email">Email:</label>
         <input type="email" id="email" name="email"><br>
+        
+        <label for="assigned_content">Assigned Content:</label>
+        <input type="text" id="assigned_content" name="assigned_content"><br>
 
         <label for="assigned_curriculums">Assigned Curriculums:</label>
         <input type="text" id="assigned_curriculums" name="assigned_curriculums"><br>
 
         <label for="completed_curriculums">Completed Curriculums:</label>
         <input type="text" id="completed_curriculums" name="completed_curriculums"><br>
-
-        <label for="content_scores">Content Scores:</label>
-        <input type="text" id="content_scores" name="content_scores"><br>
-
-        <label for="correct_answers">Correct Answers:</label>
-        <input type="text" id="correct_answers" name="correct_answers"><br>
-
+        
         <label for="current_curriculum">Current Curriculum:</label>
         <input type="text" id="current_curriculum" name="current_curriculum"><br>
 
         <label for="current_question">Current Question:</label>
         <input type="text" id="current_question" name="current_question"><br>
 
+        <label for="content_scores">Content Scores:</label>
+        <input type="text" id="content_scores" name="content_scores"><br>
+        
         <label for="curriculum_scores">Curriculum Scores:</label>
         <input type="text" id="curriculum_scores" name="curriculum_scores"><br>
-
-        <label for="incorrect_answers">Incorrect Answers:</label>
-        <input type="text" id="incorrect_answers" name="incorrect_answers"><br>
-
+        
         <label for="xp">XP:</label>
         <input type="text" id="xp" name="xp"><br>
 
-        <label for="assigned_content">Assigned Content:</label>
-        <input type="text" id="assigned_content" name="assigned_content"><br>
+        <label for="correct_answers">Correct Answers:</label>
+        <input type="text" id="correct_answers" name="correct_answers"><br>
+
+        <label for="incorrect_answers">Incorrect Answers:</label>
+        <input type="text" id="incorrect_answers" name="incorrect_answers"><br>
+        
+        <!-- Hidden fields to capture initial values -->
+        <input type="hidden" id="initial_password" name="initial_password">
+        <input type="hidden" id="initial_email" name="initial_email">
+        <input type="hidden" id="initial_assigned_content" name="initial_assigned_content">
+        <input type="hidden" id="initial_assigned_curriculums" name="initial_assigned_curriculums">
+        <input type="hidden" id="initial_completed_curriculums" name="initial_completed_curriculums">
+        <input type="hidden" id="initial_current_curriculum" name="initial_current_curriculum">
+        <input type="hidden" id="initial_current_question" name="initial_current_question">
+        <input type="hidden" id="initial_content_scores" name="initial_content_scores">
+        <input type="hidden" id="initial_curriculum_scores" name="initial_curriculum_scores">
+        <input type="hidden" id="initial_xp" name="initial_xp">
+        <input type="hidden" id="initial_correct_answers" name="initial_correct_answers">
+        <input type="hidden" id="initial_incorrect_answers" name="initial_incorrect_answers">
 
         <input type="submit" value="Update User">
     </form>
@@ -111,20 +129,83 @@
                 .then(response => response.json())
                 .then(data => {
                     document.getElementById('email').value = data.email || '';
-                    document.getElementById('assigned_curriculums').value = data.assigned_curriculums || '';
-                    document.getElementById('completed_curriculums').value = data.completed_curriculums || '';
-                    document.getElementById('content_scores').value = data.content_scores || '';
+                    document.getElementById('assigned_curriculums').value = data.assigned_curriculums ? data.assigned_curriculums.join(', ') : '';
+                    document.getElementById('completed_curriculums').value = data.completed_curriculums ? data.completed_curriculums.join(', ') : '';
+                    document.getElementById('content_scores').value = data.content_scores ? JSON.stringify(data.content_scores) : '';
                     document.getElementById('correct_answers').value = data.correct_answers || '';
                     document.getElementById('current_curriculum').value = data.current_curriculum || '';
                     document.getElementById('current_question').value = data.current_question || '';
-                    document.getElementById('curriculum_scores').value = data.curriculum_scores || '';
+                    document.getElementById('curriculum_scores').value = data.curriculum_scores ? JSON.stringify(data.curriculum_scores) : '';
                     document.getElementById('incorrect_answers').value = data.incorrect_answers || '';
-                    document.getElementById('xp').value = data.xp || '';
-                    document.getElementById('assigned_content').value = data.assigned_content || '';
+                    document.getElementById('xp').value = data.xp ? JSON.stringify(data.xp) : '';
+                    document.getElementById('assigned_content').value = data.assigned_content ? data.assigned_content.join(', ') : '';
+                    
+                    // Capture initial state in hidden fields
+                    document.getElementById('initial_password').value = '';
+                    document.getElementById('initial_email').value = data.email || '';
+                    document.getElementById('initial_assigned_curriculums').value = data.assigned_curriculums ? data.assigned_curriculums.join(', ') : '';
+                    document.getElementById('initial_completed_curriculums').value = data.completed_curriculums ? data.completed_curriculums.join(', ') : '';
+                    document.getElementById('initial_content_scores').value = data.content_scores ? JSON.stringify(data.content_scores) : '';
+                    document.getElementById('initial_correct_answers').value = data.correct_answers || '';
+                    document.getElementById('initial_current_curriculum').value = data.current_curriculum || '';
+                    document.getElementById('initial_current_question').value = data.current_question || '';
+                    document.getElementById('initial_curriculum_scores').value = data.curriculum_scores ? JSON.stringify(data.curriculum_scores) : '';
+                    document.getElementById('initial_incorrect_answers').value = data.incorrect_answers || '';
+                    document.getElementById('initial_xp').value = data.xp ? JSON.stringify(data.xp) : '';
+                    document.getElementById('initial_assigned_content').value = data.assigned_content ? data.assigned_content.join(', ') : '';
                 })
                 .catch(error => console.error('Error fetching user data:', error));
             }
         }
+        
+        function submitForm() {
+            var username = document.getElementById('username').value;
+            var form = document.getElementById('user-data-form');
+            var formData = new FormData(form);
+            var changes = { username: username };
+            
+            // Assign collections of fields by type
+            var listFields = ['assigned_content', 'assigned_curriculums', 'completed_curriculums', 'correct_answers', 'incorrect_answers'];
+            var dictFields = ['content_scores', 'curriculum_scores', 'xp'];
+        
+            // Fetch only changed fields
+            formData.forEach((value, key) => {
+                var initialKey = 'initial_' + key;
+                // Check if form[initialKey] exists and compare values
+                if (form[initialKey] && form[initialKey].value !== value) {
+                    if (listFields.includes(key)) {
+                        changes[key] = value ? value.split(',').map(item => item.trim()) : [];
+                    } else if (dictFields.includes(key)) {
+                        try {
+                            changes[key] = value ? JSON.parse(value) : {};
+                        } catch (e) {
+                            console.error('Error parsing JSON for key:', key, 'Value:', value, 'Error:', e);
+                        }
+                    } else {
+                        changes[key] = value;
+                    }
+                }
+            });
+        
+            console.log('Changes to be sent:', changes);
+        
+            fetch('/update_user', {
+                method: 'POST',
+                body: JSON.stringify(changes),
+                headers: {
+                    'Content-Type': 'application/json'
+                }
+            })
+            .then(response => response.json())
+            .then(data => {
+                alert(data.message);
+                if (data.message === "User data updated successfully") {
+                    location.reload(); // Refresh the page
+                }
+            })
+            .catch(error => console.error('Error updating user data:', error));
+        }
+
     </script>
 
 </body>

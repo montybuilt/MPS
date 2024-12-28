@@ -5,6 +5,16 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Admin Dashboard</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}">
+    
+    <style>
+        ul {
+            list-style-type: disc;
+            padding: 40px;
+        }
+        ul li {
+            margin-bottom: 10px; /* Add space between list items */
+        }
+    </style>
 </head>
 <body>
     <!-- Banner image at the top -->
@@ -24,6 +34,7 @@
     <nav>
         <ul>
             <li><a href="/new_user">Add New User</a></li>
+            <li><a href="/user_data">View and Edit User Data</a></li>
             <li><a href="/content">Create New Question</a></li>
         </ul>
     </nav>

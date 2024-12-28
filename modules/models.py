@@ -72,5 +72,5 @@ class Questions(db.Model):
         return f'Question: {self.question_key}'
     
 if __name__ == "__main__":
-    print(XP_D)
+    print("models.py")
 
