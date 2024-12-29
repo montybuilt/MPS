@@ -61,7 +61,7 @@ function startTimer() {
 
 // Function to stop the timer
 function stopTimer() {
-    clearInterval(timerInterval);
+    clearInterval(timerInterval);  // Stop the timer when the question is answered
 }
 
 //--------------------------------------------------------------------------------------
@@ -116,11 +116,11 @@ function rickRoll() {
 // Initialize the completed questions storage
 
 (function initializecorrectAnswers() {
-    if (!sessionStorage.getItem('correctAnswers')) {
-        sessionStorage.setItem('correctAnswers', JSON.stringify([]));
+    if (!localStorage.getItem('correctAnswers')) {
+        localStorage.setItem('correctAnswers', JSON.stringify([]));
     };
-    if (!sessionStorage.getItem('incorrectAnswers')) {
-        sessionStorage.setItem('incorrectAnswers', JSON.stringify([]));
+    if (!localStorage.getItem('incorrectAnswers')) {
+        localStorage.setItem('incorrectAnswers', JSON.stringify([]));
     }
 })();
 
@@ -129,7 +129,7 @@ function rickRoll() {
 // Initialize XP structure in local storage if it doesn't already exist
 
 (function initializeXP() {
-    if (!sessionStorage.getItem('xp')) {
+    if (!localStorage.getItem('xp')) {
         const initialXP = {
             overallXP: 0,
             certifications: {
@@ -137,7 +137,7 @@ function rickRoll() {
                 pcep: { xp_1: 0, xp_2: 0, xp_3: 0, xp_4: 0 }
             }
         };
-        sessionStorage.setItem('xp', JSON.stringify(initialXP));
+        localStorage.setItem('xp', JSON.stringify(initialXP));
     }
 })();
 
@@ -145,9 +145,9 @@ function rickRoll() {
 
 // Initialize the curriculumScores structure in local storage if it doesn't already exist
 (function initializeCurriculumScores() {
-    if (!sessionStorage.getItem('curriculumScores')) {
+    if (!localStorage.getItem('curriculumScores')) {
         const initialScores = {};
-        sessionStorage.setItem('curriculumScores', JSON.stringify(initialScores));
+        localStorage.setItem('curriculumScores', JSON.stringify(initialScores));
     }
 })();
 
@@ -155,51 +155,18 @@ function rickRoll() {
 
 // Initialize the contentScores structure in local storage if it doesn't already exist
 (function initializeContentScores() {
-    if (!sessionStorage.getItem('contentScores')) {
+    if (!localStorage.getItem('contentScores')) {
         const initialScores = {};
-        sessionStorage.setItem('contentScores', JSON.stringify(initialScores));
+        localStorage.setItem('contentScores', JSON.stringify(initialScores));
     }
 })();
-
-//--------------------------------------------------------------------------------------
-
-function updateSessionData() {
-    const sessionData = {
-        completedCurriculums: JSON.parse(sessionStorage.getItem('completedCurriculums')),
-        contentScores: JSON.parse(sessionStorage.getItem('contentScores')),
-        correctAnswers: JSON.parse(sessionStorage.getItem('correctAnswers')),
-        currentCurriculum: sessionStorage.getItem('currentCurriculum'),
-        currentQuestionId: sessionStorage.getItem('currentQuestionId'),
-        curriculumScores: JSON.parse(sessionStorage.getItem('curriculumScores')),
-        incorrectAnswers: JSON.parse(sessionStorage.getItem('incorrectAnswers')),
-        xp: JSON.parse(sessionStorage.getItem('xp')),
-        updatedAt: new Date().toISOString()
-    };
-
-    fetch('/update_session', {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json'
-        },
-        body: JSON.stringify(sessionData)
-    })
-    .then(response => response.json())
-    .then(data => {
-        if (data.error) {
-            console.error('Error updating session data:', data.error);
-        } else {
-            console.log('Session data updated successfully:', data);
-        }
-    })
-    .catch(error => console.error('Error:', error));
-}
 
 //--------------------------------------------------------------------------------------
 
 // This function checks to see if the question has been previously answered successfully
 
 function checkQuestionStatus(questionId) {
-    let correctAnswers = JSON.parse(sessionStorage.getItem('correctAnswers')) || [];
+    let correctAnswers = JSON.parse(localStorage.getItem('correctAnswers')) || [];
     return correctAnswers.includes(questionId);
 }
 
@@ -207,8 +174,8 @@ function checkQuestionStatus(questionId) {
 
 // Function to update the curriculumScores collection
 function updateCurriculumScores(curriculumID, XP_earned, XP_possible) {
-    // Get the current curriculumScores from sessionStorage
-    let curriculumScores = JSON.parse(sessionStorage.getItem('curriculumScores')) || {};
+    // Get the current curriculumScores from localStorage
+    let curriculumScores = JSON.parse(localStorage.getItem('curriculumScores')) || {};
 
     // If the curriculum does not exist in curriculumScores, initialize it
     if (!curriculumScores[curriculumID]) {
@@ -219,16 +186,16 @@ function updateCurriculumScores(curriculumID, XP_earned, XP_possible) {
     curriculumScores[curriculumID].Earned = parseFloat((curriculumScores[curriculumID].Earned + XP_earned).toFixed(2));
     curriculumScores[curriculumID].Possible = parseFloat((curriculumScores[curriculumID].Possible + XP_possible).toFixed(2));
 
-    // Save the updated curriculumScores back to sessionStorage
-    sessionStorage.setItem('curriculumScores', JSON.stringify(curriculumScores));
+    // Save the updated curriculumScores back to localStorage
+    localStorage.setItem('curriculumScores', JSON.stringify(curriculumScores));
 }
 
 //--------------------------------------------------------------------------------------
 
-// Function to update the contentScores collection in sessionStorage
+// Function to update the contentScores collection in localStorage
 function updateContentScores(contentId, XP_earned, XP_possible) {
-    // Retrieve the current contentScores from sessionStorage
-    let contentScores = JSON.parse(sessionStorage.getItem('contentScores')) || {};
+    // Retrieve the current contentScores from localStorage
+    let contentScores = JSON.parse(localStorage.getItem('contentScores')) || {};
 
     // If the contentId doesn't exist in the contentScores collection, initialize it
     if (!contentScores[contentId]) {
@@ -242,8 +209,8 @@ function updateContentScores(contentId, XP_earned, XP_possible) {
     contentScores[contentId].Earned = parseFloat((contentScores[contentId].Earned + XP_earned).toFixed(2));
     contentScores[contentId].Possible = parseFloat((contentScores[contentId].Possible + XP_possible).toFixed(2));
 
-    // Save the updated contentScores back to sessionStorage
-    sessionStorage.setItem('contentScores', JSON.stringify(contentScores));
+    // Save the updated contentScores back to localStorage
+    localStorage.setItem('contentScores', JSON.stringify(contentScores));
 }
 
 //------------------------------------------------------------------------------------------
@@ -252,9 +219,9 @@ function updateContentScores(contentId, XP_earned, XP_possible) {
 
 function updateXP(questionId, content, subject, difficulty, status) {
     console.log("Updating XP");
-    // Get the list of correct and incorrect answers from sessionStorage
-    let correctAnswers = JSON.parse(sessionStorage.getItem('correctAnswers')) || [];
-    let incorrectAnswers = JSON.parse(sessionStorage.getItem('incorrectAnswers')) || [];
+    // Get the list of correct and incorrect answers from localStorage
+    let correctAnswers = JSON.parse(localStorage.getItem('correctAnswers')) || [];
+    let incorrectAnswers = JSON.parse(localStorage.getItem('incorrectAnswers')) || [];
 
     // Calculate the multiplier based on the question status
     let multiplier = 1; // Default multiplier
@@ -275,8 +242,8 @@ function updateXP(questionId, content, subject, difficulty, status) {
     let dXP_accrued = Math.max(dXP, 0);
     let dXP_possible = ((Number(difficulty) / 3) * multiplier);
 
-    // Get the current XP data from sessionStorage, or initialize it if it doesn't exist
-    let xpData = JSON.parse(sessionStorage.getItem('xp')) || {
+    // Get the current XP data from localStorage, or initialize it if it doesn't exist
+    let xpData = JSON.parse(localStorage.getItem('xp')) || {
         overallXP: 0,  // Overall XP score
         certifications: {} // Content certifications (e.g., PCAP, PCEP)
     };
@@ -295,14 +262,14 @@ function updateXP(questionId, content, subject, difficulty, status) {
     // Update the overall XP (if applicable)
     xpData.overallXP += dXP;
 
-    // Save the updated XP data back to sessionStorage
-    sessionStorage.setItem('xp', JSON.stringify(xpData));
+    // Save the updated XP data back to localStorage
+    localStorage.setItem('xp', JSON.stringify(xpData));
     
     // Update content score
     updateContentScores(content, dXP_accrued, dXP_possible);
     
     // Update curriculum score
-    let currentCurriculum = sessionStorage.getItem('currentCurriculum');
+    let currentCurriculum = localStorage.getItem('currentCurriculum');
     updateCurriculumScores(currentCurriculum, dXP_accrued, dXP_possible);
     
     // Update the XP data bar
@@ -344,7 +311,7 @@ function updateDescription() {
 // Function to update the XP data bar
 function updateXPDisplay(content) {
     // Retrieve the XP data from local storage
-    const xpData = JSON.parse(sessionStorage.getItem('xp')) || {};
+    const xpData = JSON.parse(localStorage.getItem('xp')) || {};
     
     // Check if the content exists in the XP data
     if (xpData.certifications && xpData.certifications[content]) {
@@ -365,8 +332,8 @@ function updateXPDisplay(content) {
     }
     
     // Retrieve and display the curriculum score
-    const currentCurriculum = sessionStorage.getItem('currentCurriculum');
-    const curriculumScores = JSON.parse(sessionStorage.getItem('curriculumScores')) || {};
+    const currentCurriculum = localStorage.getItem('currentCurriculum');
+    const curriculumScores = JSON.parse(localStorage.getItem('curriculumScores')) || {};
     
     if (currentCurriculum && curriculumScores[currentCurriculum]) {
         const earned = curriculumScores[currentCurriculum].Earned || 0;
@@ -381,12 +348,12 @@ function updateXPDisplay(content) {
 //-------------------------------------------------------------------------------------------------------
 
 function loadProgressBar() {
-    // Retrieve data from sessionStorage
-    const currentCurriculum = sessionStorage.getItem('currentCurriculum');
-    const questionsList = sessionStorage.getItem('questionsList');
-    const correctAnswers = sessionStorage.getItem('correctAnswers');
-    const incorrectAnswers = sessionStorage.getItem('incorrectAnswers');
-    const currentQuestionId = sessionStorage.getItem('currentQuestionId');
+    // Retrieve data from localStorage
+    const currentCurriculum = localStorage.getItem('currentCurriculum');
+    const questionsList = localStorage.getItem('questionsList');
+    const correctAnswers = localStorage.getItem('correctAnswers');
+    const incorrectAnswers = localStorage.getItem('incorrectAnswers');
+    const currentQuestionId = localStorage.getItem('currentQuestionId');
 
     // Parse JSON data safely (use empty arrays as default if parsing fails)
     let parsedQuestionsList = [], parsedCorrectAnswers = [], parsedIncorrectAnswers = [];
@@ -394,19 +361,19 @@ function loadProgressBar() {
     try {
         parsedQuestionsList = JSON.parse(questionsList) || [];
     } catch (e) {
-        console.error("Error parsing 'questionsList' from sessionStorage:", e);
+        console.error("Error parsing 'questionsList' from localStorage:", e);
     }
 
     try {
         parsedCorrectAnswers = JSON.parse(correctAnswers) || [];
     } catch (e) {
-        console.error("Error parsing 'correctAnswers' from sessionStorage:", e);
+        console.error("Error parsing 'correctAnswers' from localStorage:", e);
     }
 
     try {
         parsedIncorrectAnswers = JSON.parse(incorrectAnswers) || [];
     } catch (e) {
-        console.error("Error parsing 'incorrectAnswers' from sessionStorage:", e);
+        console.error("Error parsing 'incorrectAnswers' from localStorage:", e);
     }
 
     // Check if we have a valid current curriculum
@@ -476,7 +443,7 @@ function loadProgressBar() {
             progressBox.classList.add('selected');
         
             // Now load the selected question
-            nextQuestion(nextQuestionId); // Fetch and load the clicked question
+            loadQuestion(nextQuestionId); // Fetch and load the clicked question
         });
 
     
@@ -498,7 +465,7 @@ function loadProgressBar() {
 // Function to update the page with question data
 function updatePage(data) {
     // Access the currentQuestionId
-    const currentQuestionId = sessionStorage.getItem('currentQuestionId');
+    const currentQuestionId = localStorage.getItem('currentQuestionId');
     
     // Clear the console output
     document.getElementById("console").textContent = '';
@@ -558,108 +525,59 @@ function updatePage(data) {
 
 //--------------------------------------------------------------------------------------------
 
-// Function to check curriculum status and update completedCurriculums
-
-function checkCurriculumStatus() {
-
-    // Retrieve data from local storage
-    const curriculumKey = sessionStorage.getItem('currentCurriculum');
-    const questionsList = JSON.parse(sessionStorage.getItem('questionsList')) || [];
-    const correctAnswers = JSON.parse(sessionStorage.getItem('correctAnswers')) || [];
-    const completedCurriculums = JSON.parse(sessionStorage.getItem('completedCurriculums')) || [];
-    const currentQuestionId = sessionStorage.getItem('currentQuestionId');
-    
-    // Check if all questions have been answered
-    const allQuestionsAnswered = questionsList.every(id => correctAnswers.includes(id));
-    
-    if (allQuestionsAnswered && !completedCurriculums.includes(curriculumKey)) {
-        // Mark the curriculum as complete
-        completedCurriculums.push(curriculumKey);
-        sessionStorage.setItem('completedCurriculums', JSON.stringify(completedCurriculums));
-        alert("Congratulations! You've completed the curriculum!");
-    }
-    
-}
-
-
-//--------------------------------------------------------------------------------------------
-
 // Function to advance to the next question in the curriculum
 function loadQuestion(questionId) {
     // Stop the timer
     stopTimer();
 
+    // Retrieve data from local storage
+    const curriculumKey = localStorage.getItem('currentCurriculum');
+    const questionsList = JSON.parse(localStorage.getItem('questionsList')) || [];
+    const correctAnswers = JSON.parse(localStorage.getItem('correctAnswers')) || [];
+    const completedCurriculums = JSON.parse(localStorage.getItem('completedCurriculums')) || [];
+    const currentQuestionId = localStorage.getItem('currentQuestionId');
+
     // Clear notepad
     notepadTextarea.value = '';
-    sessionStorage.removeItem('notepadNotes');
+    localStorage.removeItem('notepadNotes');
 
     // Update the current question ID and fetch the next question
-    sessionStorage.setItem('currentQuestionId', questionId);
+    localStorage.setItem('currentQuestionId', questionId);
     fetchAndUpdateQuestion(questionId);
 
     // Check if all questions have been answered
-    checkCurriculumStatus();
-    
-    // Update the progress bar
+    const allQuestionsAnswered = questionsList.every(id => correctAnswers.includes(id));
+
+    if (allQuestionsAnswered && !completedCurriculums.includes(curriculumKey)) {
+        // Mark the curriculum as complete
+        completedCurriculums.push(curriculumKey);
+        localStorage.setItem('completedCurriculums', JSON.stringify(completedCurriculums));
+        alert("Congratulations! You've completed the curriculum!");
+    }
+
+    // Update the curriculum score display
+    document.getElementById('curriculumScore').textContent = curriculumScore + '%';
+    // update progress bar
     loadProgressBar();
 }
 
 //--------------------------------------------------------------------------------------------
 
-function nextQuestion(questionId = 'next') {
-    // Stop the timer
-    stopTimer();
-
-    // Clear notepad
-    notepadTextarea.value = '';
-    sessionStorage.removeItem('notepadNotes');
-
-    if (questionId === 'next') {
-        // Retrieve the questions list from session storage
-        const questionsList = JSON.parse(sessionStorage.getItem('questionsList')) || [];
-        const currentQuestionId = sessionStorage.getItem('currentQuestionId');
-
-        // Find the index of the current question and determine the next index
-        let currentIndex = questionsList.indexOf(currentQuestionId);
-        let nextIndex = (currentIndex + 1) % questionsList.length;
-
-        // Get the next question ID and update session storage
-        const nextQuestionId = questionsList[nextIndex];
-        sessionStorage.setItem('currentQuestionId', nextQuestionId);
-
-        // Fetch and update the next question
-        fetchAndUpdateQuestion(nextQuestionId);
-    } else {
-        // Set the current question ID to the specified question and update session storage
-        sessionStorage.setItem('currentQuestionId', questionId);
-        
-        // Fetch and update the specified question
-        fetchAndUpdateQuestion(questionId);
-    }
-
-    // Check if all questions have been answered
-    checkCurriculumStatus();
-
-    // Update the progress bar
-    loadProgressBar();
-}
-
-//----------------------------------------------------------------------------------------------------
 // Function to advance to the next question in the curriculum
-function nextQuestion2() {
+function nextQuestion() {
     // Stop the timer
     stopTimer();
 
     // Retrieve data from local storage
-    const curriculumKey = sessionStorage.getItem('currentCurriculum');
-    const questionsList = JSON.parse(sessionStorage.getItem('questionsList')) || [];
-    const correctAnswers = JSON.parse(sessionStorage.getItem('correctAnswers')) || [];
-    const completedCurriculums = JSON.parse(sessionStorage.getItem('completedCurriculums')) || [];
-    const currentQuestionId = sessionStorage.getItem('currentQuestionId');
+    const curriculumKey = localStorage.getItem('currentCurriculum');
+    const questionsList = JSON.parse(localStorage.getItem('questionsList')) || [];
+    const correctAnswers = JSON.parse(localStorage.getItem('correctAnswers')) || [];
+    const completedCurriculums = JSON.parse(localStorage.getItem('completedCurriculums')) || [];
+    const currentQuestionId = localStorage.getItem('currentQuestionId');
 
     // Clear notepad
     notepadTextarea.value = '';
-    sessionStorage.removeItem('notepadNotes');
+    localStorage.removeItem('notepadNotes');
 
     // Determine the index of the current question
     let currentIndex = questionsList.indexOf(currentQuestionId);
@@ -669,46 +587,28 @@ function nextQuestion2() {
     const nextQuestionId = questionsList[nextIndex];
 
     // Update the current question ID and fetch the next question
-    sessionStorage.setItem('currentQuestionId', nextQuestionId);
+    localStorage.setItem('currentQuestionId', nextQuestionId);
     fetchAndUpdateQuestion(nextQuestionId);
 
     // Check if all questions have been answered
-    // checkCurriculumStatus();
-    
-    //Update the progress bar
+    const allQuestionsAnswered = questionsList.every(id => correctAnswers.includes(id));
+
+    if (allQuestionsAnswered && !completedCurriculums.includes(curriculumKey)) {
+        // Mark the curriculum as complete
+        completedCurriculums.push(curriculumKey);
+        localStorage.setItem('completedCurriculums', JSON.stringify(completedCurriculums));
+        alert("Congratulations! You've completed the curriculum!");
+    }
+
+    // Update the curriculum score display
+    document.getElementById('curriculumScore').textContent = curriculumScore + '%';
+    // update progress bar
     loadProgressBar();
 }
 
 //--------------------------------------------------------------------------------------
 
-function findNextQuestion() {
-    // Get the information from sessionStorage and parse them into arrays
-    const questionsList = JSON.parse(sessionStorage.getItem('questionsList') || '[]');
-    const correctAnswers = JSON.parse(sessionStorage.getItem('correctAnswers') || '[]');
-    const incorrectAnswers = JSON.parse(sessionStorage.getItem('incorrectAnswers') || '[]');
-
-    // Find the first question not in either correctAnswers or incorrectAnswers
-    for (let question of questionsList) {
-        if (!correctAnswers.includes(question) && !incorrectAnswers.includes(question)) {
-            return question;
-        }
-    }
-
-    // If all questions are in either correctAnswers or incorrectAnswers,
-    // find the first question in incorrectAnswers but not in correctAnswers
-    for (let question of incorrectAnswers) {
-        if (!correctAnswers.includes(question) && questionsList.includes(question)) {
-            return question;
-        }
-    }
-
-    // If no such question exists, return the first question from questionsList
-    return questionsList.length > 0 ? questionsList[0] : null;
-}
-
-//--------------------------------------------------------------------------------------
-
-async function fetchCurriculum(keyInput, isNew = true) {
+async function fetchCurriculum(keyInput) {
     try {
         console.log("Fetching curriculum for:", keyInput);  // Log to console
 
@@ -726,18 +626,11 @@ async function fetchCurriculum(keyInput, isNew = true) {
         console.log("Received questions list");
 
         // Save the questions list and curriculum name to local storage
-        sessionStorage.setItem("questionsList", JSON.stringify(questionsList));
-        sessionStorage.setItem("currentCurriculum", keyInput);
+        localStorage.setItem("questionsList", JSON.stringify(questionsList));
+        localStorage.setItem("currentCurriculum", keyInput);
 
-        // Now that we have curriculum data, load the question
-        // If the curriculum is changed, find unanswered or incorrect questions
-        if (isNew === false) {
-            const currentQuestionId = sessionStorage.getItem('currentQuestionId');
-            nextQuestion(currentQuestionId);
-        } else {
-            nextQuestion(findNextQuestion());
-        }
-        
+        // Now that we have curriculum data, load the next question
+        nextQuestion();
     } catch (error) {
         console.error("Error fetching curriculum:", error);
         alert("An error occurred while loading the curriculum. Please try again.");
@@ -797,12 +690,12 @@ function updateAnswerStatus(questionId, status) {
     const storageKey = status === "correct" ? 'correctAnswers' : 'incorrectAnswers';
 
     // Get the existing list from local storage or initialize it as an empty array
-    let answerList = JSON.parse(sessionStorage.getItem(storageKey)) || [];
+    let answerList = JSON.parse(localStorage.getItem(storageKey)) || [];
 
     // Add the new question ID if it's not already in the list
     if (!answerList.includes(questionId)) {
         answerList.push(questionId);
-        sessionStorage.setItem(storageKey, JSON.stringify(answerList));
+        localStorage.setItem(storageKey, JSON.stringify(answerList));
     }
 }
 
@@ -824,15 +717,10 @@ function displayOutput(output) {
 //---------------------------------------------------------------------------------------------
 
 document.getElementById("key-input").addEventListener("keypress", function(event) {
-    const currentQuestionID = sessionStorage.getItem('currentQuestionId');
     if (event.key === "Enter") {
         const keyInput = event.target.value.toLowerCase();
-        fetchCurriculum(keyInput, true).then(() => {
-            //stopTimer();
-            //updateSessionData();
-            //checkCurriculumStatus();
-            //loadQuestion(currentQuestionId);
-            //loadProgressBar();
+        fetchCurriculum(keyInput).then(() => {
+            loadProgressBar();
         });
     }
 });
@@ -841,22 +729,13 @@ document.getElementById("key-input").addEventListener("keypress", function(event
 
 // Load the current question on page refresh
 window.onload = function() {
-    const currentQuestionId = sessionStorage.getItem('currentQuestionId');
-    const currentCurriculum = sessionStorage.getItem('currentCurriculum');
-    
-    // If a current curriculum is set, put the text in the lesson code entry
-    if (currentCurriculum && currentQuestionId) {
-        fetchCurriculum(currentCurriculum, false).then(() => {
-            //stopTimer();
-            //updateSessionData();
-            //checkCurriculumStatus();
-            //nextQuestion(currentQuestionId);
-            //loadProgressBar();
-        });
-        
-        document.getElementById("key-input").value = currentCurriculum;
+    const currentQuestionId = localStorage.getItem('currentQuestionId');
+    if (currentQuestionId) {
+        // Fetch and update the question using the stored ID
+        fetchAndUpdateQuestion(currentQuestionId);
     }
-
+    // Initialize the progress bar
+    loadProgressBar();
 };
 
 //---------------------------------------------------------------------------------------------
@@ -971,76 +850,85 @@ const resultImages = [
 
 // Function to show the results bubble dialog --> gets called in
 function showResultDialog(isCorrect, dXP) {
-    return new Promise((resolve) => {
-        const resultDialog = document.getElementById('resultDialog');
-        const resultImage = document.getElementById('resultImage');
-        const dXPValue = document.getElementById('dXPValue');
-
-        const audio = new Audio('/static/sounds/bubble.mp3');
-        audio.play();
-        
-        pause(500).then(() => {
-            console.log('Pausing');
-        });
-
-        const isAnswerCorrect = (isCorrect === 'late' || isCorrect);
-        let imageSrc = '';
-
-        if (isCorrect === 'late') {
-            imageSrc = '/static/images/tooslow.png';
-        } else {
-            imageSrc = isCorrect ? '/static/images/correct.png' : '/static/images/incorrect.png';
-        }
-
-        resultImage.src = '/static/images/reset.png'
-        resultImage.src = imageSrc;
-        dXPValue.textContent = (isAnswerCorrect ? '+' : '') + dXP.toFixed(2); 
-
-        resultDialog.style.display = 'block';
-        resultDialog.style.opacity = 1;
-        resultDialog.style.transform = 'translateX(-50%) translateY(30px)';
-
-        setTimeout(() => {
-            resultDialog.style.transition = 'transform .999s ease, opacity 1.2s ease';
-            resultDialog.style.transform = 'translateX(-50%) translateY(-10px)';
-        }, 0); 
-
-        setTimeout(() => {
-            resultImage.style.transition = 'opacity .999s ease';
-            dXPValue.style.transition = 'opacity .999s ease';
-            resultImage.style.opacity = 0;
-            dXPValue.style.opacity = 0;
-        }, 999); 
-
-        setTimeout(() => {
-            resultDialog.style.transition = 'opacity 1s ease';
-            resultDialog.style.opacity = 0;
-        }, 1000);
-
-        setTimeout(() => {
-            resultDialog.style.display = 'none';
-            resultDialog.style.transition = '';
-            resultImage.style.transition = '';
-            dXPValue.style.transition = '';
-            resultImage.style.opacity = '';
-            dXPValue.style.opacity = '';
-
-            resolve();  // Resolve the promise here
-        }, 1200);
+    const resultDialog = document.getElementById('resultDialog');
+    const resultImage = document.getElementById('resultImage');
+    const dXPValue = document.getElementById('dXPValue');
+    
+    // Play sound effect (you can replace with your actual sound file)
+    const audio = new Audio('/static/sounds/bubble.mp3');
+    audio.play();
+    
+    pause(500).then(() => {
+        console.log('Pausing');
     });
+
+
+    // Adjust isCorrect to treat 'late' as true for display logic
+    const isAnswerCorrect = (isCorrect === 'late' || isCorrect);
+
+    // Determine which image to display
+    let imageSrc = '';
+    if (isCorrect === 'late') {
+        imageSrc = '/static/images/tooslow.png';
+    } else {
+        imageSrc = isCorrect ? '/static/images/correct.png' : '/static/images/incorrect.png';
+    }
+    
+    resultImage.src = '/static/images/reset.png'
+    
+
+    // Set the appropriate image and dXP value
+    resultImage.src = imageSrc;
+    dXPValue.textContent = (isAnswerCorrect ? '+' : '') + dXP.toFixed(2); // Ensure nice number format
+
+    // Show the dialog with animation
+    resultDialog.style.display = 'block';
+    resultDialog.style.opacity = 1;
+    resultDialog.style.transform = 'translateX(-50%) translateY(30px)'; // Start position (slightly below)
+
+    // Apply upward floating effect for 3 seconds
+    setTimeout(() => {
+        resultDialog.style.transition = 'transform 1.5s ease, opacity 1s ease';  // Transition for floating + fade out
+        resultDialog.style.transform = 'translateX(-50%) translateY(-10px)'; // End position (move upwards)
+    }, 0); // Start the transition immediately
+
+    // Fade out the image and dXP value in the last second
+    setTimeout(() => {
+        resultImage.style.transition = 'opacity 1.5s ease'; // Transition for fading out the image
+        dXPValue.style.transition = 'opacity 1.5s ease';    // Transition for fading out the dXP text
+        resultImage.style.opacity = 0;  // Fade out the image
+        dXPValue.style.opacity = 0;    // Fade out the dXP text
+    }, 1499); // Start fading out just before the dialog starts fading
+
+    // Fade out the whole dialog after 3 seconds
+    setTimeout(() => {
+        resultDialog.style.transition = 'opacity 1s ease'; // Transition for fading out the dialog
+        resultDialog.style.opacity = 0; // Fade out the dialog
+    }, 1500); // Start fading out the dialog after 1.5 seconds
+
+    // Hide the dialog completely after 4 seconds (after the fade-out)
+    setTimeout(() => {
+        resultDialog.style.display = 'none';
+        resultDialog.style.transition = ''; // Reset transition properties
+        resultImage.style.transition = ''; // Reset transition for the image
+        dXPValue.style.transition = ''; // Reset transition for the dXP text
+        resultImage.style.opacity = ''; // Reset opacity
+        dXPValue.style.opacity = ''; // Reset opacity
+    }, 2500); // Dialog disappears after 3 seconds
+    
 }
 
 //------------------------------------------------------------------------------------------------------------------
 
 // Handling the Submit Answer button click
-document.getElementById("submit-answer").onclick = async function() {
+document.getElementById("submit-answer").onclick = function() {
+    stopTimer();  // Stop the question timer
     var selectedAnswer = document.querySelector('input[name="answer"]:checked');
-    const currentQuestionId = sessionStorage.getItem('currentQuestionId');
+    const currentQuestionId = localStorage.getItem('currentQuestionId');
     const timeLimit = content === 'pcap' ? 90 : 80; // Set time limit based on content type
     const answeredOnTime = checkTime(timeLimit); // Check if answered on time
     
     if (selectedAnswer) {
-        stopTimer();
         // Check against the stored correct answer
         if (selectedAnswer.value === correctAnswer) {
             document.getElementById("run").disabled = false; // Enable the Run Code button
@@ -1048,16 +936,12 @@ document.getElementById("submit-answer").onclick = async function() {
             if (answeredOnTime) {
                 // Update XP and show alert for correct answer within time limit
                 dXP = updateXP(currentQuestionId, content, subject, difficulty, 'correct');
-                // Display the description and the video button
-                updateDescription();
+                showResultDialog(true, dXP);
                 updateAnswerStatus(currentQuestionId, "correct");
-                await showResultDialog(true, dXP);               
             } else {
                 // Handle case where correct answer is given but not within time limit
                 dXP = updateXP(currentQuestionId, content, subject, 0, 'correct');
-                // Display the description and the video button
-                updateDescription();
-                await showResultDialog("late", dXP);
+                showResultDialog("late", dXP);
             }
             
             updateNavbarData(currentQuestionId);
@@ -1065,19 +949,18 @@ document.getElementById("submit-answer").onclick = async function() {
         } else {
             // Incorrect answer handling (timing doesn't matter)
             dXP = updateXP(currentQuestionId, content, subject, difficulty, 'incorrect');
-            // Display the description and the video button
-            updateDescription();
+            showResultDialog(false, dXP);
+            
             updateAnswerStatus(currentQuestionId, "incorrect");
-            await showResultDialog(false, dXP);
             document.getElementById("submit-answer").disabled = true;
             document.getElementById("run").disabled = false; // Enable the Run Code button
         }
         
-        // Call this function to load the progress bar when the question is answered
-        loadProgressBar();  //here last
+        // Display the description and the video button
+        updateDescription();
         
-        // Check if all questions have been answered
-        checkCurriculumStatus();
+        // Call this function to load the progress bar when the question is answered
+        loadProgressBar();
         
     } else {
         alert("Please select an answer.");
@@ -1086,33 +969,16 @@ document.getElementById("submit-answer").onclick = async function() {
 
 //--------------------------------------------------------------------------------------
 
-function nextQuestionButton() {
-    nextQuestion();
-}
-
-//--------------------------------------------------------------------------------------
-
 // Listener for the Next Question button
 document.addEventListener("DOMContentLoaded", function() {
     // Add event listener to Next Question button
     const nextButton = document.getElementById("next-question-btn");
     
-    // Initialize the session data and progress bar
-    //updateSessionData();  // Recent add here (all 3)
-    //checkCurriculumStatus;
-    //loadProgressBar();
-    
     if (nextButton) {
-        nextButton.addEventListener("click", nextQuestionButton);
+        nextButton.addEventListener("click", nextQuestion);
     }
 });
 
-//---------------------------------------------------------------------------------------
-
-// Add the beforeunload event listener to call updateSessionData()
-
-window.addEventListener('beforeunload', function(event) { 
-    updateSessionData(); });
 
 //---------------------------------------------------------------------------------------
 
@@ -1178,7 +1044,7 @@ const notepadTextarea = document.getElementById('notepad');
 notepadBtn.onclick = function() {
     notepadModal.style.display = 'block'; // Show modal
     // Load saved notes if any
-    const savedNotes = sessionStorage.getItem('notepadNotes');
+    const savedNotes = localStorage.getItem('notepadNotes');
     if (savedNotes) {
         notepadTextarea.value = savedNotes; // Set the textarea value to saved notes
     }
@@ -1189,7 +1055,7 @@ closeNotepad.onclick = function() {
     notepadModal.style.display = 'none'; // Hide modal
     // Save notes when closing
     const notesContent = notepadTextarea.value;
-    sessionStorage.setItem('notepadNotes', notesContent); // Save notes
+    localStorage.setItem('notepadNotes', notesContent); // Save notes
 };
 
 // Draggable functionality

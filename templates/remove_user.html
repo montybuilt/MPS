@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>User Data</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+        }
+        h1 {
+            color: #333;
+        }
+        form {
+            max-width: 500px;
+            margin: auto;
+        }
+        label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+        }
+        input[type="text"],
+        input[type="password"],
+        input[type="email"],
+        input[type="submit"],
+        select {
+            width: 100%;
+            padding: 10px;
+            margin-bottom: 10px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+        }
+        input[type="submit"] {
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            cursor: pointer;
+        }
+        input[type="submit"]:hover {
+            background-color: #45a049;
+        }
+    </style>
+</head>
+<body>
+    <h1>Remove a User</h1>
+    <!--<form id="user-data-form" method="post" action="/update_user">-->
+    <form id="remove-user-form" onsubmit="submitForm(); return false;">
+        <label for="username">Select User:</label>
+        <select id="username" name="username">
+            <option value="">Select a user</option>
+            {% for user in users %}
+                <option value="{{ user.username }}">{{ user.username }}</option>
+            {% endfor %}
+        </select>
+        
+        <label for="adminUsername">Admin Username:</label>
+        <input type="text" id="adminUsername" name="adminUsername"><br>
+
+        <label for="adminPassword">Admin Password:</label>
+        <input type="text" id="adminPassword" name="adminPassword"><br>
+        
+        <input type="submit" value="Remove User">
+    </form>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            fetch('/get_users')
+                .then(response => response.json())
+                .then(users => {
+                    var dropdown = document.getElementById('username');
+                    users.forEach(username => {
+                        var option = document.createElement('option');
+                        option.value = username;
+                        option.text = username;
+                        dropdown.appendChild(option);
+                    });
+                })
+                .catch(error => console.error('Error fetching usernames:', error));
+        });
+        
+        function submitForm() {
+            var username = document.getElementById('username').value;
+            var adminUsername = document.getElementById('adminUsername').value;
+            var adminPassword = document.getElementById('adminPassword').value
+            data = {"username": username, "adminUsername": adminUsername, "adminPassword": adminPassword}
+                    
+            fetch('/remove_user_data', {
+                method: 'POST',
+                body: JSON.stringify(data),
+                headers: {
+                    'Content-Type': 'application/json'
+                }
+            })
+            .then(response => response.json())
+            .then(data => {
+                alert(data.message);
+                if (data.message === "User removed successfully") {
+                    location.reload(); // Refresh the page
+                }
+            })
+            .catch(error => console.error('Error removing user:', error));
+        }
+
+    </script>
+
+</body>
+</html>

@@ -410,6 +410,7 @@ function loadProgressBar() {
     }
 
     // Check if we have a valid current curriculum
+    console.log("currentCurriculum", currentCurriculum, "questionsList", questionsList)
     if (!currentCurriculum || !parsedQuestionsList || parsedQuestionsList.length === 0) {
         console.error("No valid curriculum or question data available");
         return; // If no valid data, don't proceed
@@ -476,7 +477,7 @@ function loadProgressBar() {
             progressBox.classList.add('selected');
         
             // Now load the selected question
-            nextQuestion(nextQuestionId); // Fetch and load the clicked question
+            loadQuestion(nextQuestionId); // Fetch and load the clicked question
         });
 
     
@@ -606,47 +607,8 @@ function loadQuestion(questionId) {
 
 //--------------------------------------------------------------------------------------------
 
-function nextQuestion(questionId = 'next') {
-    // Stop the timer
-    stopTimer();
-
-    // Clear notepad
-    notepadTextarea.value = '';
-    sessionStorage.removeItem('notepadNotes');
-
-    if (questionId === 'next') {
-        // Retrieve the questions list from session storage
-        const questionsList = JSON.parse(sessionStorage.getItem('questionsList')) || [];
-        const currentQuestionId = sessionStorage.getItem('currentQuestionId');
-
-        // Find the index of the current question and determine the next index
-        let currentIndex = questionsList.indexOf(currentQuestionId);
-        let nextIndex = (currentIndex + 1) % questionsList.length;
-
-        // Get the next question ID and update session storage
-        const nextQuestionId = questionsList[nextIndex];
-        sessionStorage.setItem('currentQuestionId', nextQuestionId);
-
-        // Fetch and update the next question
-        fetchAndUpdateQuestion(nextQuestionId);
-    } else {
-        // Set the current question ID to the specified question and update session storage
-        sessionStorage.setItem('currentQuestionId', questionId);
-        
-        // Fetch and update the specified question
-        fetchAndUpdateQuestion(questionId);
-    }
-
-    // Check if all questions have been answered
-    checkCurriculumStatus();
-
-    // Update the progress bar
-    loadProgressBar();
-}
-
-//----------------------------------------------------------------------------------------------------
 // Function to advance to the next question in the curriculum
-function nextQuestion2() {
+function nextQuestion() {
     // Stop the timer
     stopTimer();
 
@@ -681,34 +643,7 @@ function nextQuestion2() {
 
 //--------------------------------------------------------------------------------------
 
-function findNextQuestion() {
-    // Get the information from sessionStorage and parse them into arrays
-    const questionsList = JSON.parse(sessionStorage.getItem('questionsList') || '[]');
-    const correctAnswers = JSON.parse(sessionStorage.getItem('correctAnswers') || '[]');
-    const incorrectAnswers = JSON.parse(sessionStorage.getItem('incorrectAnswers') || '[]');
-
-    // Find the first question not in either correctAnswers or incorrectAnswers
-    for (let question of questionsList) {
-        if (!correctAnswers.includes(question) && !incorrectAnswers.includes(question)) {
-            return question;
-        }
-    }
-
-    // If all questions are in either correctAnswers or incorrectAnswers,
-    // find the first question in incorrectAnswers but not in correctAnswers
-    for (let question of incorrectAnswers) {
-        if (!correctAnswers.includes(question) && questionsList.includes(question)) {
-            return question;
-        }
-    }
-
-    // If no such question exists, return the first question from questionsList
-    return questionsList.length > 0 ? questionsList[0] : null;
-}
-
-//--------------------------------------------------------------------------------------
-
-async function fetchCurriculum(keyInput, isNew = true) {
+async function fetchCurriculum(keyInput) {
     try {
         console.log("Fetching curriculum for:", keyInput);  // Log to console
 
@@ -729,15 +664,8 @@ async function fetchCurriculum(keyInput, isNew = true) {
         sessionStorage.setItem("questionsList", JSON.stringify(questionsList));
         sessionStorage.setItem("currentCurriculum", keyInput);
 
-        // Now that we have curriculum data, load the question
-        // If the curriculum is changed, find unanswered or incorrect questions
-        if (isNew === false) {
-            const currentQuestionId = sessionStorage.getItem('currentQuestionId');
-            nextQuestion(currentQuestionId);
-        } else {
-            nextQuestion(findNextQuestion());
-        }
-        
+        // Now that we have curriculum data, load the next question
+        nextQuestion();
     } catch (error) {
         console.error("Error fetching curriculum:", error);
         alert("An error occurred while loading the curriculum. Please try again.");
@@ -827,7 +755,7 @@ document.getElementById("key-input").addEventListener("keypress", function(event
     const currentQuestionID = sessionStorage.getItem('currentQuestionId');
     if (event.key === "Enter") {
         const keyInput = event.target.value.toLowerCase();
-        fetchCurriculum(keyInput, true).then(() => {
+        fetchCurriculum(keyInput).then(() => {
             //stopTimer();
             //updateSessionData();
             //checkCurriculumStatus();
@@ -846,12 +774,12 @@ window.onload = function() {
     
     // If a current curriculum is set, put the text in the lesson code entry
     if (currentCurriculum && currentQuestionId) {
-        fetchCurriculum(currentCurriculum, false).then(() => {
+        fetchCurriculum(currentCurriculum).then(() => {
             //stopTimer();
             //updateSessionData();
             //checkCurriculumStatus();
-            //nextQuestion(currentQuestionId);
-            //loadProgressBar();
+            //loadQuestion(currentQuestionId);
+            loadProgressBar();
         });
         
         document.getElementById("key-input").value = currentCurriculum;
@@ -1074,7 +1002,7 @@ document.getElementById("submit-answer").onclick = async function() {
         }
         
         // Call this function to load the progress bar when the question is answered
-        loadProgressBar();  //here last
+        //loadProgressBar();  //here last
         
         // Check if all questions have been answered
         checkCurriculumStatus();
@@ -1083,12 +1011,6 @@ document.getElementById("submit-answer").onclick = async function() {
         alert("Please select an answer.");
     }
 };
-
-//--------------------------------------------------------------------------------------
-
-function nextQuestionButton() {
-    nextQuestion();
-}
 
 //--------------------------------------------------------------------------------------
 
@@ -1103,7 +1025,7 @@ document.addEventListener("DOMContentLoaded", function() {
     //loadProgressBar();
     
     if (nextButton) {
-        nextButton.addEventListener("click", nextQuestionButton);
+        nextButton.addEventListener("click", nextQuestion);
     }
 });
 

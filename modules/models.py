@@ -10,8 +10,10 @@ class User(db.Model):
     username = db.Column(db.String(120), unique=True, nullable=False, index=True)
     password_hash = db.Column(db.LargeBinary, nullable=False)
     email = db.Column(db.String(254), unique=True, nullable=True, index=True)
+    classroom_code = db.Column(db.String(120), index=True)
     assigned_curriculums = db.Column(db.JSON, default=[], index=True)
     assigned_content = db.Column(db.JSON, default=[], index=True)
+    special_curriculums = db.Column(db.JSON, default=[], index=True)
     completed_curriculums = db.Column(db.JSON, default=[])
     content_scores = db.Column(db.JSON, default=[])
     correct_answers = db.Column(db.JSON, default=[])
@@ -42,21 +44,21 @@ class Content(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     content_id = db.Column(db.String(120), unique=True, index=True, nullable=False)
     base_curriculums = db.Column(db.JSON, default=[])
-    
+        
     def __repr__(self):
         return f'<Content: {self.content_id}>'
     
 class Curriculum(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     curriculum_id = db.Column(db.String(120), unique=True, index=True, nullable=False)
-    questions_list = db.Column(db.JSON, default=[])
+    task_list = db.Column(db.JSON, default=[])
     
     def __repr__(self):
         return f'Curriculum ID: {self.curriculum_id};'
     
 class Questions(db.Model):
     id = db.Column(db.Integer, primary_key=True)
-    question_key = db.Column(db.String(120), unique=True, nullable=False, index=True)
+    task_key = db.Column(db.String(120), unique=True, nullable=False, index=True)
     code = db.Column(db.Text())
     question = db.Column(db.String(200))
     answer = db.Column(db.String(120))
@@ -69,8 +71,24 @@ class Questions(db.Model):
     tags = db.Column(db.JSON, default=[])
     
     def __repr__(self):
-        return f'Question: {self.question_key}'
+        return f'Question: {self.task_key}'
     
+class Projects(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    task_key = db.Column(db.String(120), unique=True, nullable=False, index=True)
+    code = db.Column(db.Text())
+    hint_1 = db.Column(db.Text())
+    hint_2 = db.Column(db.Text())
+    spec = db.Column(db.Text())
+    test = db.Column(db.Text())
+    description = db.Column(db.Text())
+    video = db.Column(db.String(500))
+    difficulty = db.Column(db.Float)
+    tags = db.Column(db.JSON, default=[])
+    
+    def __repr__(self):
+        return f'Question: {self.task_key}'
+
 if __name__ == "__main__":
     print("models.py")
 
