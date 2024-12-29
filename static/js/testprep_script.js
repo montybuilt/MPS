@@ -412,6 +412,7 @@ function loadProgressBar() {
     }
 
     // Check if we have a valid current curriculum
+    console.log("currentCurriculum", currentCurriculum, "questionsList", questionsList)
     if (!currentCurriculum || !parsedQuestionsList || parsedQuestionsList.length === 0) {
         console.error("No valid curriculum or question data available");
         return; // If no valid data, don't proceed
@@ -581,10 +582,6 @@ function checkCurriculumStatus() {
         alert("Congratulations! You've completed the curriculum!");
     }
     
-    // Update the curriculum score display
-    //document.getElementById('curriculumScore').textContent = curriculumScore + '%';
-    // update progress bar
-    //loadProgressBar();
 }
 
 
@@ -757,11 +754,14 @@ function displayOutput(output) {
 //---------------------------------------------------------------------------------------------
 
 document.getElementById("key-input").addEventListener("keypress", function(event) {
+    const currentQuestionID = sessionStorage.getItem('currentQuestionId');
     if (event.key === "Enter") {
         const keyInput = event.target.value.toLowerCase();
         fetchCurriculum(keyInput).then(() => {
             updateSessionData();
-            loadProgressBar();
+            checkCurriculumStatus();
+            loadQuestion(currentQuestionId);
+            //loadProgressBar();
         });
     }
 });
@@ -771,12 +771,25 @@ document.getElementById("key-input").addEventListener("keypress", function(event
 // Load the current question on page refresh
 window.onload = function() {
     const currentQuestionId = sessionStorage.getItem('currentQuestionId');
-    if (currentQuestionId) {
-        // Fetch and update the question using the stored ID
-        fetchAndUpdateQuestion(currentQuestionId);
+    const currentCurriculum = sessionStorage.getItem('currentCurriculum');
+    
+    // If a current curriculum is set, put the text in the lesson code entry
+    if (currentCurriculum && currentQuestionId) {
+        fetchCurriculum(currentCurriculum).then(() => {
+            updateSessionData();
+            checkCurriculumStatus();
+            loadQuestion(currentQuestionId);
+            //loadProgressBar();
+        });
+        
+        document.getElementById("key-input").value = currentCurriculum;
     }
-    // Initialize the progress bar
-    loadProgressBar();
+    
+    // If a current question is set, fetch and load it up
+    //if (currentQuestionId) {
+    //    loadQuestion(currentQuestionId);
+    //}
+
 };
 
 //---------------------------------------------------------------------------------------------
@@ -1010,6 +1023,11 @@ document.getElementById("submit-answer").onclick = async function() {
 document.addEventListener("DOMContentLoaded", function() {
     // Add event listener to Next Question button
     const nextButton = document.getElementById("next-question-btn");
+    
+    // Initialize the session data and progress bar
+    //updateSessionData();  // Recent add here (all 3)
+    //checkCurriculumStatus;
+    //loadProgressBar();
     
     if (nextButton) {
         nextButton.addEventListener("click", nextQuestion);

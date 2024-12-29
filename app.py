@@ -2,6 +2,7 @@
 from flask import Flask, render_template, request, jsonify, session, redirect, url_for
 from modules import Question, Curriculum, verify, login_required, hashit, fetch_usernames, fetch_user_data
 from modules import db, initialize_user_session_data, update_user_session_data, create_new_user, update_user_data
+from modules import delete_user
 from flask_migrate import Migrate
 import subprocess, logging, secrets, os, json
 
@@ -116,7 +117,10 @@ def new_user():
         # Invoke the create_new_user function from data_helpers
         try:
             new_user = create_new_user(username, password, email)
-            return redirect(url_for('index'))
+            if session.get('is_admin'):
+                return redirect(url_for('admin'))
+            else:
+                return redirect(url_for('index'))
         except Exception as e:
             app.logger.debug(f"Error creating user {username}: {e}")
             return redirect(url_for('new_user_error', username=new_user))
@@ -126,6 +130,37 @@ def new_user():
 @app.route('/new_user_error/<username>')
 def user_created(username):
     return f"Something went wrong ... User {username} not created successfully"
+
+@app.route('/remove_user', methods=['GET'])
+@login_required
+def remove_user():
+    # Check to make sure user is admin
+    if session.get('is_admin'):
+        return render_template('remove_user.html')
+
+@app.route('/remove_user_data', methods=['GET', 'POST'])
+@login_required
+def remove_user_data():
+    '''This route handles deletion of an existing user'''
+    
+    if session.get('is_admin'):
+    
+        info = request.json
+        username = info['username']
+        admin_username = info['adminUsername']
+        admin_password = info['adminPassword']
+    
+        try:
+            assert verify(admin_username, admin_password) == True
+            delete_user(username, app.logger)
+            return jsonify({"message": f"User {username} was deleted."}), 200
+        
+        except AssertionError:
+            return jsonify({"message": "Incorrect Admin Credientials."})
+        
+        except Exception as e:
+            return jsonify({"message": f"Unexpected Error: {e}"})
+
 
 @app.route('/user_data', methods=['GET'])
 @login_required

@@ -5,8 +5,11 @@ from sqlalchemy.exc import SQLAlchemyError
 from datetime import datetime
 
 # Create data defaults
-defaults = {
-                "assigned_curriculums" : ['intro'],
+defaults = {    
+                "assigned_content" : ["intro"],
+                "assigned_curriculums" : ["intro"],
+                "current_curriculum" : "intro",
+                "current_question" : "tutorial.1.1",
                 "content_scores" : {"tutorial":{"Earned":0, "Possible":0}},
                 "curriculum_scores" : {"intro":{"Earned":0, "Possible":0}},
                 "xp" : {"overallXP": 0.0, "certifications": {"tutorial": {"xp_1": 0}}}
@@ -153,8 +156,11 @@ def create_new_user(username, password, email):
             username=username,
             password_hash=password,
             email=email,
-            assigned_curriculums=defaults["assigned_curriculums"],
-            content_scores = defaults["contet_scores"],
+            assigned_content = defaults["assigned_content"],
+            assigned_curriculums = defaults["assigned_curriculums"],
+            current_curriculum = defaults["current_curriculum"],
+            current_question = defaults["current_question"],
+            content_scores = defaults["content_scores"],
             curriculum_scores = defaults["curriculum_scores"],
             xp = defaults["xp"],
             updated_at = now
@@ -192,8 +198,8 @@ def fetch_user_data(username):
 
 def update_user_data(username, changes, logger):
     '''Function to update user data'''
-    helper = CRUDHelper(User)
-    user = helper.read(username=username)[0]  # Retrieve user by username
+    user_crud = CRUDHelper(User)
+    user = user_crud.read(username=username)[0]  # Retrieve user by username
     now = datetime.utcnow()
 
     if not user:
@@ -215,11 +221,20 @@ def update_user_data(username, changes, logger):
 
     if updates:
         try:
-            helper.update(user.id, **updates)
+            user_crud.update(user.id, **updates)
         except Exception as e:
             logger.debug(f"Error updating user {username}: {e}")
             raise e
 
-
+def delete_user(username, logger):
+    '''Function to delete a user based on username'''
+    user_crud = CRUDHelper(User)
+    user = user_crud.read(username=username)[0]
+    
+    try:
+        id = user.id
+        user_crud.delete(id)
+    except Exception as e:
+        logger.debug(f"Error deleting user {username}: {e}")
 
 
