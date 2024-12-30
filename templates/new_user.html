@@ -1,24 +1,11 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>Create New User</title>
+    <link rel="stylesheet" href="../static/css/styles.css">
+    <link rel="icon" type="image/png" sizes="32x32" href="../static/images/watermark.png">
+    
     <style>
-        body {
-            font-family: Arial, sans-serif;
-            margin: 20px;
-        }
-        h1 {
-            color: #333;
-        }
-        form {
-            max-width: 500px;
-            margin: auto;
-        }
-        label {
-            display: block;
-            margin-bottom: 5px;
-            font-weight: bold;
-        }
+        
         input[type="text"],
         input[type="password"],
         input[type="email"],
@@ -41,7 +28,20 @@
     </style>
 </head>
 <body>
-    <h1>Create New User</h1>
+    <!-- Banner image at the top -->
+    <div id="banner-container">
+        <a href="../">
+            <img src="{{ url_for('static', filename='images/Web Banner.png') }}" alt="Web Banner" class="banner">
+        </a>
+    </div>
+    <!-- Navbar with admin buttons -->
+    <div id="navbar">
+        <p>Logged in as: <strong>{{ username }}</strong></p>
+        <form action="/logout" method="POST" id="logout-form">
+            <button type="submit">Logout</button> <!-- Logout button -->
+        </form>
+    </div>
+    <h2>Create New User</h2>
     <form id="new-user-form" method="post" action="/new_user">
         <label for="username">Username:</label>
         <input type="text" id="username" name="username" required><br>

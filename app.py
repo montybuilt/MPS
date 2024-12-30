@@ -2,7 +2,7 @@
 from flask import Flask, render_template, request, jsonify, session, redirect, url_for
 from modules import Question, Curriculum, verify, login_required, hashit, fetch_usernames, fetch_user_data
 from modules import db, initialize_user_session_data, update_user_session_data, create_new_user, update_user_data
-from modules import delete_user
+from modules import delete_user, fetch_question, fetch_task_keys
 from flask_migrate import Migrate
 import subprocess, logging, secrets, os, json
 
@@ -108,9 +108,11 @@ def update_session():
 def new_user():
     '''This route handles creation of new users'''
     
+    username = request.form['username']
+    
     if request.method == 'POST':
         # Extract request data
-        username = request.form['username']
+        
         password = hashit(request.form['password'])
         email = request.form['email']
         
@@ -125,7 +127,7 @@ def new_user():
             app.logger.debug(f"Error creating user {username}: {e}")
             return redirect(url_for('new_user_error', username=new_user))
             
-    return render_template('new_user.html')
+    return render_template('new_user.html', username=username)
 
 @app.route('/new_user_error/<username>')
 def user_created(username):
@@ -229,17 +231,18 @@ def testprep():
     username = session.get('username')
     return render_template("testprep.html", username=username)
     
-@app.route('/test_request', methods=['POST'])
-def test_request():
+@app.route('/task_request', methods=['POST'])
+def task_request():
     '''This function gets the question content being requested by the client'''
     
     #Extract the key input from the request
     data = request.get_json()
     question_id = data.get('key-input').lower()
     
-    # create a question object that retrieves the question data as an attribute
-    question_data = Question(question_id)
-    question_data = question_data.data
+    # Determine if the task is a Question or a Project
+    
+    # Use the fetch_question function to retrieve the question data
+    question_data = fetch_question(question_id, app.logger)
     
     # Respond to the request by returning the data as a json
     response = jsonify(question_data)
@@ -290,11 +293,10 @@ def content_page():
 @app.route('/content_keys', methods=['GET'])
 def content_keys():
     try:
-        with open(content_file_path, 'r') as file:
-            content = json.load(file)
-        return jsonify({"keys": list(content.get('questions', {}).keys())})
+        task_keys = fetch_task_keys()
+        return jsonify({"keys": task_keys}), 200
     except Exception as e:
-        return jsonify({"error": "Failed to load keys"}), 500
+        return jsonify({"error": f"Failed to load keys: {e}"}), 500
 
 # Content creation route (only for admins)
 @app.route('/submit_question', methods=['POST'])

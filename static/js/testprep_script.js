@@ -755,7 +755,7 @@ function fetchAndUpdateQuestion(keyInput) {
     // Disable the run code button
     document.getElementById("run").disabled = true;
 
-    fetch('/test_request', {
+    fetch('/task_request', {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json'

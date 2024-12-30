@@ -52,7 +52,6 @@ class Question:
             raise FileNotFoundError("The content.json file could not be found locally.")        
 
 class Curriculum:
-    """A question object contains all the data to render a question page in test prep."""
 
     def __init__(self, curriculum_id):
         self.curriculum_id = curriculum_id

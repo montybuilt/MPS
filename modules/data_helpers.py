@@ -1,6 +1,6 @@
 # Import packages
 import bcrypt
-from modules.models import db, User
+from modules.models import db, User, Questions
 from sqlalchemy.exc import SQLAlchemyError
 from datetime import datetime
 
@@ -237,4 +237,31 @@ def delete_user(username, logger):
     except Exception as e:
         logger.debug(f"Error deleting user {username}: {e}")
 
-
+def fetch_question(question_id, logger):
+    '''Function to fetch question data from the database'''
+    
+    q_crud = CRUDHelper(Questions)
+    q_content = {}
+    
+    try:
+        record = q_crud.read(task_key = question_id)[0]
+        q_content['Code'] = record.code
+        q_content['Question'] = record.question
+        q_content['Answer'] = record.answer
+        q_content['Distractor1'] = record.distractor_1
+        q_content['Distractor2'] = record.distractor_2
+        q_content['Distractor3'] = record.distractor_3
+        q_content['Description'] = record.description
+        q_content['Video'] = record.video
+        q_content['Difficulty'] = record.difficulty
+        q_content['Tags'] = record.tags
+    except IndexError as ie:
+        return f"Question ID not in database: {ie}"
+    except Exception as e:
+        return f"Unexpected error: {e}"
+    else:
+        return q_content
+        
+def fetch_task_keys():
+    task_keys = Questions.query.with_entities(Questions.task_key).all()
+    return [key[0] for key in task_keys]
