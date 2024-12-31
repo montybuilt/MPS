@@ -67,6 +67,8 @@ class Questions(db.Model):
     distractor_3 = db.Column(db.String(120))
     description = db.Column(db.Text())
     video = db.Column(db.String(500))
+    video_start = db.Column(db.Integer)
+    video_end = db.Column(db.Integer)
     difficulty = db.Column(db.Float)
     tags = db.Column(db.JSON, default=[])
     

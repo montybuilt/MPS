@@ -1,48 +1,28 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>User Data</title>
+    <title>Remove User</title>
+    <link rel="stylesheet" href="../static/css/styles.css">
+    <link rel="stylesheet" href="../static/css/form_styles.css">
+    <link rel="icon" type="image/png" sizes="32x32" href="../static/images/watermark.png">
     <style>
-        body {
-            font-family: Arial, sans-serif;
-            margin: 20px;
-        }
-        h1 {
-            color: #333;
-        }
-        form {
-            max-width: 500px;
-            margin: auto;
-        }
-        label {
-            display: block;
-            margin-bottom: 5px;
-            font-weight: bold;
-        }
-        input[type="text"],
-        input[type="password"],
-        input[type="email"],
-        input[type="submit"],
-        select {
-            width: 100%;
-            padding: 10px;
-            margin-bottom: 10px;
-            border: 1px solid #ccc;
-            border-radius: 5px;
-        }
-        input[type="submit"] {
-            background-color: #4CAF50;
-            color: white;
-            border: none;
-            cursor: pointer;
-        }
-        input[type="submit"]:hover {
-            background-color: #45a049;
-        }
+        
     </style>
 </head>
 <body>
-    <h1>Remove a User</h1>
+    <!-- Banner image at the top -->
+    <div id="banner-container">
+        <a href="../admin">
+            <img src="{{ url_for('static', filename='images/Web Banner.png') }}" alt="Web Banner" class="banner">
+        </a>
+    <!-- Navbar with admin buttons -->
+    <div id="navbar">
+        <p>Logged in as: <strong>{{ username }}</strong></p>
+        <form action="/logout" method="POST" id="logout-form">
+            <button type="submit">Logout</button> <!-- Logout button -->
+        </form>
+    </div>
+    <h2>Remove a User</h2>
     <!--<form id="user-data-form" method="post" action="/update_user">-->
     <form id="remove-user-form" onsubmit="submitForm(); return false;">
         <label for="username">Select User:</label>

@@ -2,35 +2,13 @@
 <html>
 <head>
     <link rel="stylesheet" href="../static/css/styles.css">
+    <link rel="stylesheet" href="../static/css/form_styles.css">
     <link rel="icon" type="image/png" sizes="32x32" href="../static/images/watermark.png">
-    
-    <style>
-        
-        input[type="text"],
-        input[type="password"],
-        input[type="email"],
-        input[type="submit"] {
-            width: 100%;
-            padding: 10px;
-            margin-bottom: 10px;
-            border: 1px solid #ccc;
-            border-radius: 5px;
-        }
-        input[type="submit"] {
-            background-color: #4CAF50;
-            color: white;
-            border: none;
-            cursor: pointer;
-        }
-        input[type="submit"]:hover {
-            background-color: #45a049;
-        }
-    </style>
 </head>
 <body>
     <!-- Banner image at the top -->
     <div id="banner-container">
-        <a href="../">
+        <a href="../admin">
             <img src="{{ url_for('static', filename='images/Web Banner.png') }}" alt="Web Banner" class="banner">
         </a>
     </div>

@@ -1,0 +1,157 @@
+/* Styles for the navbar and the elements on the navbar */
+
+#logout-form {
+     margin: 0; /* keeps the Logout button on the right in the forms */
+}
+
+/*---------------------------------------------------------------------------------------*/
+
+body {
+    background-color: #3d3d39;
+    font-family: Arial, sans-serif;
+    margin: 10px;
+    margin-top: 0px;
+}
+h2 {
+    color: #f5f3e6;
+}
+form {
+    max-width: 500px;
+    margin: auto;
+}
+label {
+    display: block;
+    color: #f5f3e6;
+    margin-bottom: 5px;
+    font-weight: bold;
+}
+input[type="text"],
+input[type="password"],
+input[type="email"],
+input[type="submit"],
+select {
+    width: 100%;
+    padding: 10px;
+    margin-bottom: 10px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+}
+input[type="submit"] {
+    background-color: #4CAF50;
+    color: white;
+    border: none;
+    cursor: pointer;
+}
+input[type="submit"]:hover {
+    background-color: #45a049;
+}
+
+/*------Styles for the Content Page--------------------------------------------------*/
+
+.content-page {
+    
+    #form-container {
+        display: flex;
+        gap: 15px;
+    }
+
+    #left-column, #right-column {
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+        gap: 5px;
+    }
+
+    label {
+        font-weight: bold;
+    }
+
+    input, textarea, button {
+        padding: 2px;
+        margin-top: 0px;
+        box-sizing: border-box;
+    }
+    
+    input {
+        height: 30px;
+    }
+    
+    .CodeMirror {
+        height: 450px;
+    }
+    
+    #questionStem {
+        height: 70px;
+    }
+
+    #videoStart, #videoEnd, #difficulty {
+        width: 25%;
+    }
+
+    #description {
+    height: 150px;
+    margin-bottom: 4px;
+    }
+
+    textarea {
+        width: 100%;
+    }
+    
+    #tags, #difficulty {
+        height: 30px;
+    }
+
+    button {
+        background-color: #4CAF50;
+        color: white;
+        border: none;
+        cursor: pointer;
+        height: 30px;
+    }
+    
+    #submitQuestion {
+        margin-top: 20px;
+        height: 65px;
+    }
+
+    button:hover {
+        background-color: #45a049;
+    }
+    
+    #questionKey {
+        width: 175px;
+        height: 30px;
+    }
+
+    #nav-panel, #nav-buttons {
+        display: flex;
+        justify-content: center
+        align-items: flex-end;
+        margin-bottom: 15px;
+        gap: 15px;
+    }
+    
+    #nav-panel label,
+    #nav-panel input  {
+        display: flex;
+        align-items: flex-end;
+        margin: 0;
+    }
+    
+    #nav-buttons button {
+        width: 100px; /* Set a uniform width */
+        height: 30px; /* Set a uniform height */
+        display: flex; /* Ensures text is centered */
+        justify-content: center; /* Horizontal centering */
+        align-items: center; /* Vertical centering */
+        text-align: center; /* Center the text inside the button */
+        background-color: #4CAF50;
+        color: white;
+        border: none;
+        cursor: pointer;
+    }
+    
+    #nav-buttons button:hover {
+        background-color: #45a049;
+    }
+}

@@ -2,7 +2,7 @@
 from flask import Flask, render_template, request, jsonify, session, redirect, url_for
 from modules import Question, Curriculum, verify, login_required, hashit, fetch_usernames, fetch_user_data
 from modules import db, initialize_user_session_data, update_user_session_data, create_new_user, update_user_data
-from modules import delete_user, fetch_question, fetch_task_keys
+from modules import delete_user, fetch_question, fetch_task_keys, update_question, new_question
 from flask_migrate import Migrate
 import subprocess, logging, secrets, os, json
 
@@ -107,20 +107,19 @@ def update_session():
 @login_required
 def new_user():
     '''This route handles creation of new users'''
-    
-    username = request.form['username']
+    username = session.get('username')
     
     if request.method == 'POST':
         # Extract request data
-        
+        new_username = request.form['username']
         password = hashit(request.form['password'])
         email = request.form['email']
-        
+                
         # Invoke the create_new_user function from data_helpers
         try:
-            new_user = create_new_user(username, password, email)
+            new_user = create_new_user(new_username, password, email)
             if session.get('is_admin'):
-                return redirect(url_for('admin'))
+                return redirect(url_for('admin', username=username))
             else:
                 return redirect(url_for('index'))
         except Exception as e:
@@ -136,9 +135,10 @@ def user_created(username):
 @app.route('/remove_user', methods=['GET'])
 @login_required
 def remove_user():
+    username = session.get('username')
     # Check to make sure user is admin
     if session.get('is_admin'):
-        return render_template('remove_user.html')
+        return render_template('remove_user.html', username=username)
 
 @app.route('/remove_user_data', methods=['GET', 'POST'])
 @login_required
@@ -167,9 +167,11 @@ def remove_user_data():
 @app.route('/user_data', methods=['GET'])
 @login_required
 def user_data():
+    # Get the username
+    username = session.get('username')
     # Check to make sure user is admin
     if session.get('is_admin'):
-        return render_template('user_data.html')
+        return render_template('user_data.html', username=username)
 
 @app.route('/get_users', methods=['GET'])
 @login_required
@@ -284,11 +286,14 @@ def run_code():
 # Route to the admin content creation page "content"
 @app.route('/content', methods=['GET'])
 def content_page():
+    
+    username = session.get('username')
+    
     # Check if the user is an admin
-    if not session.get('username') or not session.get('is_admin'):
+    if not session.get('is_admin'):
         return redirect(url_for('index'))  # Redirect non-admin users
 
-    return render_template('content.html')  # Render the content creation page        
+    return render_template('content.html', username=username)  # Render the content creation page        
 
 @app.route('/content_keys', methods=['GET'])
 def content_keys():
@@ -298,49 +303,42 @@ def content_keys():
     except Exception as e:
         return jsonify({"error": f"Failed to load keys: {e}"}), 500
 
-# Content creation route (only for admins)
 @app.route('/submit_question', methods=['POST'])
+@login_required
 def submit_question():
-    ''' Saves new question in content.json'''
-    ''' Future upgrade, write to database'''
-    # Check if the user is an admin
-    if not session.get('username') or not session.get('is_admin'):
-        return jsonify({"error": "Unauthorized"}), 401  # JSON response instead of HTML redirect
-
-    # Extract question data from request
-    question_data = request.get_json()
-
-    # The questionKey (ID) from the data
-    question_key = question_data['key']
-
-    # Read the existing content from content.json
+    """Saves a new question or updates an existing question in the database."""
     try:
-        with open(content_file_path, 'r') as file:
-            content = json.load(file)
-        if 'questions' not in content:
-            content['questions'] = {}  # Initialize 'questions' if not present
-    except (FileNotFoundError, json.JSONDecodeError):
-        content = {'questions': {}}  # Initialize with empty questions dictionary
+        # Authorization check
+        if not session.get('is_admin'):
+            app.logger.warning("Unauthorized access attempt to submit_question.")
+            return jsonify({"error": "Unauthorized access."}), 401
 
-    # Insert the new question under the correct key in the 'questions' dictionary
-    content['questions'][question_key] = {
-        'Tags': question_data['tags'],
-        'Code': question_data['code'],
-        'Question': question_data['stem'],
-        'Answer': question_data['answer'],
-        'Distractor1': question_data['distractors'][0],
-        'Distractor2': question_data['distractors'][1],
-        'Distractor3': question_data['distractors'][2],
-        'Description': question_data['description'],
-        'Video': question_data['videoURL'],
-        'Difficulty': question_data['difficulty']
-    }
+        # Extract question data from request
+        question_data = request.get_json()
+        question_key = question_data.pop('key', None)
 
-    # Write the updated content back to content.json
-    with open(content_file_path, 'w') as file:
-        json.dump(content, file, indent=4)
+        if not question_key:
+            app.logger.warning("Missing 'key' in question data.")
+            return jsonify({"error": "Missing question key."}), 400
 
-    return jsonify({"message": "Question submitted successfully"}), 200  # JSON success response
+        # Determine if it's a new question or an update
+        is_new = question_key not in fetch_task_keys()
+        app.logger.debug(f"New question? {is_new}")
+
+        if is_new:
+            # Handle new question insertion
+            question_data['task_key'] = question_key
+            app.logger.debug(question_data)
+            new_question(question_data, app.logger)
+            return jsonify({"message": "New question added."}), 201
+
+        # Handle question update
+        update_message = update_question(question_key, question_data, app.logger)
+        return jsonify({"message": update_message}), 200
+
+    except Exception as e:
+        app.logger.error(f"Error in /submit_question: {e}")
+        return jsonify({"error": "An unexpected error occurred."}), 500
 
 @app.route('/content_data', methods=['POST'])
 def content_data():
@@ -353,6 +351,7 @@ def content_data():
     # Create a question object that retrieves the question data as an attribute
     question_data = Question(question_id)
     question_data = question_data.data
+    question_data = fetch_question(question_id, app.logger)
     
     # Respond to the request by returning the data as a json
     response = jsonify(question_data)

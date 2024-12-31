@@ -5,323 +5,96 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Question Editor</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.5/codemirror.min.css">
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.5/codemirror.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.5/mode/python/python.min.js"></script>
-    <!-- <link rel="stylesheet" href="../static/css/content_styles.css"> -->
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-            margin: 20px;
-        }
-
-        h1 {
-            text-align: center;
-        }
-
-        #form-container {
-            display: flex;
-            gap: 20px;
-        }
-
-        #left-column, #right-column {
-            flex: 1;
-            display: flex;
-            flex-direction: column;
-            gap: 15px;
-        }
-
-        label {
-            font-weight: bold;
-        }
-
-        input, textarea, button {
-            padding: 3px;
-            margin-top: 5px;
-            box-sizing: border-box;
-        }
-
-        #questionKey, #answer, #distractor1, #distractor2, #distractor3,
-        #videoURL, #videoStart, #videoEnd, #difficulty, #tags {
-            width: 50%;
-        }
-
-        #description {
-        height: 150px;
-        }
-
-        textarea {
-            width: 100%;
-        }
-
-        button {
-            background-color: #007bff;
-            color: white;
-            border: none;
-            cursor: pointer;
-        }
-
-        button:hover {
-            background-color: #0056b3;
-        }
-
-        #nav-buttons {
-            display: flex;
-            justify-content: center;
-            margin-bottom: 20px;
-            gap: 10px;
-        }
-    </style>
+    <link rel="stylesheet" href="../static/css/styles.css">
+    <link rel="stylesheet" href="../static/css/form_styles.css">
+    <link rel="icon" type="image/png" sizes="32x32" href="../static/images/watermark.png">
 </head>
 <body>
-    <h1>Question Editor</h1>
+    <!-- Banner image at the top -->
+    <div id="banner-container">
+        <a href="../admin">
+            <img src="{{ url_for('static', filename='images/Web Banner.png') }}" alt="Web Banner" class="banner">
+        </a>
+    </div>
+    
+    <!-- Navbar with admin buttons -->
+    <div id="navbar">
+        <p>Logged in as: <strong>{{ username }}</strong></p>
+        <form action="/logout" method="POST" id="logout-form">
+            <button type="submit">Logout</button> <!-- Logout button -->
+        </form>
+    </div>
+    
+    <h2>Question Editor</h2>
 
-    <!-- Navigation Buttons -->
-    <div id="nav-buttons">
-        <button id="prevQuestion">Previous</button>
-        <button id="nextQuestion">Next</button>
+    <!-- Navigation Panel -->
+    <div class="content-page">
+        <div id="nav-panel">
+            
+            <input type="text" id="questionKey" placeholder="Enter Question Key ..." required>
+            <div id="nav-buttons">
+                <button id="prevQuestion">Previous</button>
+                <button id="nextQuestion">Next</button>
+                <button type="button" id="newQuestion">New Question</button>
+            </div>
+        </div>
     </div>
 
     <!-- Container for the form -->
-    <div id="form-container">
-        <!-- Left Column: Question Key, Code, Difficulty, and Tags -->
-        <div id="left-column">
-            <label for="questionKey">Question Key:</label>
-            <input type="text" id="questionKey" required>
-            
-            <button type="button" id="newQuestion">New Question</button>
-
-
-            <label for="code">Code:</label>
-            <textarea id="code" name="code"></textarea>
-
-            <label for="difficulty">Difficulty:</label>
-            <input type="number" id="difficulty" min="0" max="3" step="0.1" required>
-
-            <label for="tags">Tags (comma separated):</label>
-            <input type="text" id="tags">
-            
-            <label for="description">Description:</label>
-            <textarea id="description"></textarea>
-        </div>
-
-        <!-- Right Column: Additional Fields -->
-        <div id="right-column">
-            <label for="questionStem">Question Stem:</label>
-            <textarea id="questionStem" required>What is the expected output of this code?</textarea>
-
-            <label for="answer">Answer:</label>
-            <input type="text" id="answer" required>
-
-            <label for="distractor1">Distractor 1:</label>
-            <input type="text" id="distractor1" required>
-
-            <label for="distractor2">Distractor 2:</label>
-            <input type="text" id="distractor2" required>
-
-            <label for="distractor3">Distractor 3:</label>
-            <input type="text" id="distractor3" required>
-
-            <label for="videoURL">Video URL:</label>
-            <input type="url" id="videoURL">
-
-            <label for="videoStart">Video Start Time:</label>
-            <input type="number" id="videoStart">
-
-            <label for="videoEnd">Video End Time:</label>
-            <input type="number" id="videoEnd">
-
-            <button type="submit" id="submitQuestion">Submit Question</button>
+    <div class="content-page">
+        <div id="form-container">
+            <!-- Left Column: Question Key, Code, Difficulty, and Tags -->
+            <div id="left-column">
+                
+    
+                <label for="code">Code:</label>
+                <textarea id="code" name="code"></textarea>
+                
+                <label for="description">Description:</label>
+                <textarea id="description"></textarea>
+                
+                <label for="tags">Tags (comma separated):</label>
+                <input type="text" id="tags">
+            </div>
+    
+            <!-- Right Column: Additional Fields -->
+            <div id="right-column">
+                <label for="questionStem">Question Stem:</label>
+                <textarea id="questionStem" required>What is the expected output of this code?</textarea>
+    
+                <label for="answer">Answer:</label>
+                <input type="text" id="answer" required>
+    
+                <label for="distractor1">Distractor 1:</label>
+                <input type="text" id="distractor1" required>
+    
+                <label for="distractor2">Distractor 2:</label>
+                <input type="text" id="distractor2" required>
+    
+                <label for="distractor3">Distractor 3:</label>
+                <input type="text" id="distractor3" required>
+                
+                <label for="difficulty">Difficulty:</label>
+                <input type="number" id="difficulty" min="0" max="3" step="0.1" required>
+    
+                <label for="videoURL">Video URL:</label>
+                <input type="url" id="videoURL">
+    
+                <label for="videoStart">Video Start Time:</label>
+                <input type="number" id="videoStart">
+    
+                <label for="videoEnd">Video End Time:</label>
+                <input type="number" id="videoEnd">
+    
+                <button type="submit" id="submitQuestion">Submit Question</button>
+            </div>
         </div>
     </div>
 
-    <script>
-        let questionKey = '';  // To store the current questionKey
-        let questionKeys = []; // To store all question keys
-        
-        // Initialize CodeMirror
-        const codeEditor = CodeMirror.fromTextArea(document.getElementById("code"), {
-            mode: "python",
-            lineNumbers: true,
-            matchBrackets: true
-        });
-        
-        // Fetch question from the server
-        function fetchQuestion(questionKey) {
-            fetch('/content_data', {
-                method: 'POST',
-                headers: {'Content-Type': 'application/json'},
-                body: JSON.stringify({'questionKey': questionKey})
-            })
-            .then(response => {
-                if (!response.ok) {
-                    throw new Error('Network response was not ok');
-                }
-                return response.json();
-            })
-            .then(data => {
-                // Populate the form with the received question data
-                const question = data; // Direct access to the data
-        
-                document.getElementById("questionKey").value = questionKey;
-                codeEditor.setValue(question.Code || "");
-                document.getElementById("difficulty").value = question.Difficulty || "";
-                document.getElementById("tags").value = (question.Tags || []).join(", ");
-                document.getElementById("questionStem").value = question.Question || "";
-                document.getElementById("answer").value = question.Answer || "";
-                document.getElementById("distractor1").value = question.Distractor1 || "";
-                document.getElementById("distractor2").value = question.Distractor2 || "";
-                document.getElementById("distractor3").value = question.Distractor3 || "";
-                document.getElementById("description").value = question.Description || "";
-                document.getElementById("videoURL").value = question.Video || "";
-                document.getElementById("videoStart").value = question.VideoStart || "";
-                document.getElementById("videoEnd").value = question.VideoEnd || "";
-            })
-            .catch(error => {
-                console.error('Error fetching question:', error);
-                alert('Failed to load question. Please try again.');
-            });
-        }
-        
-        // Function to create a new question
-        
-        function createNewQuestion() {
-            questionKey = "";  // Reset the global questionKey
-            document.getElementById("questionKey").value = "";  // Allow user to input a new key
-            codeEditor.setValue("");  // Clear the code editor
-            document.getElementById("difficulty").value = "";  // Clear difficulty
-            document.getElementById("tags").value = "";  // Clear tags
-            document.getElementById("questionStem").value = "";  // Clear question stem
-            document.getElementById("answer").value = "";  // Clear correct answer
-            document.getElementById("distractor1").value = "";  // Clear distractor 1
-            document.getElementById("distractor2").value = "";  // Clear distractor 2
-            document.getElementById("distractor3").value = "";  // Clear distractor 3
-            document.getElementById("description").value = "";  // Clear description
-            document.getElementById("videoURL").value = "";  // Clear video URL
-            document.getElementById("videoStart").value = "";  // Clear video start time
-            document.getElementById("videoEnd").value = "";  // Clear video end time
-        
-            alert("Ready to create a new question. Enter a new question key and fill in the details.");
-        }
+    <!-- Link to JS libraries -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.5/codemirror.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.5/mode/python/python.min.js"></script>
+    <script src="{{ url_for('static', filename='js/content_script.js') }}"></script>
 
-        
-        // Save the current question
-        function saveQuestion() {
-            const newKey = document.getElementById("questionKey").value.trim();
-            if (!newKey) {
-                alert("Please enter a valid question key.");
-                return;
-            }
-        
-            // Check if the key already exists
-            if (questionKeys.includes(newKey)) {
-                if (!confirm("This key already exists. Do you want to overwrite it?")) {
-                    return;
-                }
-            }
-        
-            const questionData = {
-                key: newKey,
-                code: codeEditor.getValue(),
-                difficulty: parseFloat(document.getElementById("difficulty").value) || 0,
-                tags: document.getElementById("tags").value.split(",").map(tag => tag.trim()),
-                stem: document.getElementById("questionStem").value,
-                answer: document.getElementById("answer").value,
-                distractors: [
-                    document.getElementById("distractor1").value,
-                    document.getElementById("distractor2").value,
-                    document.getElementById("distractor3").value
-                ],
-                description: document.getElementById("description").value,
-                videoURL: document.getElementById("videoURL").value,
-                videoStart: parseFloat(document.getElementById("videoStart").value) || 0,
-                videoEnd: parseFloat(document.getElementById("videoEnd").value) || 0
-            };
-        
-            fetch('/submit_question', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify(questionData)
-            })
-            .then(response => response.json())
-            .then(data => {
-                alert(data.message || "Question saved successfully!");
-                if (!questionKeys.includes(newKey)) {
-                    questionKeys.push(newKey);  // Add the new key to the list
-                }
-            })
-            .catch(error => console.error('Error saving question:', error));
-        }
-
-
-        // New question handler
-        document.getElementById("newQuestion").addEventListener("click", createNewQuestion);
-
-        
-        // Navigation handlers
-        document.getElementById("prevQuestion").addEventListener("click", () => {
-            const currentIndex = questionKeys.indexOf(questionKey);
-            if (currentIndex > 0) {
-                questionKey = questionKeys[currentIndex - 1];
-                fetchQuestion(questionKey);
-            }
-        });
-        
-        document.getElementById("nextQuestion").addEventListener("click", () => {
-            const currentIndex = questionKeys.indexOf(questionKey);
-            if (currentIndex < questionKeys.length - 1) {
-                questionKey = questionKeys[currentIndex + 1];
-                fetchQuestion(questionKey);
-            }
-        });
-        
-        // Add an event listener to listen for changes to questionKey input
-        document.getElementById("questionKey").addEventListener("change", (event) => {
-            const newQuestionKey = event.target.value;
-            if (questionKeys.includes(newQuestionKey)) {
-                questionKey = newQuestionKey;
-                fetchQuestion(questionKey);
-            } else {
-                alert("Invalid question ID.");
-            }
-        });
-        
-        // Function to fetch all question keys from the server
-        function getKeys() {
-            fetch('/content_keys', {
-                method: 'GET',
-            })
-            .then(response => {
-                if (!response.ok) {
-                    throw new Error('Failed to fetch question keys');
-                }
-                return response.json();
-            })
-            .then(data => {
-                if (data.keys) {
-                    questionKeys = data.keys;  // Store the keys in the global variable
-                    console.log('Question Keys:', questionKeys);  // Optional: Log the keys to the console
-                } else {
-                    throw new Error('No keys returned from server');
-                }
-            })
-            .catch(error => {
-                console.error('Error fetching question keys:', error);
-            });
-        }
-
-        getKeys(); // Load the keys when the page loads
-        
-        document.addEventListener('DOMContentLoaded', function() {
-            document.getElementById("submitQuestion").addEventListener("click", (event) => {
-                event.preventDefault();  // Prevent default form submission
-                console.log("Submit button clicked");  // Log message when button is clicked
-                saveQuestion();  // Call the function to save the question
-            });
-        });
-
-
-    </script>
 </body>
 </html>

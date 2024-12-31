@@ -265,3 +265,42 @@ def fetch_question(question_id, logger):
 def fetch_task_keys():
     task_keys = Questions.query.with_entities(Questions.task_key).all()
     return [key[0] for key in task_keys]
+
+def update_question(question_id, question_data, logger):
+    """Updates a question in the database."""
+    try:
+        # Create the CRUDHelper object for the Questions table
+        q_crud = CRUDHelper(Questions)
+
+        # Retrieve the question by task_key
+        question = q_crud.read(task_key=question_id)
+
+        if not question:
+            error_message = f"Question with task_key '{question_id}' not found."
+            logger.warning(error_message)
+            return error_message
+
+        # Use the question's id to perform the update
+        q_crud.update(id=question[0].id, **question_data)
+        logger.info(f"Question '{question_id}' updated successfully.")
+        return "Question successfully updated."
+
+    except Exception as e:
+        logger.error(f"Error updating question '{question_id}': {e}")
+        raise
+
+def new_question(question_data, logger):
+    '''Writes a new question into the Questions table'''
+    try:
+        # Create teh CRUDHelper object for the Questions table
+        q_crud = CRUDHelper(Questions)
+        
+        # Use the create method to add the new question details
+        new_record = q_crud.create(**question_data)
+        logger.debug(f"New Question: {new_record}")
+        return "Question successfully created."
+    
+    except Exception as e:
+        logger.error(f"Error adding new question: {e}")
+        
+
