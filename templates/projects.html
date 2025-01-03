@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Monty's Python Test Prep Center</title>
+    <!-- Link to CodeMirror CSS -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.5/codemirror.min.css">
+    <!-- Link to your custom styles -->
+    <link rel="stylesheet" href="../static/css/styles.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+    <link rel="icon" type="image/png" sizes="32x32" href="../static/images/watermark.png">
+</head>
+
+<body>
+
+    <!-- Banner image at the top -->
+    <div id="banner-container">
+        <a href="../">
+            <img src="{{ url_for('static', filename='images/Web Banner.png') }}" alt="Web Banner" class="banner">
+        </a>
+    </div>
+    
+    <!-- Navigation Bar -->
+    <div id="navbar">
+        <!-- Entry box for the question ID -->
+        <input type="text" id="key-input" placeholder="lesson code...">
+        <!-- Placeholder for displaying content, objective, difficulty, and status -->
+        <span id="question-info" style="margin-left: 20px;"></span>
+        <!-- Elapsed time counter -->
+        <p>  Elapsed Time: <span id="timerDisplay">00:00</span></p>
+        <!-- Icons for calculator and notepad -->
+        <button id="calculatorBtn" title="Open Calculator">
+            <i class="fas fa-calculator"></i> <!-- Font Awesome calculator icon -->
+        </button>
+        <button id="notepadBtn" title="Open Notepad">
+            <i class="fas fa-pencil-alt"></i> <!-- Font Awesome pencil icon -->
+        </button>
+        <!-- Next question button -->
+        <div style="float: left; margin-left: auto;">
+            <button id="next-question-btn" type="button" style="display: inline;">Next Question</button>
+        </div>
+    </div>
+    
+    <div id="progress-container">
+        <div id="progress-bar"></div>
+    </div>
+    
+    <div id="inputModal" class="modal">
+        <div class="modal-content">
+            <!-- Container for the icon and the prompt message -->
+            <div class="modal-header">
+                <img src="../static/images/icon.png" id="inputIcon" class="input-icon" alt="icon" />
+                <p id="inputModalPromptMessage"></p>
+            </div>
+            <span id="closeInputModal" class="close">&times;</span>
+            <input type="text" id="userInput" />
+            <button id="submitInput">Submit</button>
+        </div>
+    </div>
+
+    <!-- Calculator Modal -->
+    <div id="calculatorModal" class="calculator-modal">
+        <div class="calculator-content">
+            <button id="closeCalculator" class="close">&times;</button>
+            <div id="calculator" class="calculator">
+                <input type="text" id="calcDisplay" class="calc-display" disabled>
+                <div class="calc-buttons">
+                    <button class="calc-btn">1</button>
+                    <button class="calc-btn">2</button>
+                    <button class="calc-btn">3</button>
+                    <button class="calc-btn">+</button>
+                    <button class="calc-btn">4</button>
+                    <button class="calc-btn">5</button>
+                    <button class="calc-btn">6</button>
+                    <button class="calc-btn">-</button>
+                    <button class="calc-btn">7</button>
+                    <button class="calc-btn">8</button>
+                    <button class="calc-btn">9</button>
+                    <button class="calc-btn">/</button>
+                    <button class="calc-btn">0</button>
+                    <button class="calc-btn">.</button>
+                    <button class="calc-btn">=</button>
+                    <button class="calc-btn">*</button>
+                    <button class="calc-btn clear">C</button>
+                    <button class="calc-btn">^</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Notepad Popup Window -->
+    <div id="notepadModal" class="notepad-modal">
+        <div class="notepad-content">
+            <span class="close-notepad" id="closeNotepad">&times;</span>
+            <textarea id="notepad" class="notepad-textarea" placeholder="Type your notes here..."></textarea>
+        </div>
+    </div>
+    
+    <!-- The result bubble popup -->
+    <div id="resultDialog" class="result-dialog">
+        <div class="result-content">
+            <!-- Image will be dynamically set here -->
+            <img id="resultImage" class="result-image" src="" alt="result image" />
+            <!-- dXP value will be overlaid here -->
+            <div id="dXPValue" class="dXP-value"></div>
+        </div>
+    </div>
+
+
+
+    <!-- Parent container for both code editor/console and Q&A window -->
+    <div class="editor-question-feedback-scoring-container">
+        <!-- Code editor and console container -->
+        <div id="code-console-container">
+            <div id="code-editor">
+                <textarea id="code" name="code">Loading code...</textarea>
+            </div>
+            <!-- Output console to display code results -->
+            <div id="console"></div>
+        </div>
+        
+        <div class="question-feedback-container">
+            <!-- Question window -->
+            <div id="question-window">
+                <div id="question">Loading question...</div>
+                <label><input type="radio" name="answer" id="answer1" value="..."> <span id="label1">...</span></label>
+                <label><input type="radio" name="answer" id="answer2" value="..."> <span id="label2">...</span></label>
+                <label><input type="radio" name="answer" id="answer3" value="..."> <span id="label3">...</span></label>
+                <label><input type="radio" name="answer" id="answer4" value="..."> <span id="label4">...</span></label>
+                <div id="buttons-container">
+                    <!-- New button to submit the answer -->
+                    <button id="submit-answer" class="button">Submit</button>
+                    <!-- Button to run the code -->
+                    <button id="run" class="button" disabled>Run Code</button> <!-- Initially disabled -->
+                </div>
+            </div>
+            
+            <!-- Feedback container -->
+            <div id="feedback-window">
+                <div id="description">Answer Description...</div>
+                <div id="launch-video-container">
+                    <button id="launch-video" class="v_button">Watch Video</button>
+                </div>
+            </div>
+        </div>
+            
+        <div class="scoring-container">
+            <!-- Scoring panel -->
+            <div id="scoring-panel">
+                <h4>XP Points</h4>
+                <p>XP: <span id="overallXP"></span></p>
+                <p>XP_1: <span id="xp_1"></span></p>
+                <p>XP_2: <span id="xp_2"></span></p>
+                <p>XP_3: <span id="xp_3"></span></p>
+                <p>XP_4: <span id="xp_4"></span></p>
+                <p>XP_5: <span id="xp_5"></span></p>
+                <p>Score: <span id="curriculumScore"></span></p>
+            </div>
+        </div>
+    </div>
+    
+    
+
+
+    <!-- Link to JS libraries -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.5/codemirror.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.5/mode/python/python.min.js"></script>
+    <script src="{{ url_for('static', filename='js/testprep_script.js') }}"></script>
+    
+</body>
+</html>

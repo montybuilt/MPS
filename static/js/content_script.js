@@ -1,7 +1,6 @@
 let questionKey = '';  // To store the current questionKey
 let questionKeys = []; // To store all question keys
 let newQuestion = false; // Monitor if a new question is being added
-let currentIndex = 1;
 
 // Initialize CodeMirror
 const codeEditor = CodeMirror.fromTextArea(document.getElementById("code"), {
@@ -12,7 +11,6 @@ const codeEditor = CodeMirror.fromTextArea(document.getElementById("code"), {
 
 // Fetch question from the server
 function fetchQuestion(questionKey) {
-    console.log("Question Key", questionKey);
     fetch('/content_data', {
         method: 'POST',
         headers: {'Content-Type': 'application/json'},
@@ -113,11 +111,11 @@ function saveQuestion() {
         if (!questionKeys.includes(newKey)) {
             questionKeys.push(newKey);  // Add the new key to the list
         }
-        getKeys(); // Refresh the list of question keys
-        currentIndex = questionKeys.indexOf(newKey);
-        console.log("New Key:", newKey, "Index", currentIndex)
     })
     .catch(error => console.error('Error saving question:', error));
+    
+    getKeys(); // Refresh the list of question keys
+    currentIndex = questionKeys.indexOf(newKey);
 }
 
 // New question handler
@@ -140,8 +138,6 @@ document.getElementById("nextQuestion").addEventListener("click", () => {
         fetchQuestion(questionKey);
     };
     fetchQuestion(questionKey);
-    console.log("Current Index", currentIndex, "Question Key", questionKey);
-    console.log("Question Keys", questionKeys);
 });
 
 // Add an event listener to listen for changes to questionKey input
@@ -177,7 +173,6 @@ function getKeys() {
     .then(data => {
         if (data.keys && Array.isArray(data.keys)) {
             questionKeys = data.keys;  // Store the keys in the global variable
-            console.log('New Question Keys:', questionKeys);  // Optional: Log the keys to the console
         } else {
             throw new Error('No valid keys returned from server');
         }
@@ -192,7 +187,6 @@ getKeys(); // Load the keys when the page loads
 document.addEventListener('DOMContentLoaded', function() {
     document.getElementById("submitQuestion").addEventListener("click", (event) => {
         event.preventDefault();  // Prevent default form submission
-        console.log("Submit button clicked");  // Log message when button is clicked
         saveQuestion();  // Call the function to save the question
         newQuestion = false;  // Set the global newQuestion state to default
     });

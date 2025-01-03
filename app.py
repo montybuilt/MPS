@@ -1,10 +1,11 @@
 # Import packages
+import subprocess, logging, secrets, os, json
+from flask_migrate import Migrate
 from flask import Flask, render_template, request, jsonify, session, redirect, url_for
 from modules import Question, Curriculum, verify, login_required, hashit, fetch_usernames, fetch_user_data
 from modules import db, initialize_user_session_data, update_user_session_data, create_new_user, update_user_data
 from modules import delete_user, fetch_question, fetch_task_keys, update_question, new_question
-from flask_migrate import Migrate
-import subprocess, logging, secrets, os, json
+
 
 # Create the flask object
 app = Flask(__name__)
@@ -328,7 +329,6 @@ def submit_question():
         if is_new:
             # Handle new question insertion
             question_data['task_key'] = question_key
-            app.logger.debug(question_data)
             new_question(question_data, app.logger)
             return jsonify({"message": "New question added."}), 201
 
@@ -349,8 +349,6 @@ def content_data():
     question_id = data.get('questionKey').lower()
     
     # Create a question object that retrieves the question data as an attribute
-    question_data = Question(question_id)
-    question_data = question_data.data
     question_data = fetch_question(question_id, app.logger)
     
     # Respond to the request by returning the data as a json
