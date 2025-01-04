@@ -1,6 +1,6 @@
 # Import packages
 import bcrypt
-from modules.models import db, User, Questions
+from modules.models import db, User, Questions, XP
 from sqlalchemy.exc import SQLAlchemyError
 from datetime import datetime
 
@@ -196,7 +196,7 @@ def fetch_user_data(username):
     else:
         return None
 
-def update_user_data(username, changes, logger):
+def update_user_data(username, changes, logger=None):
     '''Function to update user data'''
     user_crud = CRUDHelper(User)
     user = user_crud.read(username=username)[0]  # Retrieve user by username
@@ -226,7 +226,7 @@ def update_user_data(username, changes, logger):
             logger.debug(f"Error updating user {username}: {e}")
             raise e
 
-def delete_user(username, logger):
+def delete_user(username, logger=None):
     '''Function to delete a user based on username'''
     user_crud = CRUDHelper(User)
     user = user_crud.read(username=username)[0]
@@ -237,7 +237,7 @@ def delete_user(username, logger):
     except Exception as e:
         logger.debug(f"Error deleting user {username}: {e}")
 
-def fetch_question(question_id, logger):
+def fetch_question(question_id, logger=None):
     '''Function to fetch question data from the database'''
     
     q_crud = CRUDHelper(Questions)
@@ -266,7 +266,7 @@ def fetch_task_keys():
     task_keys = Questions.query.with_entities(Questions.task_key).all()
     return [key[0] for key in task_keys]
 
-def update_question(question_id, question_data, logger):
+def update_question(question_id, question_data, logger=None):
     """Updates a question in the database."""
     try:
         # Create the CRUDHelper object for the Questions table
@@ -289,7 +289,7 @@ def update_question(question_id, question_data, logger):
         logger.error(f"Error updating question '{question_id}': {e}")
         raise
 
-def new_question(question_data, logger):
+def new_question(question_data, logger=None):
     '''Writes a new question into the Questions table'''
     try:
         # Create teh CRUDHelper object for the Questions table
@@ -303,4 +303,21 @@ def new_question(question_data, logger):
     except Exception as e:
         logger.error(f"Error adding new question: {e}")
         
-
+def update_xp_data(xp_data, logger=None):
+    '''Function to update the XP table'''
+    
+    try:
+        # Create the CRUDHelper for XP table
+        xp_crud = CRUDHelper(XP)
+        xp_crud.create(**xp_data)
+       
+        logger.debug(f"XP Data: {xp_data}")
+        return "XP Table successfully updated"
+        
+    except SQLAlchemyError as se:
+        logger.error(f"SQL Error: {se}")
+        raise
+        
+    except Exception as e:
+        logger.error(f"Unexpected Error: {e}")
+        raise

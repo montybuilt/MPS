@@ -5,12 +5,20 @@ from datetime import datetime
 # Initialize SQLAlchemy object here to avoid circular imports
 db = SQLAlchemy()
 
+class Admin(db.Model):
+    id = db.Column(db.Integer, db.ForeignKey('user.id'), primary_key=True)
+    classroom_codes = db.Column(db.JSON, default=[])
+    custom_curriculums = db.Column(db.JSON, default=[])
+    role = db.Column(db.String(50), default='teacher', nullable=False)  # 'teacher' or 'system_admin'
+    user = db.relationship('User', backref='admin')
+
 class User(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     username = db.Column(db.String(120), unique=True, nullable=False, index=True)
     password_hash = db.Column(db.LargeBinary, nullable=False)
     email = db.Column(db.String(254), unique=True, nullable=True, index=True)
-    classroom_code = db.Column(db.String(120), index=True)
+    role = db.Column(db.String(50), default='student')
+    classroom_codes = db.Column(db.String(120), index=True)
     assigned_curriculums = db.Column(db.JSON, default=[], index=True)
     assigned_content = db.Column(db.JSON, default=[], index=True)
     special_curriculums = db.Column(db.JSON, default=[], index=True)
@@ -27,11 +35,29 @@ class User(db.Model):
 
     def __repr__(self):
         return f'<User: {self.username}>'
+    
+class Classroom(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    code = db.Column(db.String(120), unique=True, nullable=False, index=True)
+    admin_id = db.Column(db.Integer, db.ForeignKey('admin.id'), nullable=False)
+    name = db.Column(db.String(120), nullable=False)
+    admin = db.relationship('Admin', backref='classrooms')  # An admin manages many classrooms
+
+class ClassroomUser(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    classroom_id = db.Column(db.Integer, db.ForeignKey('classroom.id'), nullable=False)
+    user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
+    joined_at = db.Column(db.DateTime, default=datetime.utcnow)
+
+    classroom = db.relationship('Classroom', backref='classroom_users')
+    user = db.relationship('User', backref='classroom_users') 
 
 class XP(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     dXP = db.Column(db.Float)
     question_id = db.Column(db.String(120))
+    curriculum_id = db.Column(db.String(50))
+    elapsed_time = db.Column(db.Float, nullable=False)
     timestamp = db.Column(db.DateTime, default=datetime.utcnow)
 
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)  # Optional if you plan to link XP to users

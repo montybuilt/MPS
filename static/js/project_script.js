@@ -71,8 +71,7 @@ function stopTimer() {
 function checkTime(timeLimit) {
     const questionEndTime = new Date().getTime();
     const elapsedTime = (questionEndTime - questionStartTime) / 1000; // in seconds
-    const isWithinLimit =  elapsedTime <= timeLimit;
-    return [isWithinLimit, elapsedTime];
+    return elapsedTime <= timeLimit;
 }
 
 //--------------------------------------------------------------------------------------
@@ -929,19 +928,15 @@ document.getElementById("run").onclick = function() {
 // Function to show the custom input modal and return input value
 function showInputModal(promptMessage) {
     return new Promise((resolve) => {
-        // Set the prompt message
         document.getElementById("inputModalPromptMessage").textContent = promptMessage;
-        // Clear the input box
-        document.getElementById("userInput").value = "";
-        // Display the modal
         document.getElementById("inputModal").style.display = "block";
-        //Handle submission
+
         document.getElementById("submitInput").onclick = function() {
             let userInput = document.getElementById("userInput").value;
             document.getElementById("inputModal").style.display = "none";
             resolve(userInput);
         };
-        // Handle a blank submission
+
         document.getElementById("closeInputModal").onclick = function() {
             document.getElementById("inputModal").style.display = "none";
             resolve("");  // Resolve with an empty string if closed without input
@@ -1037,47 +1032,12 @@ function showResultDialog(isCorrect, dXP) {
 
 //------------------------------------------------------------------------------------------------------------------
 
-// Function to handle posting the XP data to the server for datbase storage
-function postXP(dXP, questionId, elapsedTime, curriculumId) {
-    const XPData = {'dXP': dXP,
-                    'question_id': questionId,
-                    'curriculum_id': curriculumId,
-                    'elapsed_time': elapsedTime};
-    // POST the jsonified data to the server
-    console.log("Sending XP data to datbase:", XPData);  // Log to console
-
-    fetch('/update_xp', {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json'
-        },
-        body: JSON.stringify(XPData)
-    })
-    .then(response => {
-        if (!response.ok) {
-            throw new Error(`HTTP error! status: ${response.status}`);
-        }
-        return response.json();
-    })
-    .then(data => {
-        console.log("XP data successfully updated:", data); // Log server response
-    })
-    .catch((error) => {
-        console.error('Error posting XP data:', error); // Log any errors
-    });
-}
-
-//------------------------------------------------------------------------------------------------------------------
-
 // Handling the Submit Answer button click
 document.getElementById("submit-answer").onclick = async function() {
     var selectedAnswer = document.querySelector('input[name="answer"]:checked');
     const currentQuestionId = sessionStorage.getItem('currentQuestionId');
-    const currentCurriculum = sessionStorage.getItem('currentCurriculum');
     const timeLimit = content === 'pcap' ? 90 : 80; // Set time limit based on content type
-    const timeData = checkTime(timeLimit);
-    const answeredOnTime = timeData[0]; // Check if answered on time
-    const elapsedTime = timeData[1];
+    const answeredOnTime = checkTime(timeLimit); // Check if answered on time
     
     if (selectedAnswer) {
         stopTimer();
@@ -1112,9 +1072,6 @@ document.getElementById("submit-answer").onclick = async function() {
             document.getElementById("submit-answer").disabled = true;
             document.getElementById("run").disabled = false; // Enable the Run Code button
         }
-        
-        // Post XP Data to the server
-        postXP(dXP, currentQuestionId, elapsedTime, currentCurriculum);
         
         // Call this function to load the progress bar when the question is answered
         loadProgressBar();  //here last

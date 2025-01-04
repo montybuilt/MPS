@@ -4,7 +4,7 @@ from flask_migrate import Migrate
 from flask import Flask, render_template, request, jsonify, session, redirect, url_for
 from modules import Question, Curriculum, verify, login_required, hashit, fetch_usernames, fetch_user_data
 from modules import db, initialize_user_session_data, update_user_session_data, create_new_user, update_user_data
-from modules import delete_user, fetch_question, fetch_task_keys, update_question, new_question
+from modules import delete_user, fetch_question, fetch_task_keys, update_question, new_question, update_xp_data
 
 
 # Create the flask object
@@ -164,7 +164,6 @@ def remove_user_data():
         except Exception as e:
             return jsonify({"message": f"Unexpected Error: {e}"})
 
-
 @app.route('/user_data', methods=['GET'])
 @login_required
 def user_data():
@@ -225,7 +224,6 @@ def update_user():
         except Exception as e:
             app.logger.debug(f"Error updating user data for {username}: {e}")
             return jsonify({'message': 'Error updating user data'}), 500
-
 
 @app.route('/testprep')
 @login_required
@@ -356,7 +354,31 @@ def content_data():
     response.headers['Content-Type'] = 'application/json; charset=UTF-8'
     return response
 
+@app.route('/update_xp', methods=['POST'])
+def update_xp():
+    '''Route to get xp updates and post to the database'''
+    
+    try:
+    
+        # Extract the xp data from the request
+        xp_data = request.get_json()
+        
+        # Update the xp_data to include username
+        xp_data.update({'user_id': session.get('username')})
+        app.logger.debug(f"In Route: {xp_data}")
+        
+        # Call call the data helper function to update the database
+        update_xp_data(xp_data, app.logger)
+        
+        # Return a sucess response for testing
+        return jsonify({"status": "success", "message": "XP Data Received"}), 200
+    
+    except Exception as e:
+        return jsonify({"status": "error", "message":str(e)}), 500
+    
+    
+    
 #------------------------------------------------------------------------------------------#
 
 if __name__ == '__main__':
-    app.run(debug=True)
+    app.run(debug=False)
