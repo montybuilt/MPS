@@ -1,0 +1,40 @@
+/* General body styles */
+
+
+
+/* Style for location label nav-loc inside the navbar */
+#navbar nav-loc {
+    font-size: 1em; /* Make it fairly large */
+    color: black;   /* Set the color to black */
+    font-weight: bold; /* Make it bold */
+}
+
+
+/* Styles for the top KPI container */
+#top-kpi-container {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    width: 100%; /* Full width minus margin */
+    margin: 10px auto;
+    margin-top: 20px;
+    padding: 3px;
+    background-color: #000000;
+    border: 1px solid #ddd;
+    border-radius: 0px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    box-sizing: border-box;
+}
+
+.kpi-item {
+    flex: 1;
+    text-align: center;
+    font-size: 2em;
+    color: white;
+}
+
+#chart-container {
+    width: 100%;
+    margin: auto;
+}
+

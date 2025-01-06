@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard</title>
+    <link rel="stylesheet" href="../static/css/styles.css">
+    <link rel="stylesheet" href="../static/css/dashboard_styles.css">
+    <!-- Include the script file -->
+    <script src="../static/js/dashboard_script.js"></script>
+    <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
+    <link rel="icon" type="image/png" sizes="32x32" href="../static/images/watermark.png">    
+</head>
+<body>
+
+    <!-- Banner image at the top -->
+    <div id="banner-container">
+        <a href="../">
+            <img src="{{ url_for('static', filename='images/Web Banner.png') }}" alt="Web Banner" class="banner">
+        </a>
+    </div>
+    
+    <!-- Navbar with admin buttons -->
+    <div id="navbar">
+        <p>Logged in as: <strong>{{ username }}</strong></p>
+        <nav-loc>Student Dashboard</nav-loc>
+        <form action="/logout" method="POST" id="logout-form">
+            <button type="submit">Logout</button> <!-- Logout button -->
+        </form>
+    </div>
+
+    <!-- Top container for KPIs -->
+    <div id="top-kpi-container">
+        <div class="kpi-item">Total XP: <span id="total-xp"></span></div>
+        <div class="kpi-item">Skill Level: <span id="xp-level"></span></div>
+        <div class="kpi-item">Total Score: <span id="xp-score"></span></div>
+    </div>
+    
+    <!-- XP Chart Container -->
+    <div id="chart-container">
+        <div id="xpChart"></div>
+    </div>
+    
+    
+</body>
+</html>

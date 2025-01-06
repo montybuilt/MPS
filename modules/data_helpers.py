@@ -2,7 +2,7 @@
 import bcrypt
 from modules.models import db, User, Questions, XP
 from sqlalchemy.exc import SQLAlchemyError
-from datetime import datetime
+from datetime import datetime, timezone
 
 # Create data defaults
 defaults = {    
@@ -29,8 +29,36 @@ class CRUDHelper:
         except SQLAlchemyError as e:
             db.session.rollback()
             raise e
-
+            
     def read(self, **kwargs):
+        try:
+            # Start with the basic query
+            query = self.model.query
+            
+            # Iterate through the kwargs and apply filters
+            for key, value in kwargs.items():
+                if isinstance(value, (tuple, list)) and len(value) == 2:
+                    operator, comparison_value = value
+                    if operator == 'gt':
+                        # Apply greater-than comparison
+                        query = query.filter(getattr(self.model, key) > comparison_value)
+                    elif operator == 'lt':
+                        # Apply less-than comparison
+                        query = query.filter(getattr(self.model, key) < comparison_value)
+                    # You can add more operators here if needed (like 'eq', 'gte', 'lte', etc.)
+                else:
+                    # For basic equality checks, use filter_by
+                    query = query.filter_by(**{key: value})
+            
+            # Execute the query
+            records = query.all()
+            return records
+        
+        except SQLAlchemyError as e:
+            raise e
+
+
+    def read2(self, **kwargs):
         try:
             records = self.model.query.filter_by(**kwargs).all()
             return records
@@ -321,3 +349,54 @@ def update_xp_data(xp_data, logger=None):
     except Exception as e:
         logger.error(f"Unexpected Error: {e}")
         raise
+
+def fetch_xp_data(user_id, last_fetched_date, logger=None):
+    """Function to fetch incremental XP data for a user."""
+    
+    try:
+        # Query the XP table for the user_id and filter by timestamp greater than last_fetched_date
+        xp_crud = CRUDHelper(XP)
+        
+        logger.debug(f"Last date: {last_fetched_date} Type: {type(last_fetched_date)}")
+        
+        # Convert last_fetched_date to a datetime object and make it naive (remove timezone)
+        last_fetched_datetime = datetime.fromisoformat(last_fetched_date.replace('Z', '')).replace(tzinfo=None)
+        
+        logger.debug(f"Last date: {last_fetched_datetime} Type: {type(last_fetched_datetime)}")
+        
+        # Query the XP table for entries with a timestamp greater than last_fetched_datetime
+        new_xp_entries = xp_crud.read(user_id=user_id, timestamp=('gt', last_fetched_datetime))
+        
+        # Check if there are any new entries
+        if new_xp_entries:
+            # Find the most recent timestamp in the new entries
+            most_recent_timestamp = max(entry.timestamp.replace(tzinfo=None) for entry in new_xp_entries)
+            
+            # Prepare the new XP data for return (with relevant fields)
+            xp_data = [{
+                "dXP": entry.dXP,
+                "question_id": entry.question_id,
+                "curriculum_id": entry.curriculum_id,
+                "elapsed_time": entry.elapsed_time,
+                "timestamp": entry.timestamp.replace(tzinfo=None)
+            } for entry in new_xp_entries]
+            
+            logger.debug(f"Client: {last_fetched_datetime} Server: {xp_data[0]['timestamp']}")
+            logger.debug(f"Client: {type(last_fetched_datetime)} Server: {type(xp_data[0]['timestamp'])}")
+            logger.debug(f"Comparison: {xp_data[0]['timestamp'] > last_fetched_datetime}")
+            
+            # Return the data and the most recent timestamp
+            return {
+                "xpData": xp_data,
+                "mostRecentDatetime": most_recent_timestamp.isoformat()  # Return as ISO 8601 string
+            }
+        else:
+            # No new data, return None or an empty response
+            return None
+
+    except Exception as e:
+        # Handle any exceptions
+        print(f"Error fetching XP data: {e}")
+        return None
+
+

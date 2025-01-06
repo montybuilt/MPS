@@ -6,6 +6,7 @@
     <title>Home</title>
     <link rel="stylesheet" href="../static/css/styles.css">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/3.1.9-1/crypto-js.js"></script>
+    <link rel="icon" type="image/png" sizes="32x32" href="../static/images/watermark.png">
     <style>
         ul {
             list-style-type: disc;
@@ -41,6 +42,7 @@
 
     <nav>
         <ul>
+            <li><a href="/dashboard">Go to Dashboard</a></li>
             <li><a href="/testprep">Go to Test Preparation</a></li>
             <!-- Admin link displayed only if user is an admin -->
             {% if session['is_admin'] %}

@@ -5,6 +5,7 @@ from flask import Flask, render_template, request, jsonify, session, redirect, u
 from modules import Question, Curriculum, verify, login_required, hashit, fetch_usernames, fetch_user_data
 from modules import db, initialize_user_session_data, update_user_session_data, create_new_user, update_user_data
 from modules import delete_user, fetch_question, fetch_task_keys, update_question, new_question, update_xp_data
+from modules import fetch_xp_data
 
 
 # Create the flask object
@@ -72,6 +73,34 @@ def login():
 def logout():
     session.clear()
     return redirect(url_for('index'))  # Redirect back to the home page
+
+@app.route('/dashboard', methods=['GET'])
+@login_required
+def dashboard():
+    username = session['username']
+    return render_template('dashboard.html', username=username)
+
+@app.route('/get_xp', methods=['POST'])
+@login_required
+def get_xp():
+    # get the last fetched datetime from request
+    last_fetched_datetime = request.json.get('lastFetchedDatetime')
+    
+    # get the username from session
+    username = session['username']
+    
+    # query the database for data (if needed)
+    xp_data = fetch_xp_data(username, last_fetched_datetime, app.logger)
+    
+    # Log the returned xp_data
+    if xp_data:
+        app.logger.debug(f"Server: Returned XP data: {len(xp_data['xpData'])}")
+        app.logger.debug(f"Most recent timestamp: {xp_data['mostRecentDatetime']}")
+    else:
+        app.logger.debug("Server: No new XP data returned.")
+        
+    # Return the XP data to the client (or None if no data)
+    return jsonify(xp_data) if xp_data else jsonify({"message": "No new XP data"})
 
 @app.route('/admin', methods=['GET'])
 @login_required
@@ -376,9 +405,8 @@ def update_xp():
     except Exception as e:
         return jsonify({"status": "error", "message":str(e)}), 500
     
-    
-    
+
 #------------------------------------------------------------------------------------------#
 
 if __name__ == '__main__':
-    app.run(debug=False)
+    app.run(debug=True)
