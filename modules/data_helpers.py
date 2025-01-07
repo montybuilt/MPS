@@ -356,14 +356,10 @@ def fetch_xp_data(user_id, last_fetched_date, logger=None):
     try:
         # Query the XP table for the user_id and filter by timestamp greater than last_fetched_date
         xp_crud = CRUDHelper(XP)
-        
-        logger.debug(f"Last date: {last_fetched_date} Type: {type(last_fetched_date)}")
-        
+                
         # Convert last_fetched_date to a datetime object and make it naive (remove timezone)
         last_fetched_datetime = datetime.fromisoformat(last_fetched_date.replace('Z', '')).replace(tzinfo=None)
-        
-        logger.debug(f"Last date: {last_fetched_datetime} Type: {type(last_fetched_datetime)}")
-        
+                
         # Query the XP table for entries with a timestamp greater than last_fetched_datetime
         new_xp_entries = xp_crud.read(user_id=user_id, timestamp=('gt', last_fetched_datetime))
         
@@ -380,10 +376,6 @@ def fetch_xp_data(user_id, last_fetched_date, logger=None):
                 "elapsed_time": entry.elapsed_time,
                 "timestamp": entry.timestamp.replace(tzinfo=None)
             } for entry in new_xp_entries]
-            
-            logger.debug(f"Client: {last_fetched_datetime} Server: {xp_data[0]['timestamp']}")
-            logger.debug(f"Client: {type(last_fetched_datetime)} Server: {type(xp_data[0]['timestamp'])}")
-            logger.debug(f"Comparison: {xp_data[0]['timestamp'] > last_fetched_datetime}")
             
             # Return the data and the most recent timestamp
             return {

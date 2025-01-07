@@ -7,13 +7,7 @@ let xpCompletion = 0;
 // Function to initialize or check xp_last_fetched_datetime in localStorage
 function checkAndInitializeLastFetchedDatetime() {
     let lastFetchedDatetime = localStorage.getItem('xpLastFetchedDatetime');
-    const current_user = sessionStorage.getItem('username')
-    const prior_user = localStorage.getItem('xpUsername')
-    if (!lastFetchedDatetime || !prior_user || current_user != prior_user) {
-        if(current_user != prior_user) {
-            console.log("New User:", current_user);
-            localStorage.removeItem('xpData');
-        };
+    if (!lastFetchedDatetime) {
         localStorage.setItem('xpLastFetchedDatetime', new Date('1970-01-01T00:00:00.000Z').toISOString());
         console.log("No previous XP data found. Initializing with placeholder datetime.");
     } else {
@@ -37,8 +31,7 @@ async function fetchXPData() {
 
         if (data.xpData) {
             localStorage.setItem("xpData", JSON.stringify(data.xpData));
-            localStorage.setItem("xpLastFetchedDatetime", data.xpLastFetchedDatetime);
-            localStorage.setItem("xpUsername", data.xpUsername);
+            localStorage.setItem("xpLastFetchedDatetime", data.mostRecentDatetime);
             console.log("XP Data updated and stored.");
         } else {
             console.log("No XP Data update needed.");
@@ -77,6 +70,10 @@ function processXP() {
         totalPossible += contentScores[content]['Possible'];
         xpScore = totalEarned / totalPossible;
     }
+
+    console.log("Total Earned:", totalEarned);
+    console.log("Total Possible", totalPossible);
+    console.log("xpScore:", xpScore);
 }
 
 //-----------------------------------------------------------------------------------------------------------------
@@ -103,11 +100,8 @@ function getXPDataForChart() {
         cumulativeData[curriculum_id] += dXP;
         cumulativeTotal += dXP;
 
-        // Ensure each series has points for each timestamp
-        Object.keys(cumulativeData).forEach(id => {
-            seriesData[id].x.push(new Date(timestamp));
-            seriesData[id].y.push(cumulativeData[id]);
-        });
+        seriesData[curriculum_id].x.push(new Date(timestamp));
+        seriesData[curriculum_id].y.push(cumulativeData[curriculum_id]);
 
         totalXPSeries.x.push(new Date(timestamp));
         totalXPSeries.y.push(cumulativeTotal);
@@ -135,7 +129,6 @@ function drawAreaChart() {
         y: seriesData[curriculum_id].y,
         mode: 'lines',
         fill: 'tozeroy',
-        stackgroup: 'one', // Ensure stacking
         name: curriculum_id,
         line: { width: 2 },
         fillcolor: getRandomBrightColor(),

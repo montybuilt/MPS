@@ -164,6 +164,7 @@ function rickRoll() {
 
 //--------------------------------------------------------------------------------------
 
+
 function updateSessionData() {
     const sessionData = {
         completedCurriculums: JSON.parse(sessionStorage.getItem('completedCurriculums')),
@@ -830,7 +831,7 @@ document.getElementById("key-input").addEventListener("keypress", function(event
         const keyInput = event.target.value.toLowerCase();
         fetchCurriculum(keyInput, true).then(() => {
             //stopTimer();
-            //updateSessionData();
+            updateSessionData();
             //checkCurriculumStatus();
             //loadQuestion(currentQuestionId);
             //loadProgressBar();
@@ -849,7 +850,7 @@ window.onload = function() {
     if (currentCurriculum && currentQuestionId) {
         fetchCurriculum(currentCurriculum, false).then(() => {
             //stopTimer();
-            //updateSessionData();
+            updateSessionData();
             //checkCurriculumStatus();
             //nextQuestion(currentQuestionId);
             //loadProgressBar();

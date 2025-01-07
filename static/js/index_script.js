@@ -16,6 +16,10 @@ document.addEventListener("DOMContentLoaded", function() {
                 if (data.error) {
                     alert(data.error);  // Display error message
                 } else {
+                    
+                    // Store the username in sessionStorage
+                    sessionStorage.setItem('username', data.username)
+                    
                     // Set sessionStorage with session data
                     const sessionData = data.session_data;
                     for (const key in sessionData) {

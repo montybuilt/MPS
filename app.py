@@ -61,7 +61,7 @@ def login():
             session['is_admin'] = username in ['amontanus']
             session_data = initialize_user_session_data(username)
 
-            return jsonify({'message': 'Login successful', 'session_data': session_data}), 200
+            return jsonify({'message': 'Login successful', 'session_data': session_data, 'username': username}), 200
 
         # If result is not True, it will contain an error message to display
         return jsonify({'error': result}), 401
@@ -92,15 +92,19 @@ def get_xp():
     # query the database for data (if needed)
     xp_data = fetch_xp_data(username, last_fetched_datetime, app.logger)
     
-    # Log the returned xp_data
     if xp_data:
-        app.logger.debug(f"Server: Returned XP data: {len(xp_data['xpData'])}")
-        app.logger.debug(f"Most recent timestamp: {xp_data['mostRecentDatetime']}")
-    else:
-        app.logger.debug("Server: No new XP data returned.")
+    
+        # organize the response dictionary
+        response = {
+                    'xpData': xp_data['xpData'],
+                    'xpLastFetchedDatetime': xp_data['mostRecentDatetime'],
+                    'xpUsername': username}
         
-    # Return the XP data to the client (or None if no data)
-    return jsonify(xp_data) if xp_data else jsonify({"message": "No new XP data"})
+        # Return the XP data to the client (or None if no data)
+        return jsonify(response)
+    
+    else:
+        return jsonify({"message": "No new XP data", "username": username})
 
 @app.route('/admin', methods=['GET'])
 @login_required
@@ -409,4 +413,4 @@ def update_xp():
 #------------------------------------------------------------------------------------------#
 
 if __name__ == '__main__':
-    app.run(debug=True)
+    app.run(debug=False)
