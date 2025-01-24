@@ -5,8 +5,136 @@
     <link rel="stylesheet" href="../static/css/styles.css">
     <link rel="stylesheet" href="../static/css/form_styles.css">
     <link rel="icon" type="image/png" sizes="32x32" href="../static/images/watermark.png">
+    <!-- Include JSONEditor from CDN -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/jsoneditor/9.5.6/jsoneditor.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jsoneditor/9.5.6/jsoneditor.min.js"></script>
+
     <style>
+        #user-data-form {
+            display: flex; /* Enables flexbox for the form */
+            flex-direction: column; /* Stack the rows vertically */
+            align-items: center; /* Horizontally center child elements */
+        }
         
+        form {
+            max-width: none;
+            margin: 20px;
+        }
+        
+        .row-container {
+            display: flex;
+            flex-wrap: nowrap;
+            gap: 10px;
+            justify-content: center;
+            align-items: center;
+            margin: 10px;
+            width: 100%;
+            box-sizing: border-box; /* Ensure padding/margin are included */
+        }
+        
+        .form-group {
+            display: flex;
+            flex-direction: column;
+            flex: 1 1 200px; /* Allow elements to grow/shrink with a base of 200px */
+            max-width: 600px; /* Optional: Prevent elements from growing too wide */
+            min-width: 200px; /* Ensures reasonable minimum size */
+            box-sizing: border-box;
+        }
+        
+        .dual-list-container {
+            display: flex; /* Enables flexbox layout for the parent container */
+            flex-direction: row; /* Aligns form-group elements horizontally */
+            justify-content: center; /* Centers form-group elements horizontally */
+            align-items: center; /* Aligns form-group elements vertically */
+            gap: 50px; /* Adds spacing between form-group sections (content and curriculum) */
+            padding: 20px;
+        }
+        
+        .dual-list-container .form-group {
+            display: flex; /* Handles layout of child elements inside each form-group */
+            flex: 1 1 200px;
+            min-width: 400px;
+            flex-direction: row; /* Aligns child elements horizontally */
+            align-items: center; /* Aligns child elements vertically */
+            gap: 1rem; /* Adds spacing between child elements */
+        }
+        
+        .list-controls {
+            position: relative;
+            top: 10%;
+            display: flex; /* Make the container a flexbox */
+            flex-direction: column; /* Arrange buttons vertically */
+            justify-content: flex-start; /* Align buttons starting at the top */
+            align-items: center; /* Center buttons horizontally */
+            gap: 0.5rem; /* Add spacing between the buttons */
+        }
+        
+        .list-box {
+            width: 150px;
+        }
+        
+        .form-select-content {
+            height: 300px; /* Adjust height of content-related select elements */
+        }
+        
+        .form-select-curriculums {
+            height: 300px; /* Adjust height of curriculum-related select elements */
+        }
+        
+        .accordion-container {
+            width: 100%;
+            margin: 0px auto;
+        }
+        
+        .accordion-header {
+            background-color: #f1f1f1;
+            padding: 10px;
+            cursor: pointer;
+            border: 1px solid #ddd;
+            text-align: center;
+            font-weight: bold;
+        }
+        
+        .accordion-body {
+            display: none; /* Hidden by default */
+            width: 100%;
+            padding-top: 10px;
+            margin: 0px;
+            border-top: 1px solid #ddd;
+            justify-content: space-between;
+            gap: 10px;
+        }
+        
+        .accordion-body.show {
+            display: flex; /* Shows the content when active */
+        }
+        
+        label {
+            margin-bottom: 5px; /* Small spacing between label and input */
+        }
+        
+        input, select {
+            padding: 8px;
+            font-size: 14px;
+            width: 100%; /* Ensures input fills the form group */
+            box-sizing: border-box;
+        }
+        
+        h5 {
+            color: #f5f3e6;
+        }
+        
+        /* Adjust layout for smaller screens */
+        @media (max-width: 800px) {
+            .row-container {
+                flex-wrap: wrap; /* Allow wrapping for smaller screens */
+            }
+            .form-group {
+                flex: 1 1 100%; /* Take full width when stacked */
+                min-width: 100%; /* Ensure full width for smaller screens */
+            }
+        }
+
     </style>
 </head>
 <body>
@@ -15,6 +143,7 @@
         <a href="../admin">
             <img src="{{ url_for('static', filename='images/Web Banner.png') }}" alt="Web Banner" class="banner">
         </a>
+    </div>
     <!-- Navbar with admin buttons -->
     <div id="navbar">
         <p>Logged in as: <strong>{{ username }}</strong></p>
@@ -22,171 +151,612 @@
             <button type="submit">Logout</button> <!-- Logout button -->
         </form>
     </div>
-    <h2>User Data</h2>
     <!--<form id="user-data-form" method="post" action="/update_user">-->
     <form id="user-data-form" onsubmit="submitForm(); return false;">
-        <label for="username">Select User:</label>
-        <select id="username" name="username" onchange="fetchUserData()">
-            <option value="">Select a user</option>
-            {% for user in users %}
-                <option value="{{ user.username }}">{{ user.username }}</option>
-            {% endfor %}
-        </select>
-        
-        <label for="email">Password:</label>
-        <input type="text" id="password" name="password"><br>
+        <!-- Top row container -->
+        <div class="row-container">
+            <div class="form-group">
+                <label for="username">Select User:</label>
+                <select id="username" name="username" onchange="fetchUserData()">
+                    <option value="">Select a user</option>
+                    {% for user in users %}
+                        <option value="{{ user.username }}">{{ user.username }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="form-group">
+                <label for="password">Password:</label>
+                <input type="text" id="password" name="password">
+            </div>
+            <div class="form-group">
+                <label for="email">Email:</label>
+                <input type="email" id="email" name="email">
+            </div>
+        </div>
+        <!-- Second row container -->
+        <div class="row-container">
+            <div class="accordion-container">
+                <div class="accordion-header" onclick="toggleAccordion('accordion1')">Current Status</div>
+                    <div class="accordion-body" id="accordion1">
+                        <div class="form-group">
+                            <label for="completed_curriculums">Completed Curriculums:</label>
+                            <input type="text" id="completed_curriculums" name="completed_curriculums">
+                        </div>
+                        <div class="form-group">
+                            <label for="current_curriculum">Current Curriculum:</label>
+                            <input type="text" id="current_curriculum" name="current_curriculum">
+                        </div>
+                        <div class="form-group">
+                            <label for="current_question">Current Question:</label>
+                            <input type="text" id="current_question" name="current_question">
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+       <!-- Third row container -->
+        <div class="row-container">
+            <div class="accordion-container">
+                <div class="accordion-header" onclick="toggleAccordion('accordion2')">Questions Answered</div>
+                <div class="accordion-body" id="accordion2">
+                    <div class="form-group">
+                        <label for="correct_answers">Correct Answers:</label>
+                        <textarea id="correct_answers" name="correct_answers" rows="4" cols="50"></textarea>
+                    </div>
+                    <div class="form-group">
+                        <label for="incorrect_answers">Incorrect Answers:</label>
+                        <textarea id="incorrect_answers" name="incorrect_answers" rows="4" cols="50"></textarea>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <!-- Fourth row container with one collapsible container for all JSON viewers -->
+        <div class="row-container">
+            <div class="accordion-container">
+                <div class="accordion-header" onclick="toggleAccordion('accordion3')">Student Scores</div>
+                    <div class="accordion-body" id="accordion3">
+                        <div class="form-group">
+                            <label for="content_scores">Content Scores:</label>
+                            <div id="content_scores" class="json-editor"></div>
+                        </div>
+                        <div class="form-group">
+                            <label for="curriculum_scores">Curriculum Scores:</label>
+                            <div id="curriculum_scores" class="json-editor"></div>
+                        </div>
+                        <div class="form-group">
+                            <label for="xp">XP:</label>
+                            <div id="xp" class="json-editor"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <!-- Fifth row container for content assignments -->
+        <div class="row-container">
+          <div class="accordion-container">
+            <div class="accordion-header" onclick="toggleAccordion('accordion4')">Content Area Assignments</div>
+            <div class="accordion-body" id="accordion4">
+              <div class="dual-list-container">
+                <!-- Left Box: Available Content Areas -->
+                <div class="form-group">
+                    <div class="list-box">
+                      <h5>Available Content Areas</h5>
+                      <select id="available-content" class="form-select-content" multiple>
+                        <!-- Placeholder items, will be dynamically generated -->
+                        <option value="content_1"></option>
+                      </select>
+                    </div>
+            
+                    <!-- Control Buttons -->
+                    <div class="list-controls">
+                      <button id="add-content" class="btn btn-primary" type="button">&rarr;</button>
+                      <button id="remove-content" class="btn btn-secondary" type="button">&larr;</button>
+                    </div>
+            
+                    <!-- Right Box: Assigned Content Areas -->
+                    <div class="list-box">
+                      <h5>Assigned Content Areas</h5>
+                      <select id="assigned-content" class="form-select-content" multiple>
+                        <!-- Placeholder items, will be dynamically updated -->
+                        <option value="content_2"></option>
+                      </select>
+                    </div>
+                </div>
+                <!-- Left Box: Available Curriculums -->
+                <div class="form-group">
+                    <div class="list-box">
+                      <h5>Available Curriculums</h5>
+                      <select id="available-curriculums" class="form-select-curriculums" multiple>
+                        <!-- Placeholder items, will be dynamically generated -->
+                        <option value="curriculum_1"></option>
+                      </select>
+                    </div>
+            
+                    <!-- Control Buttons -->
+                    <div class="list-controls">
+                      <button id="add-curriculum" class="btn btn-primary" type="button">&rarr;</button>
+                      <button id="remove-curriculum" class="btn btn-secondary" type="button">&larr;</button>
+                    </div>
+            
+                    <!-- Right Box: Assigned Curriculums -->
+                    <div class="list-box">
+                      <h5>Assigned Curriculums</h5>
+                      <select id="assigned-curriculums" class="form-select-curriculums" multiple>
+                        <!-- Placeholder items, will be dynamically updated -->
+                        <option value=""></option>
+                      </select>
+                    </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
 
-        <label for="email">Email:</label>
-        <input type="email" id="email" name="email"><br>
-        
-        <label for="assigned_content">Assigned Content:</label>
-        <input type="text" id="assigned_content" name="assigned_content"><br>
-
-        <label for="assigned_curriculums">Assigned Curriculums:</label>
-        <input type="text" id="assigned_curriculums" name="assigned_curriculums"><br>
-
-        <label for="completed_curriculums">Completed Curriculums:</label>
-        <input type="text" id="completed_curriculums" name="completed_curriculums"><br>
-        
-        <label for="current_curriculum">Current Curriculum:</label>
-        <input type="text" id="current_curriculum" name="current_curriculum"><br>
-
-        <label for="current_question">Current Question:</label>
-        <input type="text" id="current_question" name="current_question"><br>
-
-        <label for="content_scores">Content Scores:</label>
-        <input type="text" id="content_scores" name="content_scores"><br>
-        
-        <label for="curriculum_scores">Curriculum Scores:</label>
-        <input type="text" id="curriculum_scores" name="curriculum_scores"><br>
-        
-        <label for="xp">XP:</label>
-        <input type="text" id="xp" name="xp"><br>
-
-        <label for="correct_answers">Correct Answers:</label>
-        <input type="text" id="correct_answers" name="correct_answers"><br>
-
-        <label for="incorrect_answers">Incorrect Answers:</label>
-        <input type="text" id="incorrect_answers" name="incorrect_answers"><br>
-        
         <!-- Hidden fields to capture initial values -->
-        <input type="hidden" id="initial_password" name="initial_password">
-        <input type="hidden" id="initial_email" name="initial_email">
-        <input type="hidden" id="initial_assigned_content" name="initial_assigned_content">
-        <input type="hidden" id="initial_assigned_curriculums" name="initial_assigned_curriculums">
-        <input type="hidden" id="initial_completed_curriculums" name="initial_completed_curriculums">
-        <input type="hidden" id="initial_current_curriculum" name="initial_current_curriculum">
-        <input type="hidden" id="initial_current_question" name="initial_current_question">
-        <input type="hidden" id="initial_content_scores" name="initial_content_scores">
-        <input type="hidden" id="initial_curriculum_scores" name="initial_curriculum_scores">
-        <input type="hidden" id="initial_xp" name="initial_xp">
-        <input type="hidden" id="initial_correct_answers" name="initial_correct_answers">
-        <input type="hidden" id="initial_incorrect_answers" name="initial_incorrect_answers">
-
+         <input type="hidden" id="initial_password" name="initial_password">
+         <input type="hidden" id="initial_email" name="initial_email">
+         <input type="hidden" id="initial_assigned_content" name="initial_assigned_content">
+         <input type="hidden" id="initial_assigned_curriculums" name="initial_assigned_curriculums">
+         <input type="hidden" id="initial_completed_curriculums" name="initial_completed_curriculums">
+         <input type="hidden" id="initial_current_curriculum" name="initial_current_curriculum">
+         <input type="hidden" id="initial_current_question" name="initial_current_question">
+         <input type="hidden" id="initial_content_scores" name="initial_content_scores">
+         <input type="hidden" id="initial_curriculum_scores" name="initial_curriculum_scores">
+         <input type="hidden" id="initial_xp" name="initial_xp">
+         <input type="hidden" id="initial_correct_answers" name="initial_correct_answers">
+         <input type="hidden" id="initial_incorrect_answers" name="initial_incorrect_answers">
+         
         <input type="submit" value="Update User">
+        
     </form>
 
     <script>
-        document.addEventListener('DOMContentLoaded', function () {
-            fetch('/get_users')
-                .then(response => response.json())
-                .then(users => {
-                    var dropdown = document.getElementById('username');
-                    users.forEach(username => {
-                        var option = document.createElement('option');
-                        option.value = username;
-                        option.text = username;
-                        dropdown.appendChild(option);
-                    });
-                })
-                .catch(error => console.error('Error fetching usernames:', error));
-        });
     
+        // Declare the editors globally so they are accessible in other functions
+        let contentScoresEditor;
+        let curriculumScoresEditor;
+        let xpEditor;
+        var updatedContentScores = {};
+        var updatedCurriculumScores = {};
+        var updatedXp = {};
+
+        
+        function toggleAccordion(accordionId) {
+            var body = document.getElementById(accordionId);
+            if (body.style.display === "flex") {
+                body.style.display = "none";
+            } else {
+                body.style.display = "flex";
+            }
+        }
+        
+        function clearEditors() {
+            // Only clear the editor content if the editor is initialized
+            if (contentScoresEditor) contentScoresEditor.set(null);
+            if (curriculumScoresEditor) curriculumScoresEditor.set(null);
+            if (xpEditor) xpEditor.set(null);
+        }
+        
+        function initializeEditors() {
+            // Initialize the editors only if they are not initialized
+            if (!contentScoresEditor) {
+                contentScoresEditor = new JSONEditor(document.getElementById('content_scores'), {
+                    mode: 'tree',
+                    onChange: function() {
+                        updatedContentScores = contentScoresEditor.get(); // Store updated data
+                        console.log("Updated Content Scores:", updatedContentScores);
+                    }
+                });
+            }
+        
+            if (!curriculumScoresEditor) {
+                curriculumScoresEditor = new JSONEditor(document.getElementById('curriculum_scores'), {
+                    mode: 'tree',
+                    onChange: function() {
+                        updatedCurriculumScores = curriculumScoresEditor.get(); // Store updated data
+                        console.log("Updated Curriculum Scores:", updatedCurriculumScores);
+                    }
+                });
+            }
+        
+            if (!xpEditor) {
+                xpEditor = new JSONEditor(document.getElementById('xp'), {
+                    mode: 'tree',
+                    onChange: function() {
+                        updatedXp = xpEditor.get(); // Store updated data
+                        console.log("Updated xp Scores:", updatedXp);
+                    }
+                });
+            }
+        }
+
+        
+        async function fetchAndPopulateUsers() {
+            try {
+                const response = await fetch('/get_users');
+                if (!response.ok) {
+                    throw new Error(`HTTP error! Status: ${response.status}`);
+                }
+                const users = await response.json();
+        
+                // Populate the dropdown
+                const dropdown = document.getElementById('username');
+                users.forEach(username => {
+                    const option = document.createElement('option');
+                    option.value = username;
+                    option.text = username;
+                    dropdown.appendChild(option);
+                });
+            } catch (error) {
+                console.error('Error fetching usernames:', error);
+            }
+        }
+
+        async function fetchCourseData() {
+            try {
+                const response = await fetch('/course_data');
+                if (!response.ok) {
+                    throw new Error(`HTTP error! Status: ${response.status}`);
+                }
+                
+                const data = await response.json();
+                
+                // Save the data in session storage
+                sessionStorage.setItem('contentDict', JSON.stringify(data.content_dict));
+                sessionStorage.setItem('allCurriculums', JSON.stringify(data.all_curriculums));
+                
+                // Call the populateSelectionElements after data is successfully loaded
+                populateAvailableSelectionElements();
+
+            } catch (error) {
+                console.error('Error fetching course data:', error);
+            }
+        }
+        
+        function populateAvailableSelectionElements() {
+            // Retrieve available content and curriculums from sessionStorage
+            const availableContent = Object.keys(JSON.parse(sessionStorage.getItem('contentDict'))) || [];
+            const availableCurriculums = JSON.parse(sessionStorage.getItem('allCurriculums')) || [];
+            
+        
+            // Get references to the selection elements
+            const contentSelect = document.getElementById('available-content');
+            const curriculumSelect = document.getElementById('available-curriculums');
+            const assignedContentSelect = document.getElementById('assigned-content');
+            const assignedCurriculumSelect = document.getElementById('assigned-curriculums');
+        
+            // Clear existing options
+            contentSelect.innerHTML = '';
+            curriculumSelect.innerHTML = '';
+            assignedContentSelect.innerHTML = '';
+            assignedCurriculumSelect.innerHTML = '';
+        
+            // Populate content selection element
+            availableContent.forEach(content => {
+                const option = new Option(content, content);
+                contentSelect.appendChild(option);
+            });
+        
+            // Populate curriculum selection element
+            availableCurriculums.forEach(curriculum => {
+                const option = new Option(curriculum, curriculum);
+                curriculumSelect.appendChild(option);
+            });
+        }
+        
+        function populateAssignedSelectionElements(studentAssignedContent, studentAssignedCurriculums) {        
+            // Get references to the selection elements
+            const assignedContentSelect = document.getElementById('assigned-content');
+            const assignedCurriculumSelect = document.getElementById('assigned-curriculums');
+            
+            // Clear existing options
+            assignedContentSelect.innerHTML = '';
+            assignedCurriculumSelect.innerHTML = '';
+            
+            // Populate content assigned element
+            if (studentAssignedContent && studentAssignedContent.length > 0) {
+                studentAssignedContent.forEach(content => {
+                    const option = new Option(content, content);
+                    assignedContentSelect.appendChild(option);
+                });
+            }
+            
+            // Populate curriculum assigned element
+            if (studentAssignedCurriculums && studentAssignedCurriculums.length > 0) {
+                studentAssignedCurriculums.forEach(curriculum => {
+                    const option = new Option(curriculum, curriculum);
+                    assignedCurriculumSelect.appendChild(option);
+                });
+            }
+        }
+        
+        async function fetchCourseData() {
+            try {
+                const response = await fetch('/course_data');
+                if (!response.ok) {
+                    throw new Error(`HTTP error! Status: ${response.status}`);
+                }
+                
+                const data = await response.json();
+                
+                // Save the data in session storage
+                sessionStorage.setItem('contentDict', JSON.stringify(data.content_dict));
+                sessionStorage.setItem('allCurriculums', JSON.stringify(data.all_curriculums));
+                
+                // Call the populateSelectionElements after data is successfully loaded
+                populateAvailableSelectionElements();
+
+            } catch (error) {
+                console.error('Error fetching course data:', error);
+            }
+        }
+        
         function fetchUserData() {
+            // Clear the previous editor content first (this doesn't remove the DOM elements)
+            clearEditors();
+        
             var username = document.getElementById('username').value;
             if (username) {
                 fetch('/get_user_data?username=' + username)
                 .then(response => response.json())
                 .then(data => {
+                    // Populate fields with data as before
                     document.getElementById('email').value = data.email || '';
-                    document.getElementById('assigned_curriculums').value = data.assigned_curriculums ? data.assigned_curriculums.join(', ') : '';
                     document.getElementById('completed_curriculums').value = data.completed_curriculums ? data.completed_curriculums.join(', ') : '';
-                    document.getElementById('content_scores').value = data.content_scores ? JSON.stringify(data.content_scores) : '';
                     document.getElementById('correct_answers').value = data.correct_answers || '';
                     document.getElementById('current_curriculum').value = data.current_curriculum || '';
                     document.getElementById('current_question').value = data.current_question || '';
-                    document.getElementById('curriculum_scores').value = data.curriculum_scores ? JSON.stringify(data.curriculum_scores) : '';
                     document.getElementById('incorrect_answers').value = data.incorrect_answers || '';
-                    document.getElementById('xp').value = data.xp ? JSON.stringify(data.xp) : '';
-                    document.getElementById('assigned_content').value = data.assigned_content ? data.assigned_content.join(', ') : '';
                     
-                    // Capture initial state in hidden fields
-                    document.getElementById('initial_password').value = '';
+                    // Update hidden fields with initial values
+                    document.getElementById('initial_password').value = data.password || '';  // Assuming password is fetched
                     document.getElementById('initial_email').value = data.email || '';
+                    document.getElementById('initial_assigned_content').value = data.assigned_content ? data.assigned_content.join(', ') : '';
                     document.getElementById('initial_assigned_curriculums').value = data.assigned_curriculums ? data.assigned_curriculums.join(', ') : '';
                     document.getElementById('initial_completed_curriculums').value = data.completed_curriculums ? data.completed_curriculums.join(', ') : '';
-                    document.getElementById('initial_content_scores').value = data.content_scores ? JSON.stringify(data.content_scores) : '';
-                    document.getElementById('initial_correct_answers').value = data.correct_answers || '';
                     document.getElementById('initial_current_curriculum').value = data.current_curriculum || '';
                     document.getElementById('initial_current_question').value = data.current_question || '';
-                    document.getElementById('initial_curriculum_scores').value = data.curriculum_scores ? JSON.stringify(data.curriculum_scores) : '';
+                    document.getElementById('initial_content_scores').value = JSON.stringify(data.content_scores) || '{}';
+                    document.getElementById('initial_curriculum_scores').value = JSON.stringify(data.curriculum_scores) || '{}';
+                    document.getElementById('initial_xp').value = JSON.stringify(data.xp) || '{}';
+                    document.getElementById('initial_correct_answers').value = data.correct_answers || '';
                     document.getElementById('initial_incorrect_answers').value = data.incorrect_answers || '';
-                    document.getElementById('initial_xp').value = data.xp ? JSON.stringify(data.xp) : '';
-                    document.getElementById('initial_assigned_content').value = data.assigned_content ? data.assigned_content.join(', ') : '';
+                    
+                    // Call the function to populate the assigned content and curriculums selection boxes
+                    populateAssignedSelectionElements(data.assigned_content, data.assigned_curriculums);
+        
+                    // Reinitialize the editors and populate them with the data
+                    initializeEditors();  // Ensure the editors are initialized before setting data
+        
+                    if (data.content_scores) contentScoresEditor.set(data.content_scores);
+                    if (data.curriculum_scores) curriculumScoresEditor.set(data.curriculum_scores);
+                    if (data.xp) xpEditor.set(data.xp);
                 })
                 .catch(error => console.error('Error fetching user data:', error));
             }
         }
         
         function submitForm() {
-            var username = document.getElementById('username').value;
-            var form = document.getElementById('user-data-form');
-            var formData = new FormData(form);
-            var changes = { username: username };
-            
-            // Assign collections of fields by type
-            var listFields = ['assigned_content', 'assigned_curriculums', 'completed_curriculums', 'correct_answers', 'incorrect_answers'];
-            var dictFields = ['content_scores', 'curriculum_scores', 'xp'];
+            try {
+                var username = document.getElementById('username').value;
+                var form = document.getElementById('user-data-form');
+                var formData = new FormData(form);
+                var changes = { username: username };
         
-            // Fetch only changed fields
-            formData.forEach((value, key) => {
-                var initialKey = 'initial_' + key;
-                // Check if form[initialKey] exists and compare values
-                if (form[initialKey] && form[initialKey].value !== value) {
-                    if (listFields.includes(key)) {
-                        changes[key] = value ? value.split(',').map(item => item.trim()) : [];
-                    } else if (dictFields.includes(key)) {
-                        try {
-                            changes[key] = value ? JSON.parse(value) : {};
-                        } catch (e) {
-                            console.error('Error parsing JSON for key:', key, 'Value:', value, 'Error:', e);
+                // Assign collections of fields by type
+                var listFields = ['assigned_content', 'assigned_curriculums', 'completed_curriculums', 'correct_answers', 'incorrect_answers'];
+                var dictFields = ['content_scores', 'curriculum_scores', 'xp'];
+        
+                // Get assigned content and curriculums
+                var assignedContent = Array.from(document.getElementById('assigned-content').options).map(option => option.value);
+                var assignedCurriculums = Array.from(document.getElementById('assigned-curriculums').options).map(option => option.value);
+        
+                // Add the new assigned content and curriculums to changes object
+                changes['assigned_content'] = assignedContent;
+                changes['assigned_curriculums'] = assignedCurriculums;
+        
+                // Include updated content, curriculum, and xp scores if they exist
+                if (updatedContentScores) {
+                    changes['content_scores'] = updatedContentScores;
+                }
+        
+                if (updatedCurriculumScores) {
+                    changes['curriculum_scores'] = updatedCurriculumScores;
+                }
+        
+                if (updatedXp) {
+                    changes['xp'] = updatedXp;
+                }
+        
+                // Fetch only changed fields
+                formData.forEach((value, key) => {
+                    var initialKey = 'initial_' + key;
+                    // Check if form[initialKey] exists and compare values
+                    if (form[initialKey] && form[initialKey].value !== value) {
+                        if (listFields.includes(key)) {
+                            changes[key] = value ? value.split(',').map(item => item.trim()) : [];
+                        } else if (dictFields.includes(key)) {
+                            try {
+                                changes[key] = value ? JSON.parse(value) : {};
+                            } catch (e) {
+                                console.error('Error parsing JSON for key:', key, 'Value:', value, 'Error:', e);
+                            }
+                        } else {
+                            changes[key] = value;
                         }
-                    } else {
-                        changes[key] = value;
+                    }
+                });
+                
+                const mappingDict = {"assigned_content": "assignedContent",
+                                     "assigned_curriculums": "assignedCurriculums",
+                                     "completed_curriculums": "completedCurriculums"}
+        
+                console.log('Changes to be sent:', changes);
+        
+                fetch('/update_user', {
+                    method: 'POST',
+                    body: JSON.stringify(changes),
+                    headers: {
+                        'Content-Type': 'application/json'
+                    }
+                })
+                .then(response => response.json())
+                .then(data => {
+                    alert(data.message);
+                    if (data.message === "User data updated successfully") {
+                        location.reload(); // Refresh the page
+                    }
+                })
+                .catch(error => console.error('Error updating user data:', error));
+            } catch (err) {
+                console.error('Error during form submission:', err);
+            }
+        }
+
+
+        function setupContentButtons() {
+            // Add Content Button
+            document.getElementById('add-content').addEventListener('click', handleAddContent);
+            document.getElementById('remove-content').addEventListener('click', handleRemoveContent);
+        }
+        
+        function setupCurriculumButtons() {
+            // Add Curriculum Button
+            document.getElementById('add-curriculum').addEventListener('click', handleAddCurriculum);
+            document.getElementById('remove-curriculum').addEventListener('click', handleRemoveCurriculum);
+        }
+        
+        function handleAddContent() {
+            var availableContent = document.getElementById('available-content');
+            var assignedContent = document.getElementById('assigned-content');
+            var selectedContentElement = availableContent.options[availableContent.selectedIndex];
+        
+            if (!selectedContentElement) {
+                alert("Please select a content item to add");
+                return;
+            }
+        
+            if (isContentAlreadyAssigned(selectedContentElement, assignedContent)) {
+                return;
+            }
+        
+            addContentToAssigned(selectedContentElement, assignedContent);
+            addCurriculumsToAssigned(selectedContentElement.value);
+        }
+        
+        function handleRemoveContent() {
+            var assignedContent = document.getElementById('assigned-content');
+            var selectedContentElement = assignedContent.options[assignedContent.selectedIndex];
+        
+            if (!selectedContentElement) {
+                alert("Please select a content item to remove");
+                return;
+            }
+        
+            removeContentFromAssigned(selectedContentElement, assignedContent);
+            removeCurriculumsFromAssigned(selectedContentElement.value);
+        }
+        
+        function handleAddCurriculum() {
+            var availableCurriculums = document.getElementById('available-curriculums');
+            var assignedCurriculums = document.getElementById('assigned-curriculums');
+            var selectedCurriculumElement = availableCurriculums.options[availableCurriculums.selectedIndex];
+        
+            if (!selectedCurriculumElement) {
+                alert("Please select a curriculum to add");
+                return;
+            }
+        
+            addCurriculumToAssigned(selectedCurriculumElement, assignedCurriculums);
+        }
+        
+        function handleRemoveCurriculum() {
+            var assignedCurriculums = document.getElementById('assigned-curriculums');
+            var selectedCurriculumElement = assignedCurriculums.options[assignedCurriculums.selectedIndex];
+        
+            if (!selectedCurriculumElement) {
+                alert("Please select a curriculum to remove");
+                return;
+            }
+        
+            removeCurriculumFromAssigned(selectedCurriculumElement, assignedCurriculums);
+        }
+        
+        function isContentAlreadyAssigned(selectedContentElement, assignedContent) {
+            for (var i = 0; i < assignedContent.options.length; i++) {
+                if (assignedContent.options[i].value === selectedContentElement.value) {
+                    return true;
+                }
+            }
+            return false;
+        }
+        
+        function addContentToAssigned(selectedContentElement, assignedContent) {
+            var newOption = document.createElement('option');
+            newOption.value = selectedContentElement.value;
+            newOption.text = selectedContentElement.text;
+            assignedContent.appendChild(newOption);
+        }
+        
+        function addCurriculumsToAssigned(contentKey) {
+            var contentDict = JSON.parse(sessionStorage.getItem('contentDict'));
+            var baseCurriculums = contentDict[contentKey] || [];
+            var assignedCurriculums = document.getElementById('assigned-curriculums');
+        
+            baseCurriculums.forEach(function(curriculum) {
+                if (![...assignedCurriculums.options].some(option => option.value === curriculum)) {
+                    var curriculumOption = document.createElement('option');
+                    curriculumOption.value = curriculum;
+                    curriculumOption.text = curriculum;
+                    assignedCurriculums.appendChild(curriculumOption);
+                }
+            });
+        }
+        
+        function removeContentFromAssigned(selectedContentElement, assignedContent) {
+            assignedContent.removeChild(selectedContentElement);
+        }
+        
+        function removeCurriculumsFromAssigned(contentKey) {
+            var contentDict = JSON.parse(sessionStorage.getItem('contentDict'));
+            var baseCurriculums = contentDict[contentKey] || [];
+            var assignedCurriculums = document.getElementById('assigned-curriculums');
+        
+            baseCurriculums.forEach(function(curriculum) {
+                for (var i = 0; i < assignedCurriculums.options.length; i++) {
+                    if (assignedCurriculums.options[i].value === curriculum) {
+                        assignedCurriculums.removeChild(assignedCurriculums.options[i]);
+                        break;
                     }
                 }
             });
-        
-            console.log('Changes to be sent:', changes);
-        
-            fetch('/update_user', {
-                method: 'POST',
-                body: JSON.stringify(changes),
-                headers: {
-                    'Content-Type': 'application/json'
-                }
-            })
-            .then(response => response.json())
-            .then(data => {
-                alert(data.message);
-                if (data.message === "User data updated successfully") {
-                    location.reload(); // Refresh the page
-                }
-            })
-            .catch(error => console.error('Error updating user data:', error));
         }
-
+        
+        function addCurriculumToAssigned(selectedCurriculumElement, assignedCurriculums) {
+            for (var i = 0; i < assignedCurriculums.options.length; i++) {
+                if (assignedCurriculums.options[i].value === selectedCurriculumElement.value) {
+                    return; // Curriculum already assigned, exit
+                }
+            }
+        
+            var newCurriculumOption = document.createElement('option');
+            newCurriculumOption.value = selectedCurriculumElement.value;
+            newCurriculumOption.text = selectedCurriculumElement.text;
+            assignedCurriculums.appendChild(newCurriculumOption);
+        }
+        
+        function removeCurriculumFromAssigned(selectedCurriculumElement, assignedCurriculums) {
+            assignedCurriculums.removeChild(selectedCurriculumElement);
+        }
+        
+        document.addEventListener('DOMContentLoaded', function () {
+            initializeEditors();
+            fetchAndPopulateUsers();
+            fetchCourseData();
+            
+            setupContentButtons();
+            setupCurriculumButtons();
+        });
     </script>
-
 </body>
 </html>

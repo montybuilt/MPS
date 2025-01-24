@@ -36,7 +36,15 @@ async function fetchXPData() {
         const data = await response.json();
 
         if (data.xpData) {
-            localStorage.setItem("xpData", JSON.stringify(data.xpData));
+        
+            // Retrieve existing xpData
+            const existingXPData = JSON.parse(localStorage.getItem("xpData")) || [];
+            
+            // Merge existing and new xpData
+            const mergedXPData = [...existingXPData, ...data.xpData];
+            
+            // Store the merged xpData and other items back into localStorage
+            localStorage.setItem("xpData", JSON.stringify(mergedXPData));
             localStorage.setItem("xpLastFetchedDatetime", data.xpLastFetchedDatetime);
             localStorage.setItem("xpUsername", data.xpUsername);
             console.log("XP Data updated and stored.");
@@ -92,7 +100,7 @@ function getXPDataForChart() {
     const totalXPSeries = { x: [], y: [] };
     let cumulativeTotal = 0;
 
-    xpData.forEach(record => {
+    xpData.forEach((record, index) => {
         const { curriculum_id, dXP, timestamp } = record;
 
         if (!cumulativeData[curriculum_id]) {
@@ -105,11 +113,11 @@ function getXPDataForChart() {
 
         // Ensure each series has points for each timestamp
         Object.keys(cumulativeData).forEach(id => {
-            seriesData[id].x.push(new Date(timestamp));
+            seriesData[id].x.push(index); //new Date(timestamp));
             seriesData[id].y.push(cumulativeData[id]);
         });
 
-        totalXPSeries.x.push(new Date(timestamp));
+        totalXPSeries.x.push(index); //new Date(timestamp));
         totalXPSeries.y.push(cumulativeTotal);
     });
 
@@ -151,12 +159,28 @@ function drawAreaChart() {
 
     const layout = {
         title: { text: 'XP Accumulation Over Time', font: { color: 'white' } },
-        xaxis: { title: 'Time', type: 'date', tickformat: '%d/%m %H:%M', color: 'white', gridcolor: 'rgba(255, 255, 255, 0.2)' },
-        yaxis: { title: 'XP', rangemode: 'tozero', color: 'white', gridcolor: 'rgba(255, 255, 255, 0.2)' },
+        xaxis: {
+            title: '',
+            showticklabels: false, // Hide x-axis labels
+            color: 'white',
+            gridcolor: 'rgba(255, 255, 255, 0.2)'
+        },
+        yaxis: {
+            title: 'XP',
+            rangemode: 'tozero',
+            color: 'white',
+            gridcolor: 'rgba(255, 255, 255, 0.2)',
+            side: 'right' // Move y-axis labels to the right side
+        },
         paper_bgcolor: 'black',
         plot_bgcolor: 'black',
-        showlegend: true,
-        legend: { orientation: 'h', x: 0.5, xanchor: 'center', y: -0.2, font: { color: 'white' } }
+        showlegend: false, // Hide legend
+        margin: {
+            l: 20,
+            r: 30,
+            t: 40,
+            b: 20,
+        }
     };
 
     Plotly.newPlot('xpChart', data, layout);

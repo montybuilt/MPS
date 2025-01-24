@@ -17,7 +17,6 @@ class User(db.Model):
     username = db.Column(db.String(120), unique=True, nullable=False, index=True)
     password_hash = db.Column(db.LargeBinary, nullable=False)
     email = db.Column(db.String(254), unique=True, nullable=True, index=True)
-    role = db.Column(db.String(50), default='student')
     classroom_codes = db.Column(db.String(120), index=True)
     assigned_curriculums = db.Column(db.JSON, default=[], index=True)
     assigned_content = db.Column(db.JSON, default=[], index=True)
@@ -39,6 +38,7 @@ class User(db.Model):
 class Classroom(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     code = db.Column(db.String(120), unique=True, nullable=False, index=True)
+    assigned_content = db.Column(db.JSON, default=[], nullable=True)
     admin_id = db.Column(db.Integer, db.ForeignKey('admin.id'), nullable=False)
     name = db.Column(db.String(120), nullable=False)
     admin = db.relationship('Admin', backref='classrooms')  # An admin manages many classrooms
@@ -119,4 +119,3 @@ class Projects(db.Model):
 
 if __name__ == "__main__":
     print("models.py")
-

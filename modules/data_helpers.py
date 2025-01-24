@@ -1,8 +1,8 @@
 # Import packages
 import bcrypt
-from modules.models import db, User, Questions, XP
-from sqlalchemy.exc import SQLAlchemyError
-from datetime import datetime, timezone
+from modules.models import db, User, Questions, XP, Content, Curriculum
+from sqlalchemy.exc import SQLAlchemyError, IntegrityError
+from datetime import datetime
 
 # Create data defaults
 defaults = {    
@@ -57,14 +57,6 @@ class CRUDHelper:
         except SQLAlchemyError as e:
             raise e
 
-
-    def read2(self, **kwargs):
-        try:
-            records = self.model.query.filter_by(**kwargs).all()
-            return records
-        except SQLAlchemyError as e:
-            raise e
-
     def update(self, id, **kwargs):
         try:
             record = self.model.query.get(id)
@@ -84,6 +76,22 @@ class CRUDHelper:
             return True
         except SQLAlchemyError as e:
             db.session.rollback()
+            raise e
+
+    def get_column_values(self, column_name):
+        '''fetch all values for a specified column in the table'''
+        try:
+            # Fetch the column from the model
+            column = getattr(self.model, column_name)
+            
+            # Query all values from the column
+            values = self.model.query.with_entities(column).all()
+            
+            # Extract values, place in list and return
+            return [row[0] for row in values]
+        except AttributeError:
+            raise ValueError(f"Column '{column_name}' does not exist!")
+        except SQLAlchemyError as e:
             raise e
 
 def verify(username, password):
@@ -391,4 +399,82 @@ def fetch_xp_data(user_id, last_fetched_date, logger=None):
         print(f"Error fetching XP data: {e}")
         return None
 
+def fetch_course_data(logger=None):
+    '''Fetch all course content, base curriculums and custom curriculums'''
+    try:
+        # Fetch all records from the Content table
+        content_crud = CRUDHelper(Content)
+        records = content_crud.read()
+        
+        # Construct the dictionary of all content and base curriculums
+        content_dict = {record.content_id: record.base_curriculums for record in records}
+        
+        # Fetch the all curriculums list from the Curriculum table
+        curriculum_crud = CRUDHelper(Curriculum)
+        all_curriculums = curriculum_crud.get_column_values("curriculum_id")
+        
+        return {"content_dict": content_dict, "all_curriculums": all_curriculums}
+        
+    except Exception as e:
+        if logger:
+            logger.error(f"Problem getting course content: {e}")
+        return {}
 
+def fetch_course_data2(logger=None):
+    """Fetch available content and curriculums."""
+    try:
+        course_crud = CRUDHelper(Content)
+
+        available_content = course_crud.get_column_values("id")
+        base_curriculums = course_crud.get_column_values("base_curriculums")
+
+        # Flattening the list of base_curriculums
+        all_base_curriculums = [item for sublist in base_curriculums for item in sublist]
+        
+        # Debug logging
+        #logger.debug(f"Available Content: {available_content}")
+        #logger.debug(f"Base Curriculums: {all_base_curriculums}")
+        
+        return [available_content, all_base_curriculums]
+
+    except Exception as e:
+        if logger:
+            logger.error(f"Problem getting course content: {e}")
+        return [[], []]
+
+def add_new_content(item_id, table, logger=None):
+    '''
+    Function to add a new content area to the content table
+    Arg(s): unique content name, logger object
+    Returns: Success code if unique content_id added
+    '''
+    # Create the CRUDHelper object
+    
+    try:
+        
+        if table == 'content':
+            # Create helper for Content table
+            c_CRUD = CRUDHelper(Content)
+            # Add the new content_id
+            c_CRUD.create(content_id = item_id, base_curriculums = [])
+            # Return a success message
+            return f"content_id {item_id} added to the database"
+        
+        elif table == 'curriculum':
+            # Create helper for Curriculum table
+            c_CRUD = CRUDHelper(Curriculum)
+            # Add the new curriculum_id
+            c_CRUD.create(curriculum_id = item_id, task_list = [])
+            # Return a success message
+            return f"curriculum_id {item_id} added to the database"
+        
+        else:
+            raise Exception(f"Attempting to write to a non-existing table: {table}")
+        
+    except IntegrityError as ie:
+        logger.debug(f"Item ID {item_id} not unique: {ie}")
+        raise ie
+    except Exception as e:
+        logger.debug(f"Unexpected error writing item ID {item_id} to the database: {e}")
+        raise e
+    

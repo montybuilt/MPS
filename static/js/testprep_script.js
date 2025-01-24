@@ -164,7 +164,7 @@ function rickRoll() {
 
 //--------------------------------------------------------------------------------------
 
-
+// Function POSTs session data to the database
 function updateSessionData() {
     const sessionData = {
         completedCurriculums: JSON.parse(sessionStorage.getItem('completedCurriculums')),

@@ -1,11 +1,10 @@
 # Import packages
-import subprocess, logging, secrets, os, json
+import subprocess, logging, secrets, os
 from flask_migrate import Migrate
 from flask import Flask, render_template, request, jsonify, session, redirect, url_for
-from modules import Question, Curriculum, verify, login_required, hashit, fetch_usernames, fetch_user_data
-from modules import db, initialize_user_session_data, update_user_session_data, create_new_user, update_user_data
-from modules import delete_user, fetch_question, fetch_task_keys, update_question, new_question, update_xp_data
-from modules import fetch_xp_data
+from sqlalchemy.exc import SQLAlchemyError, IntegrityError
+from modules import *
+from modules import db
 
 
 # Create the flask object
@@ -245,7 +244,7 @@ def update_user():
     if session.get('is_admin'):
         
         changes = request.json
-        
+        app.logger.debug(f"Changes: {changes}")
         username = changes.pop('username', None)  # Extract username from changes
         
         if not username:
@@ -315,6 +314,17 @@ def run_code():
         
     return jsonify({'output': output})
 
+@app.route('/course_content', methods=['GET'])
+def course_content():
+    '''Route to draw the course_content page'''
+    username = session.get('username')
+    
+    # Check if the user is an admin
+    if not session.get('is_admin'):
+        return redirect(url_for('index'))  # Redirect non-admin users
+
+    return render_template('course_content.html', username=username)  # Render the content creation page
+    
 # Route to the admin content creation page "content"
 @app.route('/content', methods=['GET'])
 def content_page():
@@ -326,6 +336,30 @@ def content_page():
         return redirect(url_for('index'))  # Redirect non-admin users
 
     return render_template('content.html', username=username)  # Render the content creation page        
+
+@app.route('/new_content_or_curriculum', methods=['GET', 'POST'])
+def new_content():
+    '''Route to add new content IDs'''
+    
+    # Check if the user is an admin
+    if not session.get('is_admin'):
+        return redirect(url_for('index'))  # Redirect non-admin users
+    
+    # Extract the new content_id
+    new_content = request.get_json()
+    content_id = new_content['data']
+    table = new_content['table']
+    
+    try:
+        add_new_content(content_id, table, app.logger)
+        return jsonify({"message": "New content added"}), 201
+    
+    except IntegrityError as ie:
+        return jsonify({"error": f"Content ID already exists: {ie}"}), 409
+    
+    except Exception as e:
+        return jsonify({"error": f"Database Error: {e}"}), 500
+    
 
 @app.route('/content_keys', methods=['GET'])
 def content_keys():
@@ -373,7 +407,7 @@ def submit_question():
 
 @app.route('/content_data', methods=['POST'])
 def content_data():
-    '''This function gets a question for the content page'''
+    '''This function gets a question for the testprep page'''
     
     #Extract the question key from the request
     data = request.get_json()
@@ -409,8 +443,17 @@ def update_xp():
     except Exception as e:
         return jsonify({"status": "error", "message":str(e)}), 500
     
+@app.route('/course_data', methods=['GET'])
+def course_data():
+    try:
+        course_content = fetch_course_data(app.logger)
+        
+        return jsonify(course_content), 200
+    except Exception as e:
+        app.logger.error(f"Error in /course_data: {e}")
+        return jsonify({'message': 'Error fetching course data'}), 500
 
 #------------------------------------------------------------------------------------------#
 
 if __name__ == '__main__':
-    app.run(debug=False)
+    app.run(debug=True)
