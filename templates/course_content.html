@@ -213,7 +213,7 @@
                             <div class="form-group">
                                 <label for="content-selector">Select Content Area:</label>
                                 <select id="content-selector" class="form-select">
-                                    <!-- Options dynamically loaded -->
+                                    <option value="" disabled selected>Select Content</option>
                                 </select>
                             </div>
                             <div class="form-group">
@@ -337,7 +337,7 @@
         }
     }
     
-    // Event listenera or the content-selector dropdown
+    // Event listener for the content-selector dropdown
     document.getElementById('content-selector').addEventListener('change', function() {
         const selectedContentId = this.value;
         populateCurriculumsLists(selectedContentId);
@@ -348,7 +348,19 @@
         const contentDict = JSON.parse(sessionStorage.getItem('contentDict')) || {};
         const keys = Object.keys(contentDict);
         const dropdown = document.getElementById('content-selector');
+    
+        // Clear existing options
         dropdown.innerHTML = "";
+    
+        // Add default "Select Content" option
+        const defaultOption = document.createElement('option');
+        defaultOption.value = "";
+        defaultOption.textContent = "Select Content";
+        defaultOption.disabled = true; // Prevent selection
+        defaultOption.selected = true; // Make it the default selected option
+        dropdown.appendChild(defaultOption);
+    
+        // Populate dropdown with dynamic options
         keys.forEach(key => {
             const option = document.createElement('option');
             option.value = key;
@@ -356,6 +368,7 @@
             dropdown.appendChild(option);
         });
     }
+
     
     // Populate the Available and Assigned Curriculums list
     function populateCurriculumsLists(contentId) {
@@ -472,41 +485,10 @@
         
     }    
     
-    function setupCurriculumButtons() {
+    function assignCurriculumToContentButtons() {
         // Add Curriculum Button
         document.getElementById('add-curriculum').addEventListener('click', handleAddCurriculum);
         document.getElementById('remove-curriculum').addEventListener('click', handleRemoveCurriculum);
-    }
-    
-    function handleAddContent() {
-        var availableContent = document.getElementById('available-content');
-        var assignedContent = document.getElementById('assigned-content');
-        var selectedContentElement = availableContent.options[availableContent.selectedIndex];
-    
-        if (!selectedContentElement) {
-            alert("Please select a content item to add");
-            return;
-        }
-    
-        if (isContentAlreadyAssigned(selectedContentElement, assignedContent)) {
-            return;
-        }
-    
-        addContentToAssigned(selectedContentElement, assignedContent);
-        addCurriculumsToAssigned(selectedContentElement.value);
-    }
-    
-    function handleRemoveContent() {
-        var assignedContent = document.getElementById('assigned-content');
-        var selectedContentElement = assignedContent.options[assignedContent.selectedIndex];
-    
-        if (!selectedContentElement) {
-            alert("Please select a content item to remove");
-            return;
-        }
-    
-        removeContentFromAssigned(selectedContentElement, assignedContent);
-        removeCurriculumsFromAssigned(selectedContentElement.value);
     }
     
     function handleAddCurriculum() {
@@ -519,10 +501,16 @@
             return;
         }
     
+        // Move the selected curriculum to the assigned-curriculums list
         addCurriculumToAssigned(selectedCurriculumElement, assignedCurriculums);
+    
+        // Remove the selected curriculum from the available-curriculums list
+        availableCurriculums.removeChild(selectedCurriculumElement);
     }
+
     
     function handleRemoveCurriculum() {
+        var availableCurriculums = document.getElementById('available-curriculums');
         var assignedCurriculums = document.getElementById('assigned-curriculums');
         var selectedCurriculumElement = assignedCurriculums.options[assignedCurriculums.selectedIndex];
     
@@ -531,7 +519,11 @@
             return;
         }
     
-        removeCurriculumFromAssigned(selectedCurriculumElement, assignedCurriculums);
+        // Remove the selected curriculum from the assigned-curriculums list
+        assignedCurriculums.removeChild(selectedCurriculumElement);
+    
+        // Add the selected curriculum back to the available-curriculums list
+        availableCurriculums.appendChild(selectedCurriculumElement);
     }
     
     function isContentAlreadyAssigned(selectedContentElement, assignedContent) {
@@ -541,13 +533,6 @@
             }
         }
         return false;
-    }
-    
-    function addContentToAssigned(selectedContentElement, assignedContent) {
-        var newOption = document.createElement('option');
-        newOption.value = selectedContentElement.value;
-        newOption.text = selectedContentElement.text;
-        assignedContent.appendChild(newOption);
     }
     
     function addCurriculumsToAssigned(contentKey) {
@@ -602,7 +587,11 @@
     }
     
     document.addEventListener('DOMContentLoaded', function () {
+        // Fetch course data when page loads
         fetchCourseData();
+        
+        // Attach event listeners tot eh add/remove buttons
+        assignCurriculumToContentButtons();  // for content/curriculum pairings
        
     });
     </script>
