@@ -70,6 +70,7 @@ class Content(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     content_id = db.Column(db.String(120), unique=True, index=True, nullable=False)
     base_curriculums = db.Column(db.JSON, default=[])
+    creator_id = db.Column(db.Integer, db.ForeignKey('admin.id'), nullable=True)
         
     def __repr__(self):
         return f'<Content: {self.content_id}>'
@@ -78,6 +79,7 @@ class Curriculum(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     curriculum_id = db.Column(db.String(120), unique=True, index=True, nullable=False)
     task_list = db.Column(db.JSON, default=[])
+    creator_id = db.Column(db.Integer, db.ForeignKey('admin.id'), nullable=True)
     
     def __repr__(self):
         return f'Curriculum ID: {self.curriculum_id};'
@@ -97,6 +99,7 @@ class Questions(db.Model):
     video_end = db.Column(db.Integer)
     difficulty = db.Column(db.Float)
     tags = db.Column(db.JSON, default=[])
+    creator_id = db.Column(db.Integer, db.ForeignKey('admin.id'), nullable=True)
     
     def __repr__(self):
         return f'Question: {self.task_key}'
@@ -113,6 +116,7 @@ class Projects(db.Model):
     video = db.Column(db.String(500))
     difficulty = db.Column(db.Float)
     tags = db.Column(db.JSON, default=[])
+    creator_id = db.Column(db.Integer, db.ForeignKey('admin.id'), nullable=True)
     
     def __repr__(self):
         return f'Question: {self.task_key}'

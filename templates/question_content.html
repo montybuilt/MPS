@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Question Editor</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.5/codemirror.min.css">
+    <link rel="stylesheet" href="../static/css/styles.css">
+    <link rel="stylesheet" href="../static/css/form_styles.css">
+    <link rel="icon" type="image/png" sizes="32x32" href="../static/images/watermark.png">
+    <style>
+    #nav-panel {
+        display: flex;
+        flex-direction: row; /* Arrange elements in a row */
+        gap: 10px; /* Adjust the gap between elements */
+        width: 100%; /* Ensure the panel uses full width */
+        align-items: center; /* Align items vertically in the center */
+    }
+    
+    .form-select {
+        width: 25%; /* Set the width for the select element */
+        padding: 8px;
+        border: 1px solid #ccc;
+        border-radius: 4px;
+        font-size: 14px;
+    }
+    
+    #newQuestionKey {
+        width: 25%; /* Set the width for the input element */
+        padding: 8px;
+        border: 1px solid #ccc;
+        border-radius: 4px;
+        font-size: 14px;
+    }
+    
+    .navButton {
+        width: 10%; /* Set the width for the buttons */
+        padding: 8px;
+        border-radius: 4px;
+        font-size: 16px;
+    }
+
+    </style>
+</head>
+<body>
+    <!-- Banner image at the top -->
+    <div id="banner-container">
+        <a href="../admin">
+            <img src="{{ url_for('static', filename='images/Web Banner.png') }}" alt="Web Banner" class="banner">
+        </a>
+    </div>
+    
+    <!-- Navbar with admin buttons -->
+    <div id="navbar">
+        <p>Logged in as: <strong>{{ username }}</strong></p>
+        <form action="/logout" method="POST" id="logout-form">
+            <button type="submit">Logout</button> <!-- Logout button -->
+        </form>
+    </div>
+    
+    <h2>Question Editor</h2>
+
+    <!-- Navigation Panel -->
+    <div class="content-page">
+        <div id="nav-panel">
+            <select id="question-selector" class="form-select">
+                <option value="" disabled selected>Select a question ID</option>
+            </select>
+            <button class="navButton" id="prevQuestion">Previous</button>
+            <button class="navButton" id="nextQuestion">Next</button>
+            <label></label>
+            <label></label>
+            <label></label>
+            <label></label>
+            <label></label>
+            <button class="navButton" id="newQuestion">New Question</button>
+            <input type="text" id="newQuestionKey" placeholder="Enter new ID">
+        </div>
+
+    </div>
+
+    <!-- Container for the form -->
+    <div class="content-page">
+        <div id="form-container">
+            <!-- Left Column: Question Key, Code, Difficulty, and Tags -->
+            <div id="left-column">
+                
+    
+                <label for="code">Code:</label>
+                <textarea id="code" name="code"></textarea>
+                
+                <label for="description">Description:</label>
+                <textarea id="description"></textarea>
+                
+                <label for="tags">Tags (comma separated):</label>
+                <input type="text" id="tags">
+            </div>
+    
+            <!-- Right Column: Additional Fields -->
+            <div id="right-column">
+                <label for="questionStem">Question Stem:</label>
+                <textarea id="questionStem" required>What is the expected output of this code?</textarea>
+    
+                <label for="answer">Answer:</label>
+                <input type="text" id="answer" required>
+    
+                <label for="distractor1">Distractor 1:</label>
+                <input type="text" id="distractor1" required>
+    
+                <label for="distractor2">Distractor 2:</label>
+                <input type="text" id="distractor2" required>
+    
+                <label for="distractor3">Distractor 3:</label>
+                <input type="text" id="distractor3" required>
+                
+                <label for="difficulty">Difficulty:</label>
+                <input type="number" id="difficulty" min="0" max="3" step="0.1" required>
+    
+                <label for="videoURL">Video URL:</label>
+                <input type="url" id="videoURL">
+    
+                <label for="videoStart">Video Start Time:</label>
+                <input type="number" id="videoStart">
+    
+                <label for="videoEnd">Video End Time:</label>
+                <input type="number" id="videoEnd">
+    
+                <button type="submit" id="submitQuestion">Submit Question</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Link to JS libraries -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.5/codemirror.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.5/mode/python/python.min.js"></script>
+    <script src="{{ url_for('static', filename='js/question_content_script.js') }}"></script>
+
+</body>
+</html>

@@ -32,17 +32,18 @@ migrate = Migrate(app, db)
 # Path to content.json located in the data directory
 content_file_path = os.path.join('data', 'content.json')
 
+# Define admin users
+admin_users = ['amontanus', 'teacherA', 'teacherB']
+
 @app.route('/')
 def index():
-    
-    # List of admin users
-    admin_users = ['amontanus']
     
     # Get the username
     username = session.get('username')
     
     # Check to see if user is an admin
-    is_admin = username in admin_users
+    is_admin = is_user_admin(username)
+    app.logger.debug(f"Is admin: {is_admin}")
     
     return render_template('index.html', username = username, is_admin = is_admin)
 
@@ -57,7 +58,7 @@ def login():
 
         if result is True:  # If the verification was successful
             session['username'] = username
-            session['is_admin'] = username in ['amontanus']
+            session['is_admin'] = is_user_admin(username)
             session_data = initialize_user_session_data(username)
 
             return jsonify({'message': 'Login successful', 'session_data': session_data, 'username': username}), 200
@@ -284,17 +285,29 @@ def task_request():
 
 @app.route('/get_curriculum', methods=['POST'])
 def get_curriculum():
-    '''This function gets the curriculum content based on the user's key-input'''
+    '''This function gets the questions list for the curriculum_id'''
     
     #Extract the key input from the request
     data = request.get_json()
-    curriculum_id = data.get('key-input').lower()
+    if data.get('key-input'):
+        curriculum_id = data.get('key-input').lower()
+        app.logger.debug(f"Curriculum ID: {curriculum_id}")
+    else:
+        return jsonify({"error": "No curriculum ID given"}), 400
     
     # create a question object that retrieves the question data as an attribute
-    curriculum_data = Curriculum(curriculum_id).data
+    # curriculum_data = Curriculum(curriculum_id).data
     
-    # Respond to the request by returning the data as a json
-    return jsonify(curriculum_data)
+    try:
+        curriculum_data = fetch_curriculum_task_list(curriculum_id)
+        app.logger.debug(f"Task List: {curriculum_data}")
+        return jsonify(curriculum_data)
+        
+    except IntegrityError as ie:
+        return jsonify({"error": f"Curriculum ID not found: {ie}"}), 404
+    
+    except Exception as e:
+        return jsonify({"error": f"Error fetching task list: {e}"}), 500
 
 @app.route('/run_code', methods=['POST'])
 def run_code():
@@ -326,8 +339,8 @@ def course_content():
     return render_template('course_content.html', username=username)  # Render the content creation page
     
 # Route to the admin content creation page "content"
-@app.route('/content', methods=['GET'])
-def content_page():
+@app.route('/question_content', methods=['GET'])
+def question_content_page():
     
     username = session.get('username')
     
@@ -335,7 +348,7 @@ def content_page():
     if not session.get('is_admin'):
         return redirect(url_for('index'))  # Redirect non-admin users
 
-    return render_template('content.html', username=username)  # Render the content creation page        
+    return render_template('question_content.html', username=username)  # Render the content creation page        
 
 @app.route('/new_content_or_curriculum', methods=['GET', 'POST'])
 def new_content():
@@ -360,14 +373,54 @@ def new_content():
     except Exception as e:
         return jsonify({"error": f"Database Error: {e}"}), 500
     
-
-@app.route('/content_keys', methods=['GET'])
-def content_keys():
+@app.route('/question_keys', methods=['GET'])
+@role_required(role=['system', 'teacher'], restricted=True)
+def question_keys(user_id=None, restricted=False):
     try:
-        task_keys = fetch_task_keys()
+        task_keys = fetch_task_keys(user_id, restricted)
         return jsonify({"keys": task_keys}), 200
     except Exception as e:
         return jsonify({"error": f"Failed to load keys: {e}"}), 500
+
+@app.route('/assign_curriculum_to_content', methods=['GET', 'POST'])
+def assign_curriculum_to_content():
+    '''Route to write content + base curriculum assignments to database'''
+    
+    # # Check if the user is an admin
+    if not session.get('is_admin'):
+        return redirect(url_for('index'))  # Redirect non-admin users
+    
+    # Extract the content_id and curriculum assignments
+    content_assignments = request.get_json()
+    content_id = content_assignments['content_id']
+    base_curriculums = content_assignments['base_curriculums']
+    
+    # Call the helper function to write to the database
+    update_content_assignments(content_assignments, app.logger)
+    
+    app.logger.debug(f"Content ID: {content_id} - Base C: {base_curriculums}")
+    
+    return jsonify({'content': 'Request received'}), 200
+
+@app.route('/assign_tasks_to_curriculum', methods=['GET', 'POST'])
+def assign_tasks_to_content():
+    '''Route to write content + base curriculum assignments to database'''
+    
+    # # Check if the user is an admin
+    if not session.get('is_admin'):
+        return redirect(url_for('index'))  # Redirect non-admin users
+    
+    # Extract the content_id and curriculum assignments
+    curriculum_assignments = request.get_json()
+    curriculum_id = curriculum_assignments['curriculum_id']
+    task_list = curriculum_assignments['task_list']
+    
+    # Call the helper function to write to the database
+    update_curriculum_assignments(curriculum_assignments, app.logger)
+    
+    app.logger.debug(f"Content ID: {curriculum_id} - Base C: {task_list}")
+    
+    return jsonify({'content': 'Request received'}), 200
 
 @app.route('/submit_question', methods=['POST'])
 @login_required
@@ -375,6 +428,7 @@ def submit_question():
     """Saves a new question or updates an existing question in the database."""
     try:
         # Authorization check
+        username = session.get('username')
         if not session.get('is_admin'):
             app.logger.warning("Unauthorized access attempt to submit_question.")
             return jsonify({"error": "Unauthorized access."}), 401
@@ -394,7 +448,7 @@ def submit_question():
         if is_new:
             # Handle new question insertion
             question_data['task_key'] = question_key
-            new_question(question_data, app.logger)
+            new_question(question_data, username, app.logger)
             return jsonify({"message": "New question added."}), 201
 
         # Handle question update

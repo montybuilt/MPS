@@ -1,7 +1,6 @@
 # Import packages
-import json, os, logging
+import json, os, logging, bcrypt
 from flask import session, redirect, url_for
-import bcrypt
 from functools import wraps
 
 # Set up logging
@@ -15,14 +14,14 @@ def hashit(password):
     '''function to hash+salt a raw password'''
     return bcrypt.hashpw(password.encode('utf-8'), bcrypt.gensalt())
     
-def login_required(f):
-    """Decorator to check if user is logged in."""
-    @wraps(f)
-    def decorated_function(*args, **kwargs):
-        if 'username' not in session:  # Check if the username is in the session
-            return redirect(url_for('index'))  # Redirect if not logged in
-        return f(*args, **kwargs)  # Proceed with the original function if logged in
-    return decorated_function
+# def login_required(f):
+#     """Decorator to check if user is logged in."""
+#     @wraps(f)
+#     def decorated_function(*args, **kwargs):
+#         if 'username' not in session:  # Check if the username is in the session
+#             return redirect(url_for('index'))  # Redirect if not logged in
+#         return f(*args, **kwargs)  # Proceed with the original function if logged in
+#     return decorated_function
 
 class SourceArgError(Exception):
     def __init__(self, badargs):

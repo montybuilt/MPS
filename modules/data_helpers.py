@@ -1,10 +1,16 @@
 # Import packages
 import bcrypt
-from modules.models import db, User, Questions, XP, Content, Curriculum
+from flask import session, redirect, url_for, jsonify
+from modules.models import db, User, Admin, Questions, XP, Content, Curriculum
 from sqlalchemy.exc import SQLAlchemyError, IntegrityError
 from datetime import datetime
+from functools import wraps
+from werkzeug.exceptions import Forbidden
 
-# Create data defaults
+####################################################################################
+#### Default Variables #############################################################
+####################################################################################
+
 defaults = {    
                 "assigned_content" : ["intro"],
                 "assigned_curriculums" : ["intro"],
@@ -14,6 +20,10 @@ defaults = {
                 "curriculum_scores" : {"intro":{"Earned":0, "Possible":0}},
                 "xp" : {"overallXP": 0.0, "certifications": {"tutorial": {"xp_1": 0}}}
             }
+
+####################################################################################
+#### Classes #######################################################################
+####################################################################################
 
 class CRUDHelper:
     ''' Generalized Class for database operations '''
@@ -94,6 +104,59 @@ class CRUDHelper:
         except SQLAlchemyError as e:
             raise e
 
+####################################################################################
+#### Decorators ####################################################################
+####################################################################################
+
+def login_required(f):
+    """Decorator to check if user is logged in."""
+    @wraps(f)
+    def decorated_function(*args, **kwargs):
+        if 'username' not in session:  # Check if the username is in the session
+            return redirect(url_for('index'))  # Redirect if not logged in
+        return f(*args, **kwargs)  # Proceed with the original function if logged in
+    return decorated_function
+
+def role_required(role=None, restricted=False):
+    def wrapper(func):
+        @wraps(func)
+        def inner(*args, **kwargs):
+            # Get the username from the session
+            username = session.get('username')  # Ensure that username is stored in the session
+            if not username:
+                return jsonify({"error": "Unauthorized"}), 401
+            
+            # Get the user record
+            user = User.query.filter_by(username=username).first()
+            if not user:
+                return jsonify({"error": "User not found"}), 401
+            
+            # Get the user's role from the Admin table
+            admin_record = Admin.query.filter_by(id=user.id).first()  # Assuming user.id = admin.id
+            if not admin_record:
+                return jsonify({"error": "Forbidden: User is not an admin"}), 403
+            
+            # Check if the user's role is allowed
+            user_role = admin_record.role
+            if role and user_role not in role:
+                return jsonify({"error": "Forbidden: Insufficient role"}), 403
+
+            # Handle restricted access
+            if not restricted or admin_record.role == 'system':
+                kwargs = {}
+            else:
+                kwargs['user_id'] = user.id
+                kwargs['restricted'] = True            
+            
+            return func(*args, **kwargs)
+        return inner
+    return wrapper
+
+
+####################################################################################
+#### Functions# ####################################################################
+####################################################################################
+
 def verify(username, password):
     """Verify username and password"""
     try:
@@ -111,7 +174,26 @@ def verify(username, password):
 
     except Exception as e:
         return f"Error verifying user: {e}"  # General error message
+
+def fetch_usernames():
+    '''Function to fetch all usernames'''
+    return User.query.all()
+
+def is_user_admin(username):
+    # Fetch the user record by username
+    user = User.query.filter_by(username=username).first()
     
+    if not user:
+        return False  # If user not found, return False
+    
+    # Check if the user ID exists in the Admin table
+    admin = Admin.query.filter_by(id=user.id).first()
+    
+    if admin:
+        return True  # User is an admin
+    else:
+        return False  # User is not an admin
+
 def initialize_user_session_data(username):
     '''Sync the sessionStorage to the database at login'''
     
@@ -136,7 +218,7 @@ def initialize_user_session_data(username):
         return session_data
 
     except Exception as e:
-        return f"Error retrieving data: {e}"  # General error message
+        return f"Error retrieving data: {e}"  # General error message 
 
 def update_user_session_data(username, session_data, logger=None):
     '''Function to update database with user session data'''
@@ -207,10 +289,6 @@ def create_new_user(username, password, email):
     except Exception as e:
         raise e
 
-def fetch_usernames():
-    '''Function to fetch all usernames'''
-    return User.query.all()
-
 def fetch_user_data(username):
     '''Function to fetch user data by username'''
     user = User.query.filter_by(username=username).first()
@@ -273,6 +351,28 @@ def delete_user(username, logger=None):
     except Exception as e:
         logger.debug(f"Error deleting user {username}: {e}")
 
+def fetch_curriculum_task_list(curriculum_id, logger=None):
+    '''This function fetches the array of tasks for a given curriculum'''
+    
+    try:
+        # Create CRUD Helper
+        c_CRUD = CRUDHelper(Curriculum)
+        
+        # get the task list
+        record = c_CRUD.read(curriculum_id=curriculum_id)
+        task_list = record[0].task_list
+        
+        # Return the task_list
+        return task_list
+    
+    except IntegrityError as ie:
+        #logger.debug(f"Curriculum ID not found: {ie}")
+        raise ie
+    
+    except Exception as e:
+        #logger.debug(f"Unexpected error reading database: {e}")
+        raise e
+
 def fetch_question(question_id, logger=None):
     '''Function to fetch question data from the database'''
     
@@ -298,8 +398,19 @@ def fetch_question(question_id, logger=None):
     else:
         return q_content
         
-def fetch_task_keys():
-    task_keys = Questions.query.with_entities(Questions.task_key).all()
+def fetch_task_keys(user_id=None, restricted=True):
+    if restricted and user_id is not None:
+        # Restrict the query to tasks created by the given user_id
+        task_keys = (
+            Questions.query
+            .filter((Questions.creator_id == user_id) | (Questions.creator_id == 1))
+            .with_entities(Questions.task_key)
+            .all()
+        )
+    else:
+        # Return all task keys if no restrictions are applied
+        task_keys = Questions.query.with_entities(Questions.task_key).all()
+    
     return [key[0] for key in task_keys]
 
 def update_question(question_id, question_data, logger=None):
@@ -325,10 +436,14 @@ def update_question(question_id, question_data, logger=None):
         logger.error(f"Error updating question '{question_id}': {e}")
         raise
 
-def new_question(question_data, logger=None):
+def new_question(question_data, username, logger=None):
     '''Writes a new question into the Questions table'''
+    logger.debug(f"New Question by: {question_data}")
     try:
-        # Create teh CRUDHelper object for the Questions table
+        # Get the user id from the user table
+        user = User.query.filter_by(username=username).first()
+        question_data['creator_id'] = user.id
+        # Create the CRUDHelper object for the Questions table
         q_crud = CRUDHelper(Questions)
         
         # Use the create method to add the new question details
@@ -413,34 +528,23 @@ def fetch_course_data(logger=None):
         curriculum_crud = CRUDHelper(Curriculum)
         all_curriculums = curriculum_crud.get_column_values("curriculum_id")
         
-        return {"content_dict": content_dict, "all_curriculums": all_curriculums}
+        # Fetch all question IDs from the Questions table
+        question_crud = CRUDHelper(Questions)
+        all_questions = question_crud.get_column_values("task_key")
+        
+        # Build the curriculum dictionary from the Curriculum table
+        records_q = curriculum_crud.read()
+        curriculum_dict = {record.curriculum_id: record.task_list for record in records_q}
+        
+        return {"content_dict": content_dict,
+                "all_curriculums": all_curriculums,
+                "all_questions": all_questions,
+                "curriculum_dict": curriculum_dict}
         
     except Exception as e:
         if logger:
             logger.error(f"Problem getting course content: {e}")
         return {}
-
-def fetch_course_data2(logger=None):
-    """Fetch available content and curriculums."""
-    try:
-        course_crud = CRUDHelper(Content)
-
-        available_content = course_crud.get_column_values("id")
-        base_curriculums = course_crud.get_column_values("base_curriculums")
-
-        # Flattening the list of base_curriculums
-        all_base_curriculums = [item for sublist in base_curriculums for item in sublist]
-        
-        # Debug logging
-        #logger.debug(f"Available Content: {available_content}")
-        #logger.debug(f"Base Curriculums: {all_base_curriculums}")
-        
-        return [available_content, all_base_curriculums]
-
-    except Exception as e:
-        if logger:
-            logger.error(f"Problem getting course content: {e}")
-        return [[], []]
 
 def add_new_content(item_id, table, logger=None):
     '''
@@ -477,4 +581,37 @@ def add_new_content(item_id, table, logger=None):
     except Exception as e:
         logger.debug(f"Unexpected error writing item ID {item_id} to the database: {e}")
         raise e
+
+def update_content_assignments(data, logger=None):
+    '''Function to update assignment of content to base_curriculums'''
     
+    try:
+        # Create the CRUD helper for content table
+        c_CRUD = CRUDHelper(Content)
+        
+        # Get the record matching the content_id
+        record = c_CRUD.read(content_id = data["content_id"])
+        
+        # Update the the base curriculum assignment
+        c_CRUD.update(record[0].id, base_curriculums = data["base_curriculums"])
+        logger.debug(f"Content: {data['content_id']} Base: {data['base_curriculums']}")
+        
+    except Exception as e:
+        logger.debug(f"Error: {e}")
+        
+def update_curriculum_assignments(data, logger=None):
+    '''Function to update assignment of tasks to curriculums'''
+    
+    try:
+        # Create the CRUD helper for content table
+        c_CRUD = CRUDHelper(Curriculum)
+        
+        # Get the record matching the content_id
+        record = c_CRUD.read(curriculum_id = data["curriculum_id"])
+        
+        # Update the the base curriculum assignment
+        c_CRUD.update(record[0].id, task_list = data["task_list"])
+        logger.debug(f"Content: {data['curriculum_id']} Base: {data['task_list']}")
+        
+    except Exception as e:
+        logger.debug(f"Error: {e}")
