@@ -351,12 +351,11 @@ def question_content_page():
     return render_template('question_content.html', username=username)  # Render the content creation page        
 
 @app.route('/new_content_or_curriculum', methods=['GET', 'POST'])
-def new_content():
+def new_content_or_curriculum():
     '''Route to add new content IDs'''
     
-    # Check if the user is an admin
-    if not session.get('is_admin'):
-        return redirect(url_for('index'))  # Redirect non-admin users
+    # Retrieve the username from session
+    username = session.get('username')
     
     # Extract the new content_id
     new_content = request.get_json()
@@ -364,7 +363,7 @@ def new_content():
     table = new_content['table']
     
     try:
-        add_new_content(content_id, table, app.logger)
+        add_new_content(content_id, table, username, app.logger)
         return jsonify({"message": "New content added"}), 201
     
     except IntegrityError as ie:
@@ -386,7 +385,7 @@ def question_keys(user_id=None, restricted=False):
 def assign_curriculum_to_content():
     '''Route to write content + base curriculum assignments to database'''
     
-    # # Check if the user is an admin
+    # Check if the user is an admin
     if not session.get('is_admin'):
         return redirect(url_for('index'))  # Redirect non-admin users
     
@@ -499,8 +498,13 @@ def update_xp():
     
 @app.route('/course_data', methods=['GET'])
 def course_data():
+    '''Gets content/curriculum pairings from database'''
+    
+    # Extract the username
+    username = session.get('username')    
+    
     try:
-        course_content = fetch_course_data(app.logger)
+        course_content = fetch_course_data(username, app.logger)
         
         return jsonify(course_content), 200
     except Exception as e:

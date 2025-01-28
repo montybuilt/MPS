@@ -514,27 +514,60 @@ def fetch_xp_data(user_id, last_fetched_date, logger=None):
         print(f"Error fetching XP data: {e}")
         return None
 
-def fetch_course_data(logger=None):
+def fetch_course_data(username, logger=None):
     '''Fetch all course content, base curriculums and custom curriculums'''
     try:
+        # Fetch the user.id for filtering
+        user = User.query.filter_by(username=username).first()
+        user_id = user.id
+        
+        
+        # Fetch the admin.role
+        try:
+            admin = Admin.query.filter_by(id=user_id).first()
+            role = admin.role
+        except:
+            role = "Not Admin"
+        logger.debug(f"Admin Role: {role}")
+        
+        # Fetch the user.ids of all system level admin
+        admin_crud = CRUDHelper(Admin)
+        records = admin_crud.read()
+        system_ids = [record.id for record in records if record.role == 'system']
+        
         # Fetch all records from the Content table
         content_crud = CRUDHelper(Content)
         records = content_crud.read()
         
         # Construct the dictionary of all content and base curriculums
-        content_dict = {record.content_id: record.base_curriculums for record in records}
+        content_dict = {
+                        record.content_id: record.base_curriculums
+                        for record in records
+                        if user_id in system_ids or record.creator_id in (*system_ids, user_id)
+                        }
         
         # Fetch the all curriculums list from the Curriculum table
         curriculum_crud = CRUDHelper(Curriculum)
-        all_curriculums = curriculum_crud.get_column_values("curriculum_id")
+        records = curriculum_crud.read()
+        all_curriculums = [
+                            record.curriculum_id 
+                            for record in records 
+                            if user_id in system_ids or record.creator_id in (*system_ids, user_id)]
         
         # Fetch all question IDs from the Questions table
         question_crud = CRUDHelper(Questions)
-        all_questions = question_crud.get_column_values("task_key")
+        records = question_crud.read()
+        all_questions = [
+                        record.task_key
+                        for record in records
+                        if user_id in system_ids or record.creator_id in (*system_ids, user_id)]
         
         # Build the curriculum dictionary from the Curriculum table
-        records_q = curriculum_crud.read()
-        curriculum_dict = {record.curriculum_id: record.task_list for record in records_q}
+        records = curriculum_crud.read()
+        curriculum_dict = {
+                            record.curriculum_id: record.task_list
+                            for record in records
+                            if user_id in system_ids or record.creator_id in (*system_ids, user_id)}
         
         return {"content_dict": content_dict,
                 "all_curriculums": all_curriculums,
@@ -546,21 +579,21 @@ def fetch_course_data(logger=None):
             logger.error(f"Problem getting course content: {e}")
         return {}
 
-def add_new_content(item_id, table, logger=None):
+def add_new_content(item_id, table, username, logger=None):
     '''
     Function to add a new content area to the content table
     Arg(s): unique content name, logger object
     Returns: Success code if unique content_id added
-    '''
-    # Create the CRUDHelper object
-    
+    '''    
     try:
+        # Lookup user.id from username
+        user = User.query.filter_by(username=username).first()
         
         if table == 'content':
             # Create helper for Content table
             c_CRUD = CRUDHelper(Content)
             # Add the new content_id
-            c_CRUD.create(content_id = item_id, base_curriculums = [])
+            c_CRUD.create(content_id = item_id, base_curriculums = [], creator_id=user.id)
             # Return a success message
             return f"content_id {item_id} added to the database"
         
@@ -568,7 +601,7 @@ def add_new_content(item_id, table, logger=None):
             # Create helper for Curriculum table
             c_CRUD = CRUDHelper(Curriculum)
             # Add the new curriculum_id
-            c_CRUD.create(curriculum_id = item_id, task_list = [])
+            c_CRUD.create(curriculum_id = item_id, task_list = [], creator_id=user.id)
             # Return a success message
             return f"curriculum_id {item_id} added to the database"
         
