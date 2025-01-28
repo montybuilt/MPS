@@ -32,9 +32,6 @@ migrate = Migrate(app, db)
 # Path to content.json located in the data directory
 content_file_path = os.path.join('data', 'content.json')
 
-# Define admin users
-admin_users = ['amontanus', 'teacherA', 'teacherB']
-
 @app.route('/')
 def index():
     
@@ -42,7 +39,7 @@ def index():
     username = session.get('username')
     
     # Check to see if user is an admin
-    is_admin = is_user_admin(username)
+    is_admin = session.get('is_admin')
     app.logger.debug(f"Is admin: {is_admin}")
     
     return render_template('index.html', username = username, is_admin = is_admin)
@@ -57,11 +54,14 @@ def login():
         result = verify(username, password)
 
         if result is True:  # If the verification was successful
-            session['username'] = username
-            session['is_admin'] = is_user_admin(username)
-            session_data = initialize_user_session_data(username)
+            
+            # Build the session data for this app
+            build_session(username, app.logger)
+            
+            # Build sesstionStorage data for the client
+            sessionStorage_data = initialize_user_sessionStorage_data(username)
 
-            return jsonify({'message': 'Login successful', 'session_data': session_data, 'username': username}), 200
+            return jsonify({'message': 'Login successful', 'session_data': sessionStorage_data, 'username': username}), 200
 
         # If result is not True, it will contain an error message to display
         return jsonify({'error': result}), 401
@@ -121,7 +121,7 @@ def admin():
 
 @app.route('/update_session', methods=['POST'])
 def update_session():
-    '''Route to update the database with sessionStorate'''
+    '''Route to update the database with sessionStorage'''
     # Extract the session data from the request
     session_data = request.get_json()
     
@@ -209,10 +209,10 @@ def user_data():
 @app.route('/get_users', methods=['GET'])
 @login_required
 def get_users():
+    '''Responds with a list of usernames for user_data.html'''
     try:
         users = fetch_usernames()
-        sorted_users = sorted([user.username for user in users])
-        return jsonify(sorted_users)
+        return jsonify(users)
     except Exception as e:
         app.logger.debug(f"Error fetching usernames: {e}")
         return jsonify({'message': 'Error fetching usernames'}), 500
@@ -373,7 +373,7 @@ def new_content_or_curriculum():
         return jsonify({"error": f"Database Error: {e}"}), 500
     
 @app.route('/question_keys', methods=['GET'])
-@role_required(role=['system', 'teacher'], restricted=True)
+# @role_required(role=['system', 'teacher'], restricted=True)
 def question_keys(user_id=None, restricted=False):
     try:
         task_keys = fetch_task_keys(user_id, restricted)

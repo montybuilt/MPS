@@ -1,6 +1,6 @@
 # Import packages
 import bcrypt
-from flask import session, redirect, url_for, jsonify
+from flask import session, redirect, url_for, jsonify, has_request_context
 from modules.models import db, User, Admin, Questions, XP, Content, Curriculum
 from sqlalchemy.exc import SQLAlchemyError, IntegrityError
 from datetime import datetime
@@ -175,27 +175,44 @@ def verify(username, password):
     except Exception as e:
         return f"Error verifying user: {e}"  # General error message
 
+def build_session(username, logger=None):
+    '''This function builds requred session data'''
+    
+    # Get the user.id
+    user = User.query.filter_by(username=username).first()
+    user_id = user.id
+    
+    # Fetch admin status of user
+    try:
+        admin = Admin.query.filter_by(id=user_id).first()
+        role = admin.role
+    except:
+        role = "student"
+        
+    # Fetch the user.ids of all system level admin
+    admin_crud = CRUDHelper(Admin)
+    records = admin_crud.read()
+    system_ids = [record.id for record in records if record.role == 'system']
+    
+    logger.debug(f"user: {username} ID: {user_id} role: {role} Admins: {system_ids}")
+    
+    # Build session variables
+    session['username'] = username
+    session['is_admin'] = role in ('teacher', 'system')
+    session['user_id'] = user_id
+    session['system_ids'] = system_ids
+    
+
 def fetch_usernames():
     '''Function to fetch all usernames'''
-    return User.query.all()
+    '''Need to add filter for user access based on classrooms'''
+    
+    users =  User.query.all()
+    sorted_users = sorted([user.username for user in users])
+    return sorted_users
 
-def is_user_admin(username):
-    # Fetch the user record by username
-    user = User.query.filter_by(username=username).first()
-    
-    if not user:
-        return False  # If user not found, return False
-    
-    # Check if the user ID exists in the Admin table
-    admin = Admin.query.filter_by(id=user.id).first()
-    
-    if admin:
-        return True  # User is an admin
-    else:
-        return False  # User is not an admin
-
-def initialize_user_session_data(username):
-    '''Sync the sessionStorage to the database at login'''
+def initialize_user_sessionStorage_data(username):
+    '''Send user data from Server to Client for sessionStorage'''
     
     # Query the data fields
     try:
@@ -221,7 +238,7 @@ def initialize_user_session_data(username):
         return f"Error retrieving data: {e}"  # General error message 
 
 def update_user_session_data(username, session_data, logger=None):
-    '''Function to update database with user session data'''
+    '''Send user data from Client sessionStorage into server database'''
     
     try:
         user_crud = CRUDHelper(User)
@@ -311,7 +328,7 @@ def fetch_user_data(username):
         return None
 
 def update_user_data(username, changes, logger=None):
-    '''Function to update user data'''
+    '''Function to update server database with new user data'''
     user_crud = CRUDHelper(User)
     user = user_crud.read(username=username)[0]  # Retrieve user by username
     now = datetime.utcnow()
@@ -399,6 +416,7 @@ def fetch_question(question_id, logger=None):
         return q_content
         
 def fetch_task_keys(user_id=None, restricted=True):
+    ''' Next to fix 1/28/25'''
     if restricted and user_id is not None:
         # Restrict the query to tasks created by the given user_id
         task_keys = (
@@ -528,7 +546,6 @@ def fetch_course_data(username, logger=None):
             role = admin.role
         except:
             role = "Not Admin"
-        logger.debug(f"Admin Role: {role}")
         
         # Fetch the user.ids of all system level admin
         admin_crud = CRUDHelper(Admin)
