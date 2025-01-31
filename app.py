@@ -327,6 +327,17 @@ def run_code():
         
     return jsonify({'output': output})
 
+@app.route('/manage_classrooms', methods=['GET'])
+def manage_classrooms():
+    '''Route to draw the manage_classrooms page'''
+    username = session.get('username')
+    
+    # Check if the user is an admin
+    if not session.get('is_admin'):
+        return redirect(url_for('index'))  # Redirect non-admin users
+
+    return render_template('manage_classrooms.html', username=username)  # Render the content creation page
+
 @app.route('/course_content', methods=['GET'])
 def course_content():
     '''Route to draw the course_content page'''
@@ -373,10 +384,10 @@ def new_content_or_curriculum():
         return jsonify({"error": f"Database Error: {e}"}), 500
     
 @app.route('/question_keys', methods=['GET'])
-# @role_required(role=['system', 'teacher'], restricted=True)
-def question_keys(user_id=None, restricted=False):
+def question_keys():
     try:
-        task_keys = fetch_task_keys(user_id, restricted)
+        user_id = session.get('user_id')
+        task_keys = fetch_task_keys(user_id, app.logger)
         return jsonify({"keys": task_keys}), 200
     except Exception as e:
         return jsonify({"error": f"Failed to load keys: {e}"}), 500

@@ -415,20 +415,27 @@ def fetch_question(question_id, logger=None):
     else:
         return q_content
         
-def fetch_task_keys(user_id=None, restricted=True):
-    ''' Next to fix 1/28/25'''
-    if restricted and user_id is not None:
-        # Restrict the query to tasks created by the given user_id
+def fetch_task_keys(user_id, logger):
+    ''' Fetches task keys'''
+    
+    # Get the system_ids
+    system_ids = session.get("system_ids")
+    logger.debug(f"System IDs: {system_ids}")
+    
+    if user_id in system_ids:
+        # system users see all task_keys
+        task_keys = Questions.query.with_entities(Questions.task_key).all()
+        
+    else:
+        # teachers see their task_keys and all system task_keys
         task_keys = (
             Questions.query
-            .filter((Questions.creator_id == user_id) | (Questions.creator_id == 1))
+            .filter((Questions.creator_id == user_id) | (Questions.creator_id.in_(system_ids)))
             .with_entities(Questions.task_key)
             .all()
         )
-    else:
-        # Return all task keys if no restrictions are applied
-        task_keys = Questions.query.with_entities(Questions.task_key).all()
     
+    # return the keys as a list
     return [key[0] for key in task_keys]
 
 def update_question(question_id, question_data, logger=None):
@@ -536,21 +543,10 @@ def fetch_course_data(username, logger=None):
     '''Fetch all course content, base curriculums and custom curriculums'''
     try:
         # Fetch the user.id for filtering
-        user = User.query.filter_by(username=username).first()
-        user_id = user.id
-        
-        
-        # Fetch the admin.role
-        try:
-            admin = Admin.query.filter_by(id=user_id).first()
-            role = admin.role
-        except:
-            role = "Not Admin"
+        user_id = session.get("user_id")
         
         # Fetch the user.ids of all system level admin
-        admin_crud = CRUDHelper(Admin)
-        records = admin_crud.read()
-        system_ids = [record.id for record in records if record.role == 'system']
+        system_ids = session.get("system_ids")
         
         # Fetch all records from the Content table
         content_crud = CRUDHelper(Content)
