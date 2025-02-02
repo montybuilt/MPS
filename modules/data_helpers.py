@@ -697,6 +697,9 @@ def update_classroom_assignments(class_code, students=None, content=None, logger
             if not classroom:
                 status['error_msg'] = "Incorrect class_code"
                 raise Exception(f"{status['error_msg']}")
+                
+            # Capture assigned_content array from classroom table for student assignment
+            content_to_add = classroom.assigned_content
             
             # Fetch all users in one query and create a dictionary
             user_dict = {user.email: user for user in User.query.filter(User.email.in_(students)).all()}
@@ -719,12 +722,34 @@ def update_classroom_assignments(class_code, students=None, content=None, logger
                 # Assign the user to the classroom by adding a new record in ClassroomUsers
                 classroom_user = ClassroomUser(classroom_id=classroom.id, user_id=user.id)
                 db.session.add(classroom_user)
+                
+                # Update the user profile for content and curriculum assignments
+                curriculums_to_add = []
+                # Loop through each new content area to get the list of curriculums
+                for content_name in content_to_add:
+                    # get base_curriculums from content table
+                    content_obj = Content.query.filter_by(content_id=content_name).first()
+                    base_curriculums = content_obj.base_curriculums if content_obj else []
+                    # Add these curriculums to the temporary list
+                    curriculums_to_add.extend(base_curriculums)
+                # Combine the new content from classroom assignment with existing content assigned user
+                updated_content_list = list(set(user.assigned_content + content_to_add))
+                logger.debug(f"Existing: {user.assigned_content} - New: {content_to_add} - All: {updated_content_list}")
+                updated_curriculums_list = list(set(user.assigned_curriculums + curriculums_to_add))
+                logger.debug(f"Existing: {user.assigned_curriculums} - New: {curriculums_to_add} - All: {curriculums_to_add}")
+                # Update the user table with new assigned_content and assigned_curriculum
+                user_crud = CRUDHelper(User)
+                user_crud.update(user.id, assigned_content = sorted(updated_content_list), assigned_curriculums = sorted(updated_curriculums_list))
+                    
+                    
             
             # Commit all changes for students
             db.session.commit()
             
+            # loop through the new students and update assigned content + curriculum in User
             
-        logger.debug(f"Not found emails: {status['not_found_emails']}")
+            
+            
         return status
     
     except Exception as e:
