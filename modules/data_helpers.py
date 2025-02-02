@@ -1,8 +1,9 @@
 # Import packages
 import bcrypt
 from flask import session, redirect, url_for, jsonify, has_request_context
-from modules.models import db, User, Admin, Questions, XP, Content, Curriculum
+from modules.models import db, User, Admin, Questions, XP, Content, Curriculum, Classroom, ClassroomUser
 from sqlalchemy.exc import SQLAlchemyError, IntegrityError
+from sqlalchemy.orm.attributes import flag_modified
 from datetime import datetime
 from functools import wraps
 from werkzeug.exceptions import Forbidden
@@ -189,6 +190,8 @@ def build_session(username, logger=None):
     except:
         role = "student"
         
+    logger.debug(f"Logging In:  Role: {role}")
+        
     # Fetch the user.ids of all system level admin
     admin_crud = CRUDHelper(Admin)
     records = admin_crud.read()
@@ -201,8 +204,8 @@ def build_session(username, logger=None):
     session['is_admin'] = role in ('teacher', 'system')
     session['user_id'] = user_id
     session['system_ids'] = system_ids
+    session['role'] = role
     
-
 def fetch_usernames():
     '''Function to fetch all usernames'''
     '''Need to add filter for user access based on classrooms'''
@@ -359,6 +362,7 @@ def update_user_data(username, changes, logger=None):
 
 def delete_user(username, logger=None):
     '''Function to delete a user based on username'''
+    '''Needs fix - teachers can only delete their own students'''
     user_crud = CRUDHelper(User)
     user = user_crud.read(username=username)[0]
     
@@ -592,6 +596,143 @@ def fetch_course_data(username, logger=None):
             logger.error(f"Problem getting course content: {e}")
         return {}
 
+def fetch_classrooms(logger=None):
+    '''Fetches classrooms for the user if an admin'''
+    
+    # Fetch the user.id and admin status for filtering
+    user_id = session.get('user_id')
+    role = session.get('role')
+    
+    try:
+        all_classes = db.session.query(Classroom).all()
+    
+        if role == 'system':
+            my_classes = [classroom.code for classroom in all_classes]
+        elif role == 'teacher':
+            my_classes = [classroom.code for classroom in all_classes if user_id == classroom.admin_id]
+        else:
+            raise Exception("User does not have access to manage classrooms")
+            
+        logger.debug(f"My Classes: {my_classes}")
+        return my_classes
+        
+    except Exception as e:
+        logger.debug(f"Error: {e}")
+
+def fetch_classroom_data(class_code, logger=None):
+    '''
+    Function to fetch classroom data.
+    Arg(s): class_code as string, logger as logger object
+    Returns: Dictionary keys: emails, content - values as lists
+    '''
+    
+    try:
+        
+        # Fetch the user.id and admin status for filtering
+        system_ids = session.get('system_ids')
+        user_id = session.get('user_id')
+        logger.debug(f"Front - system_ids: {system_ids} - user_id: {user_id} - class_code: {class_code}")
+        
+        # Access needed data from Classroom table
+        classroom = Classroom.query.filter_by(code=class_code).first()
+        
+        if not classroom:
+            logger.debug(f"Classroom {class_code} not found")
+            raise Exception
+            
+        logger.debug(f"Just prior to get admin_id - class_code: {class_code}")
+        admin_id = classroom.admin_id
+        class_id = classroom.id
+        logger.debug(f"Classroom ID: {class_id}")
+        
+        # Verify the user.id is system or the creator of the class_code
+        if not (user_id == admin_id or user_id in system_ids):
+            raise Exception(f"User does not have access to classrom {class_code}")
+        
+        # User CRUDHelper to get records via ClassroomUser
+        cu_helper = CRUDHelper(ClassroomUser)
+        cu_users = cu_helper.read(classroom_id=class_id)
+        logger.debug("ClassroomUser object ok")
+        
+        # Extract the user IDs from ClassroomUser records
+        student_ids = [cu.user_id for cu in cu_users]
+        logger.debug(f"User IDs: {student_ids}")
+        
+        # User CRUDHelper to get records from User
+        u_helper = CRUDHelper(User)
+        students = u_helper.read()
+        students = [student for student in students if student.id in student_ids]
+        logger.debug(f"Users: {students}")
+        
+        # Extract student emails from User records
+        student_emails = [student.email for student in students if student.email]
+        
+        # Get assigned content from the classroom
+        content = classroom.assigned_content
+        
+        return{'students': student_emails, 'content': content}
+        
+    except Exception as e:
+        logger.debug(f"An unexpected error occurred: {e}")
+        raise e
+
+def update_classroom_assignments(class_code, students=None, content=None, logger=None):
+    '''Write new student assignments for classrooms'''
+    
+    # Get admin credentials
+    user_id = session.get('user_id')
+    role = session.get('role')
+    
+    # Create a status dict to return
+    status = {'error_msg': '', 'not_found_emails': []}
+    
+    try:
+        if students:
+            # Initialize not found email list
+            
+            # Fetch the classroom object by class_code
+            classroom = Classroom.query.filter_by(code=class_code).first()
+           
+            
+            if not classroom:
+                status['error_msg'] = "Incorrect class_code"
+                raise Exception(f"{status['error_msg']}")
+            
+            # Fetch all users in one query and create a dictionary
+            user_dict = {user.email: user for user in User.query.filter(User.email.in_(students)).all()}
+            
+            # Iterate through the list of student emails
+            for email in students:
+                # Fetch the User object by email address
+                user = user_dict.get(email)
+                
+                if not user:
+                    # If not a user, append to the not_found_emails list
+                    status['not_found_emails'].append(email)
+                    continue
+                
+                # Append class_code to user's classroom_codes array if not there already
+                if class_code not in user.classroom_codes:
+                    user.classroom_codes.append(class_code)
+                    flag_modified(user, "classroom_codes")                
+                
+                # Assign the user to the classroom by adding a new record in ClassroomUsers
+                classroom_user = ClassroomUser(classroom_id=classroom.id, user_id=user.id)
+                db.session.add(classroom_user)
+            
+            # Commit all changes for students
+            db.session.commit()
+            
+            
+        logger.debug(f"Not found emails: {status['not_found_emails']}")
+        return status
+    
+    except Exception as e:
+        # Log the error and update the error code
+        logger.debug(f"Error: {e}")
+        status['error_msg'] = f'{e}'
+        return status
+        
 def add_new_content(item_id, table, username, logger=None):
     '''
     Function to add a new content area to the content table
@@ -661,3 +802,33 @@ def update_curriculum_assignments(data, logger=None):
         
     except Exception as e:
         logger.debug(f"Error: {e}")
+
+def add_new_classroom(class_code, class_description, logger=None):
+    '''Function to write new classroom code and description to database'''
+    
+    try:
+        # Extract user credentials
+        user_id = session.get("user_id")
+        role = session.get("role")
+        logger.debug(f"Add Classroom Role: {user_id} - {role}")
+        
+        # Ensure the user adding the classroom is an admin
+        if role not in ['teacher', 'system']:
+            raise Exception("Only Admins can create classrooms!")
+        
+        # Create the classroom CRUD helper
+        class_CRUD = CRUDHelper(Classroom)
+        
+        # Create the new classroom record
+        class_CRUD.create(code = class_code, name = class_description, admin_id = user_id)
+        
+        # Return success message        
+        return f"Classroom: {class_code} successfully added!"
+    
+    except IntegrityError as ie:
+        logger.debug(f"Classroom Code {class_code} not unique!")
+        raise ie
+        
+    except Exception as e:
+        logger.debug(f"Unexpected error writing classroom {class_code} to database: {e}")
+        raise e

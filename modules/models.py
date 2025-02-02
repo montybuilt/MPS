@@ -17,7 +17,7 @@ class User(db.Model):
     username = db.Column(db.String(120), unique=True, nullable=False, index=True)
     password_hash = db.Column(db.LargeBinary, nullable=False)
     email = db.Column(db.String(254), unique=True, nullable=True, index=True)
-    classroom_codes = db.Column(db.String(120), index=True)
+    classroom_codes = db.Column(db.JSON, default=[], index=True)
     assigned_curriculums = db.Column(db.JSON, default=[], index=True)
     assigned_content = db.Column(db.JSON, default=[], index=True)
     special_curriculums = db.Column(db.JSON, default=[], index=True)

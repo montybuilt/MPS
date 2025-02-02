@@ -485,6 +485,74 @@ def content_data():
     response.headers['Content-Type'] = 'application/json; charset=UTF-8'
     return response
 
+@app.route('/new_classroom', methods=['POST'])
+def new_classroom():
+    '''Route to add new classroom and description'''
+    
+    # Extract the classroom code and description
+    data = request.get_json()
+    class_code = data['data'][0]
+    class_description = data['data'][1]
+    
+    try:
+        app.logger.debug(f"Pre-call: class_code: {class_code}")
+        add_new_classroom(class_code, class_description, app.logger)
+        return jsonify({"message": "New classroom added"}), 201
+    
+    except IntegrityError as ie:
+        return jsonify({"error": f"Classroom ID already exists: {ie}"}), 409
+    
+    except Exception as e:
+        return jsonify({"error": f"Database Error: {e}"}), 500
+
+@app.route('/classrooms', methods=['GET'])
+def classrooms():
+    '''route to fetch all classrooms for an admin'''
+    
+    try:
+        classrooms = fetch_classrooms(app.logger)
+        return jsonify({"data": classrooms}), 201
+    except Exception as e:
+        return jsonify({'error': e})
+
+@app.route('/classroom_data', methods=['POST'])
+def classroom_data():
+    '''Route to get classroom data for manage_classrooms page'''
+    
+    # Extract the classroom code
+    data = request.get_json()
+    class_code = data['class_code']
+    
+    try:
+        classroom_data = fetch_classroom_data(class_code, app.logger)
+        return jsonify({'data': classroom_data}), 200
+    except Exception as e:
+        return jsonify({'error': f'Unexpected Error: {e}' })
+
+@app.route('/assign_students_to_classroom', methods=['POST'])
+def assign_students_to_classroom():
+    '''Route to change student classroom assignments'''
+    
+    # Extract the data
+    data = request.get_json()
+    class_code = data['classroom_code']
+    students = data['students']  # student emails as list
+    
+    try:
+        status = update_classroom_assignments(class_code=class_code, students=students, logger=app.logger)
+        app.logger.debug(f"status in route: {status['not_found_emails']}")
+        # Return message if some emails were not found
+        if status['not_found_emails']:
+            return jsonify({'message': f'Partial Update-The following emails were not found: {status["not_found_emails"]}'})
+        
+        # Check if there's an error message and raise an exception
+        if status.get('error_msg'):  # Now checking error_msg
+            raise Exception(status['error_msg'])
+        
+        return jsonify({'message': 'Data received!'}), 200
+    except Exception as e:
+        return jsonify({'error': f"Unexpected Error: {e}"}), 500
+
 @app.route('/update_xp', methods=['POST'])
 def update_xp():
     '''Route to get xp updates and post to the database'''
