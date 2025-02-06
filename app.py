@@ -3,6 +3,7 @@ import subprocess, logging, secrets, os
 from flask_migrate import Migrate
 from flask import Flask, render_template, request, jsonify, session, redirect, url_for
 from sqlalchemy.exc import SQLAlchemyError, IntegrityError
+from werkzeug.exceptions import HTTPException
 from modules import *
 from modules import db
 
@@ -59,7 +60,7 @@ def login():
             build_session(username, app.logger)
             
             # Build sesstionStorage data for the client
-            sessionStorage_data = initialize_user_sessionStorage_data(username)
+            sessionStorage_data = initialize_user_sessionStorage_data()
 
             return jsonify({'message': 'Login successful', 'session_data': sessionStorage_data, 'username': username}), 200
 
@@ -125,13 +126,14 @@ def update_session():
     # Extract the session data from the request
     session_data = request.get_json()
     
-    # Get the username
-    username = session.get('username')
-    
     # Write the session data to the database
+    
     try:
-        update_user_session_data(username, session_data, app.logger)
+        
+        update_user_session_data(session_data, app.logger)
+        
     except Exception as e:
+        
         app.logger.debug(f"Update Session Error: {e}")
         return jsonify({"message": "Session Update Error"}), 400
     
@@ -210,12 +212,16 @@ def user_data():
 @login_required
 def get_users():
     '''Responds with a list of usernames for user_data.html'''
+    
     try:
         users = fetch_usernames()
-        return jsonify(users)
+        return jsonify({'users': users}), 200
+    
+    except HTTPException as e:
+        return jsonify({'error': str(e)}), e.code
+    
     except Exception as e:
-        app.logger.debug(f"Error fetching usernames: {e}")
-        return jsonify({'message': 'Error fetching usernames'}), 500
+        return jsonify({'error': 'Internal Server Error'}), 500
 
 @app.route('/get_user_data', methods=['GET'])
 @login_required
@@ -227,13 +233,12 @@ def get_user_data():
     
         username = request.args.get('username')
         try:
-            user_data = fetch_user_data(username)
+            user_data = fetch_user_data(username, app.logger)
             if user_data:
                 return jsonify(user_data)
             else:
                 return jsonify({'message': 'User not found'}), 404
         except Exception as e:
-            app.logger.debug(f"Error fetching user data for {username}: {e}")
             return jsonify({'message': 'Error fetching user data'}), 500
 
 @app.route('/update_user', methods=['POST'])

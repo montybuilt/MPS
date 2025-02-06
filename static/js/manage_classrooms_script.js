@@ -296,6 +296,7 @@ function handleSubmitStudentAssignments() {
 
     // Prepare the payload
     const studentAssignments = { 'classroom_code': classroomCode, 'students': newStudents };
+    console.log("Adding Student", studentAssignments['students'])
 
     // Send the POST request using Fetch API
     fetch('/assign_students_to_classroom', {

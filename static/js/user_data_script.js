@@ -61,13 +61,14 @@ async function fetchAndPopulateUsers() {
     try {
         const response = await fetch('/get_users');
         if (!response.ok) {
-            throw new Error(`HTTP error! Status: ${response.status}`);
+            const errorData = await response.json();  // Extract the error message from the response
+            throw new Error(errorData.error || `HTTP error! Status: ${response.status}`);
         }
-        const users = await response.json();
+        const data = await response.json();  // Assume response is { "users": [...] }
 
         // Populate the dropdown
         const dropdown = document.getElementById('username');
-        users.forEach(username => {
+        data.users.forEach(username => {  // Access the usernames via 'data.users'
             const option = document.createElement('option');
             option.value = username;
             option.text = username;
@@ -75,8 +76,12 @@ async function fetchAndPopulateUsers() {
         });
     } catch (error) {
         console.error('Error fetching usernames:', error);
+
+        // Display the error message in an alert
+        alert(`Error: ${error.message}`);
     }
 }
+
 
 async function fetchCourseData() {
     try {
@@ -164,9 +169,20 @@ async function fetchCourseData() {
         }
         
         const data = await response.json();
-        
-        // Save the data in session storage
-        sessionStorage.setItem('contentDict', JSON.stringify(data.content_dict));
+        const content_dict = data.content_dict;
+
+        // Sort the dictionary by its keys case-insensitively
+        const sortedContentDict = Object.keys(content_dict)
+            .sort((keyA, keyB) => keyA.toLowerCase().localeCompare(keyB.toLowerCase()))
+            .reduce((obj, key) => {
+                obj[key] = content_dict[key];
+                return obj;
+            }, {});
+
+        console.log(sortedContentDict); // Check the sorted dictionary
+
+        // Save the sorted dictionary in session storage
+        sessionStorage.setItem('contentDict', JSON.stringify(sortedContentDict));
         sessionStorage.setItem('allCurriculums', JSON.stringify(data.all_curriculums));
         
         // Call the populateSelectionElements after data is successfully loaded
@@ -177,12 +193,16 @@ async function fetchCourseData() {
     }
 }
 
+
+
+
 function fetchUserData() {
     // Clear the previous editor content first (this doesn't remove the DOM elements)
     clearEditors();
 
     var username = document.getElementById('username').value;
     if (username) {
+    console.log("Fetch Data for :", username)
         fetch('/get_user_data?username=' + username)
         .then(response => response.json())
         .then(data => {
@@ -236,6 +256,9 @@ function submitForm() {
         // Get assigned content and curriculums
         var assignedContent = Array.from(document.getElementById('assigned-content').options).map(option => option.value);
         var assignedCurriculums = Array.from(document.getElementById('assigned-curriculums').options).map(option => option.value);
+        
+        console.log("Assigned Curriculum:", assignedCurriculums);
+        console.log("Assigned Content", assignedContent);
 
         // Add the new assigned content and curriculums to changes object
         changes['assigned_content'] = assignedContent;

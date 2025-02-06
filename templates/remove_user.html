@@ -44,19 +44,21 @@
 
     <script>
         document.addEventListener('DOMContentLoaded', function () {
-            fetch('/get_users')
-                .then(response => response.json())
-                .then(users => {
-                    var dropdown = document.getElementById('username');
-                    users.forEach(username => {
-                        var option = document.createElement('option');
-                        option.value = username;
-                        option.text = username;
-                        dropdown.appendChild(option);
-                    });
-                })
-                .catch(error => console.error('Error fetching usernames:', error));
-        });
+             fetch('/get_users')
+                 .then(response => response.json())
+                 .then(data => {
+                     var users = data.users;  // Correctly access the 'users' key
+                     var dropdown = document.getElementById('username');
+                     users.forEach(username => {
+                         var option = document.createElement('option');
+                         option.value = username;
+                         option.text = username;
+                         dropdown.appendChild(option);
+                     });
+                 })
+                 .catch(error => console.error('Error fetching usernames:', error));
+         });
+
         
         function submitForm() {
             var username = document.getElementById('username').value;

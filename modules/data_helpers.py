@@ -1,12 +1,12 @@
 # Import packages
-import bcrypt
+import bcrypt, itertools
 from flask import session, redirect, url_for, jsonify, has_request_context
-from modules.models import db, User, Admin, Questions, XP, Content, Curriculum, Classroom, ClassroomUser
+from modules.models import db, User, Admin, Questions, XP, Content, Curriculum, Classroom, ClassroomUser, ContentCurriculum, UserContent, UserCurriculum, CurriculumQuestion, ClassroomContent
 from sqlalchemy.exc import SQLAlchemyError, IntegrityError
 from sqlalchemy.orm.attributes import flag_modified
 from datetime import datetime
 from functools import wraps
-from werkzeug.exceptions import Forbidden
+from werkzeug.exceptions import Forbidden, BadRequest, Unauthorized
 
 ####################################################################################
 #### Default Variables #############################################################
@@ -178,6 +178,7 @@ def verify(username, password):
 
 def build_session(username, logger=None):
     '''This function builds requred session data'''
+    ### No change needed for new schema ###
     
     # Get the user.id
     user = User.query.filter_by(username=username).first()
@@ -189,16 +190,12 @@ def build_session(username, logger=None):
         role = admin.role
     except:
         role = "student"
-        
-    logger.debug(f"Logging In:  Role: {role}")
-        
+                
     # Fetch the user.ids of all system level admin
     admin_crud = CRUDHelper(Admin)
     records = admin_crud.read()
     system_ids = [record.id for record in records if record.role == 'system']
-    
-    logger.debug(f"user: {username} ID: {user_id} role: {role} Admins: {system_ids}")
-    
+        
     # Build session variables
     session['username'] = username
     session['is_admin'] = role in ('teacher', 'system')
@@ -207,23 +204,138 @@ def build_session(username, logger=None):
     session['role'] = role
     
 def fetch_usernames():
-    '''Function to fetch all usernames'''
-    '''Need to add filter for user access based on classrooms'''
+    '''
+    Function to fetch all usernames for a teacher or system admin
     
-    users =  User.query.all()
-    sorted_users = sorted([user.username for user in users])
-    return sorted_users
+    Notes:
+        - called in the /get_users route for the user_data.html page
+        - Results should be filtered so teachers only see users enrolled in one of their classrooms
+        - System admin see all users
+    
+    '''
 
-def initialize_user_sessionStorage_data(username):
-    '''Send user data from Server to Client for sessionStorage'''
-    
-    # Query the data fields
+    # Fetch the user's ID and role, only admins see all users
+    # Teachers only see students enrolled in their classrooms
+    user_id = session.get('user_id')
+    role = session.get('role')
+
     try:
-        user_crud = CRUDHelper(User)
-        user = user_crud.read(username=username)[0]
+        if role == 'teacher':
+            # Initialize my_usernames
+            my_usernames = []
+
+            # Query all students enrolled in classrooms of the teacher
+            students = db.session.query(User.username).\
+                join(ClassroomUser, ClassroomUser.user_id == User.id).\
+                join(Classroom, Classroom.id == ClassroomUser.classroom_id).\
+                filter(Classroom.admin_id == user_id).\
+                all()
+
+            # Extract the usernames from the query result
+            my_usernames = [username[0] for username in students]
+
+            if my_usernames:
+                return sorted(my_usernames)
+            else:
+                raise BadRequest("You need to have 1 or more students enrolled in 1 or more classrooms!")
+
+        elif role == 'system':
+            # System users see all usernames in the database
+            users = User.query.all()
+            return sorted([user.username for user in users])
+
+        else:
+            raise Unauthorized("Not Authorized!")
+
+    except BadRequest as br:
+        raise br    
+    
+    except Unauthorized as u:
+        raise u
+
+    except Exception as e:
+        raise e     
+
+def fetch_user_ids():
+    '''
+    Function to fetch all User.id for a teacher or system admin
+    
+    Notes:
+        - Results should be filtered so teachers only see user.ids enrolled in one of their classrooms
+        - System admin see all user.ids
+    
+    '''
+
+    # Fetch the user's ID and role, only admins see all users
+    # Teachers only see students enrolled in their classrooms
+    user_id = session.get('user_id')
+    role = session.get('role')
+
+    try:
+        if role == 'teacher':
+            # Initialize my_usernames
+            my_ids = []
+
+            # Query all students enrolled in classrooms of the teacher
+            students = db.session.query(User.id).\
+                join(ClassroomUser, ClassroomUser.user_id == User.id).\
+                join(Classroom, Classroom.id == ClassroomUser.classroom_id).\
+                filter(Classroom.admin_id == user_id).\
+                all()
+
+            # Extract the usernames from the query result
+            my_ids = [id[0] for id in students]
+
+            if my_ids:
+                return sorted(my_ids)
+            else:
+                raise BadRequest("You need to have 1 or more students enrolled in 1 or more classrooms!")
+
+        elif role == 'system':
+            # System users see all usernames in the database
+            users = User.query.all()
+            return sorted([user.id for user in users])
+
+        else:
+            raise Unauthorized("Not Authorized!")
+
+    except BadRequest as br:
+        raise br    
+    
+    except Unauthorized as u:
+        raise u
+
+    except Exception as e:
+        raise e
+
+def initialize_user_sessionStorage_data(logger=None):
+    '''
+    Send user data from Server to Client for sessionStorage
+    
+    Notes:
+        - This function initializes the client side sessionStorage data
+        - This is student related data (i.e., coursework related)
+    '''
+    
+    try:
         
-        session_data = {"assignedContent": user.assigned_content,
-                        "assignedCurriculums": user.assigned_curriculums,
+        # Get the user.id from session data
+        user_id = session.get('user_id')
+        
+        # Query User data
+        user = User.query.filter_by(id = user_id).first()
+        
+        # Use a table joing to query course assignments
+        coursework = db.session.query(ContentCurriculum.content_id, ContentCurriculum.curriculum_id).\
+            join(UserContent, UserContent.content_id == ContentCurriculum.content_id).\
+            join(User, User.id == UserContent.user_id).\
+            filter(User.id == user_id).\
+            all()
+        
+        # Update session data with the basic fields
+        session_data = {
+                        "assignedContent": [course.content_id for course in coursework],
+                        "assignedCurriculums": [course.curriculum_id for course in coursework],
                         "completedCurriculums": user.completed_curriculums,
                         "contentScores": user.content_scores,
                         "correctAnswers": user.correct_answers,
@@ -234,18 +346,28 @@ def initialize_user_sessionStorage_data(username):
                         "xp": user.xp,
                         "updatedAt": user.updated_at
                         }
-        
+            
         return session_data
 
     except Exception as e:
         return f"Error retrieving data: {e}"  # General error message 
 
-def update_user_session_data(username, session_data, logger=None):
-    '''Send user data from Client sessionStorage into server database'''
+def update_user_session_data(session_data, logger=None):
+    '''
+    Send user data from Client sessionStorage into server database
     
-    try:
+    Notes:
+        - This function is sued to update the database with the sessionStorage data
+        - This function deals with student data
+    '''
+    
+    try:        
+        
+        # Fetch user.id from session
+        user_id = session.get('user_id')
+        
         user_crud = CRUDHelper(User)
-        user = user_crud.read(username=username)[0]
+        user = user_crud.read(id=user_id)[0]
         
         # Pre-process the updatedAt field
         if "updatedAt" in session_data:
@@ -266,6 +388,7 @@ def update_user_session_data(username, session_data, logger=None):
             "xp": "xp",
             "updatedAt": "updated_at"
         }
+        
         update_data = {update_map[key]: value for key, value in session_data.items() if key in update_map}
         
         # Use the update method of CRUDHelper
@@ -294,8 +417,6 @@ def create_new_user(username, password, email):
             username=username,
             password_hash=password,
             email=email,
-            assigned_content = defaults["assigned_content"],
-            assigned_curriculums = defaults["assigned_curriculums"],
             current_curriculum = defaults["current_curriculum"],
             current_question = defaults["current_question"],
             content_scores = defaults["content_scores"],
@@ -309,13 +430,44 @@ def create_new_user(username, password, email):
     except Exception as e:
         raise e
 
-def fetch_user_data(username):
-    '''Function to fetch user data by username'''
+def fetch_user_data(username, logger=None):
+    '''
+    Function to fetch user data by username
+    
+    Notes:
+        - This function is used in the /get_user_data route
+        - It is used to populate information in the user_data.html page
+    '''
+    
+    # Fetch the user_id belonging to the student username passed
+    user_id = db.session.query(User.id).filter_by(username = username).scalar()
+    
+    
+    # Get Content.id array assigned in UserContent
+    content_ids = db.session.query(UserContent.content_id).filter_by(user_id=user_id).all()
+    content_ids = [c[0] for c in content_ids]
+    
+    # Fetch the corresponding content_id from the Content table
+    contents = db.session.query(Content.content_id).filter(Content.id.in_(content_ids)).all()
+    contents = [c for c in contents]
+    
+    # Get Curriculum.id array assigned in UserCurriculum
+    curriculum_ids = db.session.query(UserCurriculum.curriculum_id).filter_by(user_id=user_id).all()
+    curriculum_ids = [c[0] for c in curriculum_ids]
+    
+    # Fetch the corresponding curriculum_id data from the Curriculum table
+    curriculums = db.session.query(Curriculum.curriculum_id).filter(Curriculum.id.in_(curriculum_ids)).all()
+    curriculums = [c for c in curriculums]
+    
+    # Query the username of the student
     user = User.query.filter_by(username=username).first()
+    
+    assigned_content = [c[0] for c in contents]
+            
     if user:
         user_data = {
             'email': user.email,
-            'assigned_curriculums': user.assigned_curriculums,
+            'assigned_curriculums': [c[0] for c in curriculums],
             'completed_curriculums': user.completed_curriculums,
             'content_scores': user.content_scores,
             'correct_answers': user.correct_answers,
@@ -324,14 +476,33 @@ def fetch_user_data(username):
             'curriculum_scores': user.curriculum_scores,
             'incorrect_answers': user.incorrect_answers,
             'xp': user.xp,
-            'assigned_content': user.assigned_content
+            'assigned_content': [c[0] for c in contents]
         }
         return user_data
     else:
         return None
 
 def update_user_data(username, changes, logger=None):
-    '''Function to update server database with new user data'''
+    '''
+    Function to update server database with new user data
+    
+    Arg(s):
+        - username as string, changes as dictionary, logger as app.logger
+    
+    Notes:
+        - Function is called in the /update_user route
+        - GETs information from user_data.html and POSTs it to the database
+    
+    '''
+    
+    # Fetch the user_id belonging to the student username passed
+    user_id = db.session.query(User.id).filter_by(username = username).scalar()
+    
+    # Break out assigned_curriculum and assigned_content from changes    
+    assigned_content = changes.pop('assigned_content')
+    assigned_curriculums = changes.pop('assigned_curriculums')
+    
+    
     user_crud = CRUDHelper(User)
     user = user_crud.read(username=username)[0]  # Retrieve user by username
     now = datetime.utcnow()
@@ -352,6 +523,50 @@ def update_user_data(username, changes, logger=None):
             updates[key] = value
             
         updates["updated_at"] = now
+        
+    if assigned_content:
+        # Query existing user-content relationships
+        existing_content_ids = {uc.content_id for uc in db.session.query(UserContent.content_id)
+                                .filter(UserContent.user_id == user_id, UserContent.content_id.in_(
+            db.session.query(Content.id).filter(Content.content_id.in_(assigned_content))
+        )).all()}
+    
+        # Get content.id values
+        content_records = db.session.query(Content.id).filter(Content.content_id.in_(assigned_content)).all()
+        content_ids_map = {record.id for record in content_records}
+    
+        # Determine which content_ids are new (not in existing_content_ids)
+        new_content_ids = content_ids_map - existing_content_ids
+    
+        # Insert only new entries
+        user_content_entries = [UserContent(user_id=user_id, content_id=content_id) for content_id in new_content_ids]
+        
+        if user_content_entries:
+            db.session.bulk_save_objects(user_content_entries)
+
+    if assigned_curriculums:
+        # Query existing user-curriculum relationships
+        existing_curriculum_ids = {uc.curriculum_id for uc in db.session.query(UserCurriculum.curriculum_id)
+                                   .filter(UserCurriculum.user_id == user_id, UserCurriculum.curriculum_id.in_(
+            db.session.query(Curriculum.id).filter(Curriculum.curriculum_id.in_(assigned_curriculums))
+        )).all()}
+    
+        # Get curriculum.id values
+        curriculum_records = db.session.query(Curriculum.id).filter(Curriculum.curriculum_id.in_(assigned_curriculums)).all()
+        curriculum_ids_map = {record.id for record in curriculum_records}
+    
+        # Determine which curriculum_ids are new (not in existing_curriculum_ids)
+        new_curriculum_ids = curriculum_ids_map - existing_curriculum_ids
+    
+        # Insert only new entries
+        user_curriculum_entries = [UserCurriculum(user_id=user_id, curriculum_id=curriculum_id) for curriculum_id in new_curriculum_ids]
+        
+        if user_curriculum_entries:
+            db.session.bulk_save_objects(user_curriculum_entries)
+    
+    if assigned_content or assigned_curriculums:
+        db.session.commit()
+
 
     if updates:
         try:
@@ -362,18 +577,25 @@ def update_user_data(username, changes, logger=None):
 
 def delete_user(username, logger=None):
     '''Function to delete a user based on username'''
-    '''Needs fix - teachers can only delete their own students'''
-    user_crud = CRUDHelper(User)
-    user = user_crud.read(username=username)[0]
     
-    try:
-        id = user.id
-        user_crud.delete(id)
-    except Exception as e:
-        logger.debug(f"Error deleting user {username}: {e}")
+    # Fetch usernames
+    my_users = fetch_usernames()
+    
+    if username in my_users:
+    
+        # Create CRUDHelper oblect
+        user_crud = CRUDHelper(User)
+        user = user_crud.read(username=username)[0]
+        
+        try:
+            id = user.id
+            user_crud.delete(id)
+        except Exception as e:
+            logger.debug(f"Error deleting user {username}: {e}")
 
 def fetch_curriculum_task_list(curriculum_id, logger=None):
     '''This function fetches the array of tasks for a given curriculum'''
+    ### CHANGE needed for new schema ###
     
     try:
         # Create CRUD Helper
@@ -387,15 +609,14 @@ def fetch_curriculum_task_list(curriculum_id, logger=None):
         return task_list
     
     except IntegrityError as ie:
-        #logger.debug(f"Curriculum ID not found: {ie}")
         raise ie
     
     except Exception as e:
-        #logger.debug(f"Unexpected error reading database: {e}")
         raise e
 
 def fetch_question(question_id, logger=None):
     '''Function to fetch question data from the database'''
+    ### No change needed for new schema ###
     
     q_crud = CRUDHelper(Questions)
     q_content = {}
@@ -421,10 +642,10 @@ def fetch_question(question_id, logger=None):
         
 def fetch_task_keys(user_id, logger):
     ''' Fetches task keys'''
+    ### CHANGE MIGHT BE needed for new schema ###
     
     # Get the system_ids
     system_ids = session.get("system_ids")
-    logger.debug(f"System IDs: {system_ids}")
     
     if user_id in system_ids:
         # system users see all task_keys
@@ -444,6 +665,8 @@ def fetch_task_keys(user_id, logger):
 
 def update_question(question_id, question_data, logger=None):
     """Updates a question in the database."""
+    ### No change needed for new schema ###
+    
     try:
         # Create the CRUDHelper object for the Questions table
         q_crud = CRUDHelper(Questions)
@@ -467,7 +690,8 @@ def update_question(question_id, question_data, logger=None):
 
 def new_question(question_data, username, logger=None):
     '''Writes a new question into the Questions table'''
-    logger.debug(f"New Question by: {question_data}")
+    ### No change needed for new schema ###
+    
     try:
         # Get the user id from the user table
         user = User.query.filter_by(username=username).first()
@@ -477,7 +701,6 @@ def new_question(question_data, username, logger=None):
         
         # Use the create method to add the new question details
         new_record = q_crud.create(**question_data)
-        logger.debug(f"New Question: {new_record}")
         return "Question successfully created."
     
     except Exception as e:
@@ -485,13 +708,13 @@ def new_question(question_data, username, logger=None):
         
 def update_xp_data(xp_data, logger=None):
     '''Function to update the XP table'''
+    ### No change needed for new schema ###
     
     try:
         # Create the CRUDHelper for XP table
         xp_crud = CRUDHelper(XP)
         xp_crud.create(**xp_data)
        
-        logger.debug(f"XP Data: {xp_data}")
         return "XP Table successfully updated"
         
     except SQLAlchemyError as se:
@@ -504,6 +727,7 @@ def update_xp_data(xp_data, logger=None):
 
 def fetch_xp_data(user_id, last_fetched_date, logger=None):
     """Function to fetch incremental XP data for a user."""
+    ### No change needed for new schema ###
     
     try:
         # Query the XP table for the user_id and filter by timestamp greater than last_fetched_date
@@ -544,47 +768,86 @@ def fetch_xp_data(user_id, last_fetched_date, logger=None):
         return None
 
 def fetch_course_data(username, logger=None):
-    '''Fetch all course content, base curriculums and custom curriculums'''
+    '''
+    Fetch all course content, base curriculums and custom curriculums for a user.
+    
+    Arg(s): username as string, logger as app.logger object
+    
+    Notes:
+        This function gets course data for a specified user, not the current user.
+        Data should be filtered and parsed based on current user admin status.
+        Teachers see only their + system content and curriculums
+        System admin see all content and curriculums      
+    '''
+    
     try:
         # Fetch the user.id for filtering
         user_id = session.get("user_id")
         
+        # Query the student's id based on the username parameter
+        
         # Fetch the user.ids of all system level admin
         system_ids = session.get("system_ids")
         
-        # Fetch all records from the Content table
-        content_crud = CRUDHelper(Content)
-        records = content_crud.read()
+        # Query all Content.id and Content.content_id from the Content table and place in a dictionary
+        # Filter if non system admin user
+        content_data = db.session.query(Content.id, Content.content_id)
+        if user_id not in system_ids:
+            content_data = content_data.\
+                filter((Content.creator_id == user_id) | (Content.creator_id.in_(system_ids)))
+        content_data = content_data.all()
+        all_content_dict = {content_key: content_id for content_key, content_id in content_data}
         
-        # Construct the dictionary of all content and base curriculums
-        content_dict = {
-                        record.content_id: record.base_curriculums
-                        for record in records
-                        if user_id in system_ids or record.creator_id in (*system_ids, user_id)
-                        }
+        # Query all Curriculum.id and Curriculum.curriculum_id from Curriculum and place in dictionary
+        # Filter if non system admin user
+        curriculum_data = db.session.query(Curriculum.id, Curriculum.curriculum_id)
+        if user_id not in system_ids:
+            curriculum_data = curriculum_data.\
+                filter((Curriculum.creator_id == user_id) | (Curriculum.creator_id.in_(system_ids)))
+        curriculum_data = curriculum_data.all()
+        all_curriculum_dict = {curriculum_key: curriculum_id for curriculum_key, curriculum_id in curriculum_data}
         
-        # Fetch the all curriculums list from the Curriculum table
-        curriculum_crud = CRUDHelper(Curriculum)
-        records = curriculum_crud.read()
-        all_curriculums = [
-                            record.curriculum_id 
-                            for record in records 
-                            if user_id in system_ids or record.creator_id in (*system_ids, user_id)]
+        # Query all ContentCurriculum assignments and place in dictionary
+        assignment_data = db.session.query(ContentCurriculum.content_id, ContentCurriculum.curriculum_id).all()
         
-        # Fetch all question IDs from the Questions table
-        question_crud = CRUDHelper(Questions)
-        records = question_crud.read()
-        all_questions = [
-                        record.task_key
-                        for record in records
-                        if user_id in system_ids or record.creator_id in (*system_ids, user_id)]
+        # Build a dicionary of ContentCurriculum Assigments
+        all_assignment_dict = {}
+        for content_id, curriculum_id in assignment_data:
+            # Use content_id to find the corresponding curriculum_id in the curriculum_dict
+            if content_id not in all_assignment_dict:
+                all_assignment_dict[content_id] = []
+            all_assignment_dict[content_id].append(all_curriculum_dict.get(curriculum_id))
+            
+        # Build the content_dict
+        content_dict = {}
+        for k, v in all_content_dict.items():
+            if k in all_assignment_dict:
+                content_dict[v] = all_assignment_dict[k]
+            else:
+                content_dict[v] = []
+                
+        # Sort content_dict alphabetically
+        #content_dict = dict(sorted(content_dict.items(), key=lambda item: item[0].lower()))
+                
+        # Get all curriculums as a list from the all_curriculum dictionary
+        all_curriculums = list(all_curriculum_dict.values())
         
-        # Build the curriculum dictionary from the Curriculum table
-        records = curriculum_crud.read()
-        curriculum_dict = {
-                            record.curriculum_id: record.task_list
-                            for record in records
-                            if user_id in system_ids or record.creator_id in (*system_ids, user_id)}
+        # Query all question IDs from Questions
+        # Filter if user is not system admin
+        question_data = db.session.query(Questions.id, Questions.task_key)
+        if user_id not in system_ids:
+            question_data = question_data.\
+                filter((Questions.creator_id == user_id) | (Questions.creator_id.in_(system_ids)))
+        question_data = question_data.all()
+        
+        # Build the all_questions list from the query result
+        all_questions = [record.task_key for record in question_data]
+               
+        # Get the question assignments
+        #question_assignments = db.session.query(CurriculumQuestion.curriculum_id, CurriculumQuestion.question_id).all()
+       
+        # Future dev - build curriculum to task assignment dictionary 
+        curriculum_dict = {}
         
         return {"content_dict": content_dict,
                 "all_curriculums": all_curriculums,
@@ -598,6 +861,7 @@ def fetch_course_data(username, logger=None):
 
 def fetch_classrooms(logger=None):
     '''Fetches classrooms for the user if an admin'''
+    ### No change needed for new schema ###
     
     # Fetch the user.id and admin status for filtering
     user_id = session.get('user_id')
@@ -613,7 +877,6 @@ def fetch_classrooms(logger=None):
         else:
             raise Exception("User does not have access to manage classrooms")
             
-        logger.debug(f"My Classes: {my_classes}")
         return my_classes
         
     except Exception as e:
@@ -625,13 +888,13 @@ def fetch_classroom_data(class_code, logger=None):
     Arg(s): class_code as string, logger as logger object
     Returns: Dictionary keys: emails, content - values as lists
     '''
+    ### CHANGE needed for new schema ###
     
     try:
         
         # Fetch the user.id and admin status for filtering
         system_ids = session.get('system_ids')
         user_id = session.get('user_id')
-        logger.debug(f"Front - system_ids: {system_ids} - user_id: {user_id} - class_code: {class_code}")
         
         # Access needed data from Classroom table
         classroom = Classroom.query.filter_by(code=class_code).first()
@@ -640,10 +903,8 @@ def fetch_classroom_data(class_code, logger=None):
             logger.debug(f"Classroom {class_code} not found")
             raise Exception
             
-        logger.debug(f"Just prior to get admin_id - class_code: {class_code}")
         admin_id = classroom.admin_id
         class_id = classroom.id
-        logger.debug(f"Classroom ID: {class_id}")
         
         # Verify the user.id is system or the creator of the class_code
         if not (user_id == admin_id or user_id in system_ids):
@@ -652,17 +913,14 @@ def fetch_classroom_data(class_code, logger=None):
         # User CRUDHelper to get records via ClassroomUser
         cu_helper = CRUDHelper(ClassroomUser)
         cu_users = cu_helper.read(classroom_id=class_id)
-        logger.debug("ClassroomUser object ok")
         
         # Extract the user IDs from ClassroomUser records
         student_ids = [cu.user_id for cu in cu_users]
-        logger.debug(f"User IDs: {student_ids}")
         
         # User CRUDHelper to get records from User
         u_helper = CRUDHelper(User)
         students = u_helper.read()
         students = [student for student in students if student.id in student_ids]
-        logger.debug(f"Users: {students}")
         
         # Extract student emails from User records
         student_emails = [student.email for student in students if student.email]
@@ -678,6 +936,7 @@ def fetch_classroom_data(class_code, logger=None):
 
 def update_classroom_assignments(class_code, students=None, content=None, logger=None):
     '''Write new student assignments for classrooms'''
+    ### CHANGE needed for new schema ###
     
     # Get admin credentials
     user_id = session.get('user_id')
@@ -691,18 +950,23 @@ def update_classroom_assignments(class_code, students=None, content=None, logger
             # Initialize not found email list
             
             # Fetch the classroom object by class_code
-            classroom = Classroom.query.filter_by(code=class_code).first()
-           
+            classroom = Classroom.query.filter_by(code=class_code).first()           
             
             if not classroom:
                 status['error_msg'] = "Incorrect class_code"
                 raise Exception(f"{status['error_msg']}")
                 
-            # Capture assigned_content array from classroom table for student assignment
-            content_to_add = classroom.assigned_content
+            # Query content for this Classroom from ClassroomContent table
+            content = ClassroomContent.query.filter_by(classroom_id=classroom.id).all()
+            content_to_add = [c.content_id for c in content]
             
+            # Query curriculum for content_to_add from the ContentCurriculum table
+            curriculum = ContentCurriculum.query.filter(ContentCurriculum.content_id.in_(content_to_add)).all()
+            curriculum_to_add = [c.curriculum_id for c in curriculum]
+
             # Fetch all users in one query and create a dictionary
             user_dict = {user.email: user for user in User.query.filter(User.email.in_(students)).all()}
+            
             
             # Iterate through the list of student emails
             for email in students:
@@ -714,40 +978,47 @@ def update_classroom_assignments(class_code, students=None, content=None, logger
                     status['not_found_emails'].append(email)
                     continue
                 
-                # Append class_code to user's classroom_codes array if not there already
-                if class_code not in user.classroom_codes:
-                    user.classroom_codes.append(class_code)
-                    flag_modified(user, "classroom_codes")                
-                
                 # Assign the user to the classroom by adding a new record in ClassroomUsers
                 classroom_user = ClassroomUser(classroom_id=classroom.id, user_id=user.id)
                 db.session.add(classroom_user)
-                
-                # Update the user profile for content and curriculum assignments
-                curriculums_to_add = []
-                # Loop through each new content area to get the list of curriculums
-                for content_name in content_to_add:
-                    # get base_curriculums from content table
-                    content_obj = Content.query.filter_by(content_id=content_name).first()
-                    base_curriculums = content_obj.base_curriculums if content_obj else []
-                    # Add these curriculums to the temporary list
-                    curriculums_to_add.extend(base_curriculums)
-                # Combine the new content from classroom assignment with existing content assigned user
-                updated_content_list = list(set(user.assigned_content + content_to_add))
-                logger.debug(f"Existing: {user.assigned_content} - New: {content_to_add} - All: {updated_content_list}")
-                updated_curriculums_list = list(set(user.assigned_curriculums + curriculums_to_add))
-                logger.debug(f"Existing: {user.assigned_curriculums} - New: {curriculums_to_add} - All: {curriculums_to_add}")
-                # Update the user table with new assigned_content and assigned_curriculum
-                user_crud = CRUDHelper(User)
-                user_crud.update(user.id, assigned_content = sorted(updated_content_list), assigned_curriculums = sorted(updated_curriculums_list))
+                     
+                # Add the content to UserContent
+                if content_to_add:
+                    existing = db.session.query(UserContent.content_id).filter(UserContent.user_id==user.id).all()
+                    existing_content = {e[0] for e in existing}
                     
+                    #Identify new entries
+                    new_entries = [
+                        UserContent(user_id=user.id, content_id=content_id)
+                        for content_id in content_to_add
+                        if content_id not in existing_content
+                    ]
                     
+                    # Bulk insert new entries
+                    if new_entries:
+                        db.session.bulk_save_objects(new_entries)
+                        
+                # Add the curriculums to UserCurriculum
+                if curriculum_to_add:
+                    existing = db.session.query(UserCurriculum.curriculum_id).filter(UserCurriculum.user_id==user.id).all()
+                    existing_curriculum = {e[0] for e in existing}
+                    
+                    #Identify new entries
+                    new_entries = [
+                        UserCurriculum(user_id=user.id, curriculum_id=curriculum_id)
+                        for curriculum_id in curriculum_to_add
+                        if curriculum_id not in existing_curriculum
+                    ]
+                    
+                    # Bulk insert new entries
+                    if new_entries:
+                        db.session.bulk_save_objects(new_entries)
             
             # Commit all changes for students
             db.session.commit()
             
-            # loop through the new students and update assigned content + curriculum in User
-            
+            # Need logic on what to do when a student is removed from a classroom
+            ## Left OFF HERE###
             
             
         return status
@@ -763,7 +1034,9 @@ def add_new_content(item_id, table, username, logger=None):
     Function to add a new content area to the content table
     Arg(s): unique content name, logger object
     Returns: Success code if unique content_id added
-    '''    
+    '''
+    ### CHANGE needed for new schema ###
+    
     try:
         # Lookup user.id from username
         user = User.query.filter_by(username=username).first()
@@ -796,6 +1069,7 @@ def add_new_content(item_id, table, username, logger=None):
 
 def update_content_assignments(data, logger=None):
     '''Function to update assignment of content to base_curriculums'''
+    ### CHANGE needed for new schema ###
     
     try:
         # Create the CRUD helper for content table
@@ -813,6 +1087,7 @@ def update_content_assignments(data, logger=None):
         
 def update_curriculum_assignments(data, logger=None):
     '''Function to update assignment of tasks to curriculums'''
+    ### CHANGE needed for new schema ###
     
     try:
         # Create the CRUD helper for content table
@@ -830,12 +1105,12 @@ def update_curriculum_assignments(data, logger=None):
 
 def add_new_classroom(class_code, class_description, logger=None):
     '''Function to write new classroom code and description to database'''
+    ### No change needed for new schema ###
     
     try:
         # Extract user credentials
         user_id = session.get("user_id")
         role = session.get("role")
-        logger.debug(f"Add Classroom Role: {user_id} - {role}")
         
         # Ensure the user adding the classroom is an admin
         if role not in ['teacher', 'system']:
