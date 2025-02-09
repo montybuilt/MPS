@@ -139,12 +139,20 @@ function populateAssignedSelectionElements(studentAssignedContent, studentAssign
     // Get references to the selection elements
     const assignedContentSelect = document.getElementById('assigned-content');
     const assignedCurriculumSelect = document.getElementById('assigned-curriculums');
+    const assignedContentSelect2 = document.getElementById('assigned-content-2');
+    const assignedCurriculumSelect2 = document.getElementById('assigned-curriculums-2');
+    const removedContent = document.getElementById('removed-content');
+    const removedCurriculums = document.getElementById('removed-curriculums');
     
     // Clear existing options
     assignedContentSelect.innerHTML = '';
     assignedCurriculumSelect.innerHTML = '';
+    assignedContentSelect2.innerHTML = '';
+    assignedCurriculumSelect2.innerHTML = '';
+    removedContent.innerHTML = '';
+    removedCurriculums.innerHTML = '';
     
-    // Populate content assigned element
+    // Populate content assigned element for add content
     if (studentAssignedContent && studentAssignedContent.length > 0) {
         studentAssignedContent.forEach(content => {
             const option = new Option(content, content);
@@ -152,11 +160,27 @@ function populateAssignedSelectionElements(studentAssignedContent, studentAssign
         });
     }
     
-    // Populate curriculum assigned element
+    // Populate content assigned element for rmeove content
+    if (studentAssignedContent && studentAssignedContent.length > 0) {
+        studentAssignedContent.forEach(content => {
+            const option = new Option(content, content);
+            assignedContentSelect2.appendChild(option);
+        });
+    }
+    
+    // Populate curriculum assigned element for add curriculums
     if (studentAssignedCurriculums && studentAssignedCurriculums.length > 0) {
         studentAssignedCurriculums.forEach(curriculum => {
             const option = new Option(curriculum, curriculum);
             assignedCurriculumSelect.appendChild(option);
+        });
+    }
+    
+    // Populate curriculum assigned element for remove curriculums
+    if (studentAssignedCurriculums && studentAssignedCurriculums.length > 0) {
+        studentAssignedCurriculums.forEach(curriculum => {
+            const option = new Option(curriculum, curriculum);
+            assignedCurriculumSelect2.appendChild(option);
         });
     }
 }
@@ -250,19 +274,22 @@ function submitForm() {
         var changes = { username: username };
 
         // Assign collections of fields by type
-        var listFields = ['assigned_content', 'assigned_curriculums', 'completed_curriculums', 'correct_answers', 'incorrect_answers'];
+        var listFields = ['assigned_content', 'assigned_curriculums', 'removed_content', 'removed_curriculums', 'completed_curriculums', 'correct_answers', 'incorrect_answers'];
         var dictFields = ['content_scores', 'curriculum_scores', 'xp'];
 
         // Get assigned content and curriculums
         var assignedContent = Array.from(document.getElementById('assigned-content').options).map(option => option.value);
         var assignedCurriculums = Array.from(document.getElementById('assigned-curriculums').options).map(option => option.value);
         
-        console.log("Assigned Curriculum:", assignedCurriculums);
-        console.log("Assigned Content", assignedContent);
+        // Get removed content and curriculums
+        var removedContent = Array.from(document.getElementById('removed-content').options).map(option => option.value);
+        var removedCurriculums = Array.from(document.getElementById('removed-curriculums').options).map(option => option.value);
 
-        // Add the new assigned content and curriculums to changes object
+        // Add the content and curriculums changes to changes dictionary
         changes['assigned_content'] = assignedContent;
         changes['assigned_curriculums'] = assignedCurriculums;
+        changes['removed_content'] = removedContent;
+        changes['removed_curriculums'] = removedCurriculums;        
 
         // Include updated content, curriculum, and xp scores if they exist
         if (updatedContentScores) {
@@ -327,12 +354,16 @@ function setupContentButtons() {
     // Add Content Button
     document.getElementById('add-content').addEventListener('click', handleAddContent);
     document.getElementById('remove-content').addEventListener('click', handleRemoveContent);
+    document.getElementById('add-content-2').addEventListener('click', handleAddContent2);
+    document.getElementById('remove-content-2').addEventListener('click', handleRemoveContent2);
 }
 
 function setupCurriculumButtons() {
     // Add Curriculum Button
     document.getElementById('add-curriculum').addEventListener('click', handleAddCurriculum);
     document.getElementById('remove-curriculum').addEventListener('click', handleRemoveCurriculum);
+    document.getElementById('add-curriculum-2').addEventListener('click', handleAddCurriculum2);
+    document.getElementById('remove-curriculum-2').addEventListener('click', handleRemoveCurriculum2);
 }
 
 function handleAddContent() {
@@ -345,12 +376,30 @@ function handleAddContent() {
         return;
     }
 
-    if (isContentAlreadyAssigned(selectedContentElement, assignedContent)) {
+    if (isContentAlreadyMoved(selectedContentElement, assignedContent)) {
         return;
     }
 
-    addContentToAssigned(selectedContentElement, assignedContent);
+    addContentToMoved(selectedContentElement, assignedContent);
     addCurriculumsToAssigned(selectedContentElement.value);
+}
+
+function handleAddContent2() {
+    var assignedContent = document.getElementById('assigned-content-2');
+    var removedContent = document.getElementById('removed-content');
+    var selectedContentElement = assignedContent.options[assignedContent.selectedIndex];
+
+    if (!selectedContentElement) {
+        alert("Please select a content item to move");
+        return;
+    }
+
+    if (isContentAlreadyMoved(selectedContentElement, removedContent)) {
+        return;
+    }
+
+    addContentToMoved(selectedContentElement, removedContent);
+    addCurriculumsToRemoved(selectedContentElement.value);
 }
 
 function handleRemoveContent() {
@@ -362,8 +411,21 @@ function handleRemoveContent() {
         return;
     }
 
-    removeContentFromAssigned(selectedContentElement, assignedContent);
+    removeContentFromMoved(selectedContentElement, assignedContent);
     removeCurriculumsFromAssigned(selectedContentElement.value);
+}
+
+function handleRemoveContent2() {
+    var movedContent = document.getElementById('removed-content');
+    var selectedContentElement = movedContent.options[movedContent.selectedIndex];
+
+    if (!selectedContentElement) {
+        alert("Please select a content item to remove");
+        return;
+    }
+
+    removeContentFromMoved(selectedContentElement, movedContent);
+    removeCurriculumsFromRemoved(selectedContentElement.value);
 }
 
 function handleAddCurriculum() {
@@ -376,7 +438,20 @@ function handleAddCurriculum() {
         return;
     }
 
-    addCurriculumToAssigned(selectedCurriculumElement, assignedCurriculums);
+    addCurriculumToMoved(selectedCurriculumElement, assignedCurriculums);
+}
+
+function handleAddCurriculum2() {
+    var assignedCurriculums = document.getElementById('assigned-curriculums-2');
+    var removedCurriculums = document.getElementById('removed-curriculums');
+    var selectedCurriculumElement = assignedCurriculums.options[assignedCurriculums.selectedIndex];
+
+    if (!selectedCurriculumElement) {
+        alert("Please select a curriculum to add");
+        return;
+    }
+
+    addCurriculumToMoved(selectedCurriculumElement, removedCurriculums);
 }
 
 function handleRemoveCurriculum() {
@@ -388,23 +463,35 @@ function handleRemoveCurriculum() {
         return;
     }
 
-    removeCurriculumFromAssigned(selectedCurriculumElement, assignedCurriculums);
+    removeCurriculumFromMoved(selectedCurriculumElement, assignedCurriculums);
 }
 
-function isContentAlreadyAssigned(selectedContentElement, assignedContent) {
-    for (var i = 0; i < assignedContent.options.length; i++) {
-        if (assignedContent.options[i].value === selectedContentElement.value) {
+function handleRemoveCurriculum2() {
+    var removedCurriculums = document.getElementById('removed-curriculums');
+    var selectedCurriculumElement = removedCurriculums.options[removedCurriculums.selectedIndex];
+
+    if (!selectedCurriculumElement) {
+        alert("Please select a curriculum to remove");
+        return;
+    }
+
+    removeCurriculumFromMoved(selectedCurriculumElement, removedCurriculums);
+}
+
+function isContentAlreadyMoved(selectedContentElement, movedContent) {
+    for (var i = 0; i < movedContent.options.length; i++) {
+        if (movedContent.options[i].value === selectedContentElement.value) {
             return true;
         }
     }
     return false;
 }
 
-function addContentToAssigned(selectedContentElement, assignedContent) {
+function addContentToMoved(selectedContentElement, movedContent) {
     var newOption = document.createElement('option');
     newOption.value = selectedContentElement.value;
     newOption.text = selectedContentElement.text;
-    assignedContent.appendChild(newOption);
+    movedContent.appendChild(newOption);
 }
 
 function addCurriculumsToAssigned(contentKey) {
@@ -422,8 +509,23 @@ function addCurriculumsToAssigned(contentKey) {
     });
 }
 
-function removeContentFromAssigned(selectedContentElement, assignedContent) {
-    assignedContent.removeChild(selectedContentElement);
+function addCurriculumsToRemoved(contentKey) {
+    var contentDict = JSON.parse(sessionStorage.getItem('contentDict'));
+    var baseCurriculums = contentDict[contentKey] || [];
+    var movedCurriculums = document.getElementById('removed-curriculums');
+
+    baseCurriculums.forEach(function(curriculum) {
+        if (![...movedCurriculums.options].some(option => option.value === curriculum)) {
+            var curriculumOption = document.createElement('option');
+            curriculumOption.value = curriculum;
+            curriculumOption.text = curriculum;
+            movedCurriculums.appendChild(curriculumOption);
+        }
+    });
+}
+
+function removeContentFromMoved(selectedContentElement, movedContent) {
+    movedContent.removeChild(selectedContentElement);
 }
 
 function removeCurriculumsFromAssigned(contentKey) {
@@ -441,21 +543,35 @@ function removeCurriculumsFromAssigned(contentKey) {
     });
 }
 
-function addCurriculumToAssigned(selectedCurriculumElement, assignedCurriculums) {
-    for (var i = 0; i < assignedCurriculums.options.length; i++) {
-        if (assignedCurriculums.options[i].value === selectedCurriculumElement.value) {
+function removeCurriculumsFromRemoved(contentKey) {
+    var contentDict = JSON.parse(sessionStorage.getItem('contentDict'));
+    var baseCurriculums = contentDict[contentKey] || [];
+    var removedCurriculums = document.getElementById('removed-curriculums');
+
+    baseCurriculums.forEach(function(curriculum) {
+        for (var i = 0; i < removedCurriculums.options.length; i++) {
+            if (removedCurriculums.options[i].value === curriculum) {
+                removedCurriculums.removeChild(removedCurriculums.options[i]);
+                break;
+            }
+        }
+    });
+}
+
+function addCurriculumToMoved(selectedCurriculumElement, movedCurriculums) {
+    for (var i = 0; i < movedCurriculums.options.length; i++) {
+        if (movedCurriculums.options[i].value === selectedCurriculumElement.value) {
             return; // Curriculum already assigned, exit
         }
     }
-
     var newCurriculumOption = document.createElement('option');
     newCurriculumOption.value = selectedCurriculumElement.value;
     newCurriculumOption.text = selectedCurriculumElement.text;
-    assignedCurriculums.appendChild(newCurriculumOption);
+    movedCurriculums.appendChild(newCurriculumOption);
 }
 
-function removeCurriculumFromAssigned(selectedCurriculumElement, assignedCurriculums) {
-    assignedCurriculums.removeChild(selectedCurriculumElement);
+function removeCurriculumFromMoved(selectedCurriculumElement, movedCurriculums) {
+    movedCurriculums.removeChild(selectedCurriculumElement);
 }
 
 document.addEventListener('DOMContentLoaded', function () {

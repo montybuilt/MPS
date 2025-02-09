@@ -235,7 +235,7 @@
         <!-- Fifth row container for content assignments -->
         <div class="row-container">
           <div class="accordion-container">
-            <div class="accordion-header" onclick="toggleAccordion('accordion4')">Content Area Assignments</div>
+            <div class="accordion-header" onclick="toggleAccordion('accordion4')">Add Custom Content Assignments - (won't affect classroom assignments)</div>
             <div class="accordion-body" id="accordion4">
               <div class="dual-list-container">
                 <!-- Left Box: Available Content Areas -->
@@ -292,21 +292,81 @@
             </div>
           </div>
         </div>
+        <!-- Sixth row container for removing content assignments -->
+        <div class="row-container">
+          <div class="accordion-container">
+            <div class="accordion-header" onclick="toggleAccordion('accordion5')">Remove Custom Content Assignments - (won't affect clasroom assignments)</div>
+            <div class="accordion-body" id="accordion5">
+              <div class="dual-list-container">
+                <!-- Left Box: Assigned Content Areas -->
+                <div class="form-group">
+                    <div class="list-box">
+                      <h5>Assigned Content</h5>
+                      <select id="assigned-content-2" class="form-select-content" multiple>
+                        <!-- Placeholder items, will be dynamically generated -->
+                        <option value="content_1"></option>
+                      </select>
+                    </div>
+            
+                    <!-- Control Buttons -->
+                    <div class="list-controls">
+                      <button id="add-content-2" class="btn btn-primary" type="button">&rarr;</button>
+                      <button id="remove-content-2" class="btn btn-secondary" type="button">&larr;</button>
+                    </div>
+            
+                    <!-- Right Box: Content Areas To Remove -->
+                    <div class="list-box">
+                      <h5>Remove Content</h5>
+                      <select id="removed-content" class="form-select-content" multiple>
+                        <!-- Placeholder items, will be dynamically updated -->
+                        <option value="content_2"></option>
+                      </select>
+                    </div>
+                </div>
+                <!-- Left Box: Available Curriculums -->
+                <div class="form-group">
+                    <div class="list-box">
+                      <h5>Assigned Curriculums</h5>
+                      <select id="assigned-curriculums-2" class="form-select-curriculums" multiple>
+                        <!-- Placeholder items, will be dynamically generated -->
+                        <option value="curriculum_1"></option>
+                      </select>
+                    </div>
+            
+                    <!-- Control Buttons -->
+                    <div class="list-controls">
+                      <button id="add-curriculum-2" class="btn btn-primary" type="button">&rarr;</button>
+                      <button id="remove-curriculum-2" class="btn btn-secondary" type="button">&larr;</button>
+                    </div>
+            
+                    <!-- Right Box: Assigned Curriculums -->
+                    <div class="list-box">
+                      <h5>Remove Curriculums</h5>
+                      <select id="removed-curriculums" class="form-select-curriculums" multiple>
+                        <!-- Placeholder items, will be dynamically updated -->
+                        <option value=""></option>
+                      </select>
+                    </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
 
         <!-- Hidden fields to capture initial values -->
-         <input type="hidden" id="initial_password" name="initial_password">
-         <input type="hidden" id="initial_email" name="initial_email">
-         <input type="hidden" id="initial_assigned_content" name="initial_assigned_content">
-         <input type="hidden" id="initial_assigned_curriculums" name="initial_assigned_curriculums">
-         <input type="hidden" id="initial_completed_curriculums" name="initial_completed_curriculums">
-         <input type="hidden" id="initial_current_curriculum" name="initial_current_curriculum">
-         <input type="hidden" id="initial_current_question" name="initial_current_question">
-         <input type="hidden" id="initial_content_scores" name="initial_content_scores">
-         <input type="hidden" id="initial_curriculum_scores" name="initial_curriculum_scores">
-         <input type="hidden" id="initial_xp" name="initial_xp">
-         <input type="hidden" id="initial_correct_answers" name="initial_correct_answers">
-         <input type="hidden" id="initial_incorrect_answers" name="initial_incorrect_answers">
-         
+        <input type="hidden" id="initial_password" name="initial_password">
+        <input type="hidden" id="initial_email" name="initial_email">
+        <input type="hidden" id="initial_assigned_content" name="initial_assigned_content">
+        <input type="hidden" id="initial_assigned_curriculums" name="initial_assigned_curriculums">
+        <input type="hidden" id="initial_completed_curriculums" name="initial_completed_curriculums">
+        <input type="hidden" id="initial_current_curriculum" name="initial_current_curriculum">
+        <input type="hidden" id="initial_current_question" name="initial_current_question">
+        <input type="hidden" id="initial_content_scores" name="initial_content_scores">
+        <input type="hidden" id="initial_curriculum_scores" name="initial_curriculum_scores">
+        <input type="hidden" id="initial_xp" name="initial_xp">
+        <input type="hidden" id="initial_correct_answers" name="initial_correct_answers">
+        <input type="hidden" id="initial_incorrect_answers" name="initial_incorrect_answers">
+        <label>&nbsp;</label><br>
         <input type="submit" value="Update User">
         
     </form>

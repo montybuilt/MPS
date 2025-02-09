@@ -1,7 +1,7 @@
 # Import packages
 import bcrypt, itertools
 from flask import session, redirect, url_for, jsonify, has_request_context
-from modules.models import db, User, Admin, Questions, XP, Content, Curriculum, Classroom, ClassroomUser, ContentCurriculum, UserContent, UserCurriculum, CurriculumQuestion, ClassroomContent
+from modules.models import *
 from sqlalchemy.exc import SQLAlchemyError, IntegrityError
 from sqlalchemy.orm.attributes import flag_modified
 from datetime import datetime
@@ -494,14 +494,15 @@ def update_user_data(username, changes, logger=None):
         - GETs information from user_data.html and POSTs it to the database
     
     '''
-    
+
     # Fetch the user_id belonging to the student username passed
     user_id = db.session.query(User.id).filter_by(username = username).scalar()
     
     # Break out assigned_curriculum and assigned_content from changes    
     assigned_content = changes.pop('assigned_content')
     assigned_curriculums = changes.pop('assigned_curriculums')
-    
+    removed_content = changes.pop('removed_content')
+    removed_curriculums = changes.pop('removed_curriculums')    
     
     user_crud = CRUDHelper(User)
     user = user_crud.read(username=username)[0]  # Retrieve user by username
@@ -563,10 +564,33 @@ def update_user_data(username, changes, logger=None):
         
         if user_curriculum_entries:
             db.session.bulk_save_objects(user_curriculum_entries)
+            
+    if removed_content:
+        
+        # First fetch the Content.id for each of the Content.content_id contained in the removed_content list
+        content_query = db.session.query(Content.id).filter(Content.content_id.in_(removed_content)).all()
+        content_ids = [c[0] for c in content_query]
+        
+        # Remove the each of the Content.id for User.id in the ContentUser table
+        db.session.query(UserContent).filter(
+            UserContent.user_id == user_id,
+            UserContent.content_id.in_(content_ids)
+        ).delete(synchronize_session=False)        
+        
+    if removed_curriculums:
+        
+        # First fetch the Curriculum.id for each of the Curriculum.curriculum_id contained in the removed_curriculums list
+        curriculum_query = db.session.query(Curriculum.id).filter(Curriculum.curriculum_id.in_(removed_curriculums)).all()
+        curriculum_ids = [c[0] for c in curriculum_query]
+        
+        # Remove the each of the Content.id for User.id in the ContentUser table
+        db.session.query(UserCurriculum).filter(
+            UserCurriculum.user_id == user_id,
+            UserCurriculum.curriculum_id.in_(curriculum_ids)
+        ).delete(synchronize_session=False)
     
-    if assigned_content or assigned_curriculums:
+    if assigned_content or assigned_curriculums or removed_content or removed_curriculums:
         db.session.commit()
-
 
     if updates:
         try:
@@ -908,7 +932,7 @@ def fetch_classroom_data(class_code, logger=None):
         
         # Verify the user.id is system or the creator of the class_code
         if not (user_id == admin_id or user_id in system_ids):
-            raise Exception(f"User does not have access to classrom {class_code}")
+            raise Exception(f"User does not have access to classroom {class_code}")
         
         # User CRUDHelper to get records via ClassroomUser
         cu_helper = CRUDHelper(ClassroomUser)
@@ -925,18 +949,50 @@ def fetch_classroom_data(class_code, logger=None):
         # Extract student emails from User records
         student_emails = [student.email for student in students if student.email]
         
-        # Get assigned content from the classroom
-        content = classroom.assigned_content
+        # Get content already assigned to this classroom
+        content_query = db.session.query(ClassroomContent.content_id).filter_by(classroom_id=class_id).all()
+        content_ids = [c[0] for c in content_query]
         
-        return{'students': student_emails, 'content': content}
+        # Query the content names from the Content table give Content.id above
+        content_query = Content.query.filter(Content.id.in_(content_ids)).all()
+        assigned_content = [c.content_id for c in content_query]
+        
+        # Query all content areas where this admin is the creator + all system content
+        available_content = (
+            Content.query
+            .filter((Content.creator_id == user_id) | (Content.creator_id.in_(system_ids)))
+            .with_entities(Content.content_id)
+            .all()
+        )
+        
+        available_content = [c[0] for c in available_content]
+        logger.debug(f"Available Content: {available_content}")
+        
+        
+        
+        
+        
+        logger.debug(f"Content: {content_ids}")
+
+        return{'students': student_emails, 'availableContent': available_content, 'assignedContent': assigned_content}
         
     except Exception as e:
         logger.debug(f"An unexpected error occurred: {e}")
         raise e
 
-def update_classroom_assignments(class_code, students=None, content=None, logger=None):
-    '''Write new student assignments for classrooms'''
-    ### CHANGE needed for new schema ###
+def update_classroom_student_assignments(class_code, students=None, logger=None):
+    '''
+    Write new student assignments for classrooms to the database
+    
+    Arg(s): class_code as string, students as array of email strings, logger as app.logger
+    
+    Returns: status dictionary with further instructions for route server
+    
+    Notes:
+        - This function updates the student.id assigned to classroom.id
+        - This only updates the ClassroomUser pairings, not UserContent or UserCurriculum
+        - Currently this function only works to add students to a classroom, not remove students
+    '''
     
     # Get admin credentials
     user_id = session.get('user_id')
@@ -947,7 +1003,6 @@ def update_classroom_assignments(class_code, students=None, content=None, logger
     
     try:
         if students:
-            # Initialize not found email list
             
             # Fetch the classroom object by class_code
             classroom = Classroom.query.filter_by(code=class_code).first()           
@@ -957,12 +1012,12 @@ def update_classroom_assignments(class_code, students=None, content=None, logger
                 raise Exception(f"{status['error_msg']}")
                 
             # Query content for this Classroom from ClassroomContent table
-            content = ClassroomContent.query.filter_by(classroom_id=classroom.id).all()
-            content_to_add = [c.content_id for c in content]
+            # content = ClassroomContent.query.filter_by(classroom_id=classroom.id).all()
+            # content_to_add = [c.content_id for c in content]
             
             # Query curriculum for content_to_add from the ContentCurriculum table
-            curriculum = ContentCurriculum.query.filter(ContentCurriculum.content_id.in_(content_to_add)).all()
-            curriculum_to_add = [c.curriculum_id for c in curriculum]
+            # curriculum = ContentCurriculum.query.filter(ContentCurriculum.content_id.in_(content_to_add)).all()
+            # curriculum_to_add = [c.curriculum_id for c in curriculum]
 
             # Fetch all users in one query and create a dictionary
             user_dict = {user.email: user for user in User.query.filter(User.email.in_(students)).all()}
@@ -982,44 +1037,71 @@ def update_classroom_assignments(class_code, students=None, content=None, logger
                 classroom_user = ClassroomUser(classroom_id=classroom.id, user_id=user.id)
                 db.session.add(classroom_user)
                      
-                # Add the content to UserContent
-                if content_to_add:
-                    existing = db.session.query(UserContent.content_id).filter(UserContent.user_id==user.id).all()
-                    existing_content = {e[0] for e in existing}
-                    
-                    #Identify new entries
-                    new_entries = [
-                        UserContent(user_id=user.id, content_id=content_id)
-                        for content_id in content_to_add
-                        if content_id not in existing_content
-                    ]
-                    
-                    # Bulk insert new entries
-                    if new_entries:
-                        db.session.bulk_save_objects(new_entries)
-                        
-                # Add the curriculums to UserCurriculum
-                if curriculum_to_add:
-                    existing = db.session.query(UserCurriculum.curriculum_id).filter(UserCurriculum.user_id==user.id).all()
-                    existing_curriculum = {e[0] for e in existing}
-                    
-                    #Identify new entries
-                    new_entries = [
-                        UserCurriculum(user_id=user.id, curriculum_id=curriculum_id)
-                        for curriculum_id in curriculum_to_add
-                        if curriculum_id not in existing_curriculum
-                    ]
-                    
-                    # Bulk insert new entries
-                    if new_entries:
-                        db.session.bulk_save_objects(new_entries)
-            
-            # Commit all changes for students
             db.session.commit()
             
             # Need logic on what to do when a student is removed from a classroom
-            ## Left OFF HERE###
             
+        return status
+    
+    except Exception as e:
+        # Log the error and update the error code
+        logger.debug(f"Error: {e}")
+        status['error_msg'] = f'{e}'
+        return status
+    
+def update_classroom_content_assignments(class_code, content=None, logger=None):
+    '''
+    Write new content assignments for classrooms to the database
+    
+    Arg(s): class_code as string, content as array, logger as app.logger
+    
+    Notes:
+        - This function updates the content.id assigned to classroom.id
+        - This only updates the ClassroomContent pairings, not UserContent or UserCurriculum
+        - Currently this function only works to add content to a classroom, not remove content
+    '''
+    
+    # Get admin credentials
+    user_id = session.get('user_id')
+    role = session.get('role')
+    
+    # Create a status dict to return
+    status = {'error_msg': '', 'no_content': []}
+    
+    try:
+        
+        if content:
+            
+            # Fetch the classroom object by class_code
+            classroom = Classroom.query.filter_by(code=class_code).first()
+        
+            if not classroom:
+                status['error_msg'] = "Incorrect class_code"
+                raise Exception(f"{status['error_msg']}")
+        
+            # Extract the Classroom.id
+            class_id = classroom.id
+        
+            # Fetch the content objects
+            content_records = db.session.query(Content).filter(Content.content_id.in_(content)).all()
+            content_ids = [c.id for c in content_records]
+        
+            # Get existing records in ClassroomContent to prevent duplicates
+            existing_records = db.session.query(ClassroomContent.content_id).filter_by(classroom_id=class_id).all()
+            existing_content_ids = {record.content_id for record in existing_records}  # Convert to set for fast lookup
+        
+            # Create new entries excluding duplicates
+            new_entries = [
+                ClassroomContent(classroom_id=class_id, content_id=content_id)
+                for content_id in content_ids if content_id not in existing_content_ids
+            ]
+        
+            # Bulk insert new entries
+            if new_entries:
+                db.session.bulk_save_objects(new_entries)
+                db.session.commit()
+            
+            # Need logic on what to do when a content is removed from a classroom
             
         return status
     

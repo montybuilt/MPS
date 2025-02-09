@@ -68,6 +68,7 @@ document.getElementById('classroom-selector').addEventListener('change', async f
     await fetchClassroomData(selectedClassroomId);
     // When data is done fetching then populate the students in the classroom
     populateStudentsAddedList();
+    populateContentAddedList();
 });
 
 
@@ -120,90 +121,48 @@ function populateStudentsAddedList() {
     });
 }
 
-// Populate the available and assigned Questions lists
-function populateQuestionLists(curriculumId) {
-    const curriculumDict = JSON.parse(sessionStorage.getItem('curriculumDict'));
-    const allQuestions = JSON.parse(sessionStorage.getItem('allQuestions'));
+// Initialize the Content Added list with content already in the classroom
+function populateContentAddedList() {
+    
+    // Get content already assigned to classroom
+    const assignedContent = classroomData['assignedContent'] || [];
+    
+    // Get available content - filter out content already assigned
+    const availableContent = classroomData['availableContent'].filter(c => !assignedContent.includes(c));
+    
+    // Get the list select elements
+    const availableContentList = document.getElementById('available-content');
+    const assignedContentList = document.getElementById('assigned-content');
 
-    // Get assigned questions for the selected curriculum
-    const assignedQuestions = curriculumDict[curriculumId] || [];
+    // Clear existing options in both lists
+    while (availableContentList.firstChild) {availableContentList.removeChild(availableContentList.firstChild)};
+    while (assignedContentList.firstChild) {assignedContentList.removeChild(assignedContentList.firstChild)};
 
-    // Filter out assigned questions to get the available questions
-    const availableQuestions = allQuestions.filter(q => !assignedQuestions.includes(q));
-
-    // Populate the assigned-questions list
-    const assignedList = document.getElementById('assigned-questions');
-    assignedList.innerHTML = '';
-    assignedQuestions.forEach(question => {
+    // Populate assigned students list
+    assignedContent.forEach(content => {
         const option = document.createElement('option');
-        option.value = question;
-        option.textContent = question;
-        assignedList.appendChild(option);
+        option.value = content;
+        option.textContent = content;
+        assignedContentList.appendChild(option);
     });
-
-    // Populate the available-questions list
-    const availableList = document.getElementById('available-questions');
-    availableList.innerHTML = '';
-    availableQuestions.forEach(question => {
+    
+    // Populate the available content list
+    availableContent.forEach(content => {
         const option = document.createElement('option');
-        option.value = question;
-        option.textContent = question;
-        availableList.appendChild(option);
+        option.value = content;
+        option.textContent = content;
+        availableContentList.appendChild(option);
     });
 }
 
-// Event Listener to update database with new classroom upon pressing submit-new-classroom button
-document.getElementById('submit-new-classroom').addEventListener('click', function() {
-    // Get the values from the input fields
-    const newClassroom = document.getElementById('new-classroom').value;
-    const newClassroomDescription = document.getElementById('new-classroom-description').value;
-
-    // Prepare the data to be sent in the POST request
-    const data = { data: [newClassroom, newClassroomDescription], table: 'classroom' };
-
-    // Send the POST request using the Fetch API
-    fetch('/new_classroom', {
-        method: 'POST', // Use the POST method
-        headers: {
-            'Content-Type': 'application/json' // Send as JSON
-        },
-        body: JSON.stringify(data) // Convert data object to JSON string
-    })
-    .then(response => {
-        // Parse JSON and check response status
-        return response.json().then(jsonData => {
-            if (!response.ok) {
-                // Targeted error handling based on server response
-                if (response.status === 409 && jsonData.error?.includes('UNIQUE constraint')) {
-                    throw new Error("Database Error: Make sure your content ID is unique.");
-                } else {
-                    throw new Error(jsonData.error || "An Unexpected Error Occurred.");
-                }
-            }
-            return jsonData;
-        });
-    })
-    .then(data => {
-        console.log('Success:', data);        
-        // Clear the new-content entry box and alert the user
-        document.getElementById('new-classroom').value = '';
-        document.getElementById('new-classroom-description').value = '';
-        alert("New classroom added successfully!");
-    })
-    .catch((error) => {
-        // Handle errors
-        console.error('Error:', error);
-        alert(error.message || "An Unexpected Error Occurred.");
-    });
-});
 
 function assignAddRemoveButtons() {
     // Student assignment buttons
     document.getElementById('add-student').addEventListener('click', handleAddStudent);
     document.getElementById('remove-student').addEventListener('click', handleRemoveStudent);
     // Content assignment buttons
-    //document.getElementById('add-content').addEventListener('click', handleAddContent);
-    //document.getElementById('remove-content').addEventListener('click', handleRemoveContent);
+    document.getElementById('add-content').addEventListener('click', handleAddContent);
+    document.getElementById('remove-content').addEventListener('click', handleRemoveContent);
 }
 
 // Common function for adding or removing items from list to list
@@ -219,7 +178,7 @@ function handleAddStudent() {
     var studentsToAdd = document.getElementById('students-to-add');
     var assignedStudents = document.getElementById('assigned-students');
 
-    // Get all entered email addresses
+    // Convert the studentsToAdd to an array
     var newStudents = studentsToAdd.value.split("\n").map(email => email.trim()).filter(email => email !== "");
 
     if (newStudents.length === 0) {
@@ -237,6 +196,36 @@ function handleAddStudent() {
 
     // Clear the textarea after adding students
     studentsToAdd.value = "";
+}
+
+function isContentAlreadyAssigned(selectedContentElement, assignedContent) {
+    for (var i = 0; i < assignedContent.options.length; i++) {
+        if (assignedContent.options[i].value === selectedContentElement.value) {
+            return true;
+        }
+    }
+    return false;
+}
+
+function handleAddContent() {
+    var availableContent = document.getElementById('available-content');
+    var assignedContent = document.getElementById('assigned-content');
+    var selectedContentElement = availableContent.options[availableContent.selectedIndex];
+
+    if (!selectedContentElement) {
+        alert("Please select a content item to add");
+        return;
+    }
+
+    if (isContentAlreadyAssigned(selectedContentElement, assignedContent)) {
+        return;
+    }
+
+    // Add content to the assigned content list
+    var newOption = document.createElement('option');
+    newOption.value = selectedContentElement.value;
+    newOption.text = selectedContentElement.text;
+    assignedContent.appendChild(newOption);    
 }
 
 function handleRemoveStudent() {
@@ -262,15 +251,34 @@ function handleRemoveStudent() {
     selectedStudents.forEach(option => option.remove());
 }
 
+function handleRemoveContent() {
+    var availableContent = document.getElementById('available-content');
+    var assignedContent = document.getElementById('assigned-content');
+    var selectedContentElement = assignedContent.options[assignedContent.selectedIndex];
+    
+    if (!selectedContentElement) {
+        alert("Please select a content item to remove");
+        return;
+    }
+    // Remove selection from the assigned-content list
+    assignedContent.removeChild(selectedContentElement);
+    
+    // Removed content should appear back in the available content list
+    var newOption = document.createElement('option');
+    newOption.value = selectedContentElement.value;
+    newOption.text = selectedContentElement.text;
+    availableContent.appendChild(newOption);
+}
+
 
 // Sets up the button assignment so can be recognized on page load
 function assignSubmitButtons() {
     const submitStudentAssignmentsButton = document.getElementById('submit-student-assignments');
-    //const contentSubmitButton = document.getElementById('submit-curriculum-assignment');
+    const contentSubmitButton = document.getElementById('submit-content-assignment');
     if (submitStudentAssignmentsButton) {submitStudentAssignmentsButton.addEventListener('click', handleSubmitStudentAssignments)}
     else {console.error('Button with ID "submit-student-assignments" not found.')}
-    //if (contentSubmitButton) {curriculumSubmitButton.addEventListener('click', handleSubmitContentAssignment)}
-    //else {console.error('Button with ID "submit-curriculum-assignment" not found.')}
+    if (contentSubmitButton) {contentSubmitButton.addEventListener('click', handleSubmitContentAssignment)}
+    else {console.error('Button with ID "submit-content-assignment" not found.')}
 }
 
 function handleSubmitStudentAssignments() {
@@ -279,6 +287,7 @@ function handleSubmitStudentAssignments() {
     const assignedStudents = Array.from(document.getElementById('assigned-students')?.children || []).map(item => item.value);
     const existingStudents = classroomData['students'] || [];
     const newStudents = assignedStudents.filter(student => !existingStudents.includes(student));
+    console.log("New Students:", newStudents)
 
     if (!classroomCode) {
         alert('Please select a classroom and add students.');
@@ -313,6 +322,8 @@ function handleSubmitStudentAssignments() {
                 throw new Error(data.error);
             }
             alert(data.message);
+            // Update the classroomData variable
+            fetchClassroomData(classroomCode);
         })
         .catch(error => {
             console.error('Error:', error);
@@ -320,19 +331,21 @@ function handleSubmitStudentAssignments() {
         });
 }
 
-function handleSubmitCurriculumAssignment() {
-    // Get the curriculum_id and array of tasks assigned
-    const curriculumId = document.getElementById('curriculum-selector')?.value;
-    const assignedQuestions = Array.from(document.getElementById('assigned-questions')?.children || []).map(item => item.value);
+function handleSubmitContentAssignment() {
+   // Get the classroom_code and array of student emails assigned
+    const classroomCode = document.getElementById('classroom-selector')?.value;
+    const assignedContent = Array.from(document.getElementById('assigned-content')?.children || []).map(item => item.value);
+    const existingContent = classroomData['assignedContent'] || [];
+    const newContent = assignedContent.filter(content => !existingContent.includes(content));
 
-    if (!curriculumId) {
-        alert('Please select a curriculum item.');
+    if (!classroomCode) {
+        alert('Please select a classroom and add content.');
         return;
     }
 
-    if (assignedQuestions.length === 0) {
+    if (assignedContent.length === 0) {
         // Show confirmation dialog with custom message
-        const confirmAction = window.confirm('No tasks assigned. Continuing will remove all assigned tasks for this content area. Are you sure?');
+        const confirmAction = window.confirm('No content assigned. Continuing will remove all content from this classroom. Are you sure?');
         
         if (!confirmAction) {
             return;  // If user clicks "No", exit the function
@@ -340,15 +353,16 @@ function handleSubmitCurriculumAssignment() {
     }
 
     // Prepare the payload
-    const curriculumAssignments = { 'curriculum_id': curriculumId, 'task_list': assignedQuestions };
+    const contentAssignments = { 'classroom_code': classroomCode, 'content': newContent };
+    console.log("Adding Content", contentAssignments['content'])
 
     // Send the POST request using Fetch API
-    fetch('/assign_tasks_to_curriculum', {
+    fetch('/assign_content_to_classroom', {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json',
         },
-        body: JSON.stringify(curriculumAssignments),
+        body: JSON.stringify(contentAssignments),
     })
         .then(response => response.json())
         .then(data => {
@@ -356,11 +370,7 @@ function handleSubmitCurriculumAssignment() {
                 alert(data.error);
                 throw new Error(data.error);
             }
-            // Update curriculumDict in sessionStorage
-            const curriculumDict = JSON.parse(sessionStorage.getItem('curriculumDict')) || {};
-            curriculumDict[curriculumId] = assignedQuestions;
-            sessionStorage.setItem('curriculumDict', JSON.stringify(curriculumDict));
-            alert('Curriculum and task assignments updated successfully!');
+            alert(data.message);
         })
         .catch(error => {
             console.error('Error:', error);
