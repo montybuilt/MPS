@@ -24,21 +24,28 @@
         margin: 10px;
     }
     
+    .new-class-button {
+        width: 100px;
+        height: 40px;
+        color: white;
+        background-color: green;
+        }
+    
     .form-group {
         display: flex;
         flex-direction: column;
         align-items: left;
-        margin-top: 10px;
-        flex: 1 1 100px; /* Allow elements to grow/shrink with a base of 200px */
-        max-width: 600px; /* Optional: Prevent elements from growing too wide */
-        min-width: 100px; /* Ensures reasonable minimum size */
+        margin-top: 10px;        
+        max-width: 400px;
+        min-width: 50px;
         box-sizing: border-box;
     }
     
     .dual-list-container {
+        width: 100%;
         display: flex;
         align-items: center;
-        gap: 5px;
+        gap: 10px;
     }
     
     .list-controls {           
@@ -86,7 +93,7 @@
         border-radius: 4px;
         padding: 10px; /* Add padding inside the border */
         display: flex;
-        flex-wrap: nowrap; /* Allow the items to wrap */
+        
         gap: 0px; /* Add space between the form groups */
     }
 
@@ -96,7 +103,7 @@
         flex-direction: column;
         align-items: center;
         justify-content: center;
-        
+        flex: 1 1;
         min-width: 200px;
     }
     
@@ -227,7 +234,7 @@
                         </div>
                         <div class="form-group">
                             <label>&nbsp;</label>
-                            <button id="submit-new-classroom" class="button" type="button">Submit</button>
+                            <button id="submit-new-classroom" class="new-class-button" type="button">Submit</button>
                         </div>
                     </div>
                 </div>

@@ -322,20 +322,51 @@ def initialize_user_sessionStorage_data(logger=None):
         # Get the user.id from session data
         user_id = session.get('user_id')
         
-        # Query User data
-        user = User.query.filter_by(id = user_id).first()
+        # Query all classrooms this user is enrolled in
+        all_classrooms = {c.classroom_id for c in ClassroomUser.query.with_entities(ClassroomUser.classroom_id).filter_by(user_id=user_id).all()}
         
-        # Use a table joing to query course assignments
-        coursework = db.session.query(ContentCurriculum.content_id, ContentCurriculum.curriculum_id).\
-            join(UserContent, UserContent.content_id == ContentCurriculum.content_id).\
-            join(User, User.id == UserContent.user_id).\
-            filter(User.id == user_id).\
-            all()
+        # Query all content_id that are assigned to all classroom_id in ClassroomContent
+        all_classroom_content_ids = {c.content_id for c in ClassroomContent.query.with_entities(ClassroomContent.content_id).filter(ClassroomContent.classroom_id.in_(all_classrooms)).all()} if all_classrooms else set()
+        
+        # Query all content_id that are assigned directly to the user in UserContent
+        all_user_content_ids = {c.content_id for c in UserContent.query.with_entities(UserContent.content_id).filter_by(user_id=user_id).all()}
+        
+        # Combine both sets
+        all_user_content = all_classroom_content_ids | all_user_content_ids
+        
+        # Query Content table to get the content_id for each Content.id
+        content_query = Content.query.with_entities(Content.content_id).filter(Content.id.in_(all_user_content)).all()
+        
+        # Extract content_id values
+        assigned_content = [c[0] for c in content_query]
+
+        # Now query curriculums - all curriculums assigned to assigned_content plus any from CurriculumUser
+        # First get all curriculums assigned to all_user_content
+        # Query all content_id that are assigned to all classroom_id in ClassroomContent
+        all_content_curriculum_ids = {c.curriculum_id for c in ContentCurriculum.query.with_entities(ContentCurriculum.curriculum_id).filter(ContentCurriculum.content_id.in_(all_user_content)).all()} if all_user_content else set()
+        
+        # Now query all user_curriculum_ids
+        # Query all content_id that are assigned directly to the user in UserContent
+        all_user_curriculum_ids = {c.curriculum_id for c in UserCurriculum.query.with_entities(UserCurriculum.curriculum_id).filter_by(user_id=user_id).all()}
+        
+        # combine both sets
+        all_user_curriculums = all_content_curriculum_ids | all_user_curriculum_ids
+        
+        # Query Curriculum table to get the curriculum_id for each Curriculum.id
+        curriculum_query = Curriculum.query.with_entities(Curriculum.curriculum_id).filter(Curriculum.id.in_(all_user_curriculums)).all()
+        
+        # Extract the curriculum id values
+        assigned_curriculums = [c[0] for c in curriculum_query]
+
+        # Query the User table for the other session data
+        user = User.query.filter_by(id=user_id).first()
+        logger.debug(f"")
+        
         
         # Update session data with the basic fields
         session_data = {
-                        "assignedContent": [course.content_id for course in coursework],
-                        "assignedCurriculums": [course.curriculum_id for course in coursework],
+                        "assignedContent": assigned_content,
+                        "assignedCurriculums": assigned_curriculums,
                         "completedCurriculums": user.completed_curriculums,
                         "contentScores": user.content_scores,
                         "correctAnswers": user.correct_answers,
@@ -346,7 +377,7 @@ def initialize_user_sessionStorage_data(logger=None):
                         "xp": user.xp,
                         "updatedAt": user.updated_at
                         }
-            
+        
         return session_data
 
     except Exception as e:
@@ -622,12 +653,18 @@ def fetch_curriculum_task_list(curriculum_id, logger=None):
     ### CHANGE needed for new schema ###
     
     try:
-        # Create CRUD Helper
-        c_CRUD = CRUDHelper(Curriculum)
+        # Get the Curriculum.id from the curriculum_id
+        curriculum_id = db.session.query(Curriculum.id).filter_by(curriculum_id = curriculum_id).scalar()
         
-        # get the task list
-        record = c_CRUD.read(curriculum_id=curriculum_id)
-        task_list = record[0].task_list
+        # Get all tasks assigned to that Curriculum.id from the CurriculumQuestions table
+        if curriculum_id:
+            c_questions = db.session.query(CurriculumQuestion.question_id).filter_by(curriculum_id=curriculum_id).all()
+            question_ids = [q[0] for q in c_questions]
+            
+        # From question ids above get task_keys from Questions table
+        if question_ids:
+            questions = db.session.query(Questions.task_key).filter(Questions.id.in_(question_ids)).all()
+            task_list = [t[0] for t in questions]
         
         # Return the task_list
         return task_list

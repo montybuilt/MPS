@@ -58,9 +58,9 @@ def login():
             
             # Build the session data for this app
             build_session(username, app.logger)
-            
+            app.logger.debug(f"The login was successful - building sessionStorage")
             # Build sesstionStorage data for the client
-            sessionStorage_data = initialize_user_sessionStorage_data()
+            sessionStorage_data = initialize_user_sessionStorage_data(app.logger)
 
             return jsonify({'message': 'Login successful', 'session_data': sessionStorage_data, 'username': username}), 200
 
@@ -299,9 +299,6 @@ def get_curriculum():
         app.logger.debug(f"Curriculum ID: {curriculum_id}")
     else:
         return jsonify({"error": "No curriculum ID given"}), 400
-    
-    # create a question object that retrieves the question data as an attribute
-    # curriculum_data = Curriculum(curriculum_id).data
     
     try:
         curriculum_data = fetch_curriculum_task_list(curriculum_id)
