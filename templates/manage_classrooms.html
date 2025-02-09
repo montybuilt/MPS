@@ -62,9 +62,16 @@
         padding-inline: 0px;
     }
     
+    .dual-list-button {
+        size: flex;
+        min-width: 400px;
+        height: 60px;
+        background-color: green;
+        color: white;
+    }
+    
     .list-controls .btn-primary {
         background-color: green;
-        
         color: white;
     }
     
@@ -79,7 +86,7 @@
         border-radius: 4px;
         padding: 10px; /* Add padding inside the border */
         display: flex;
-        flex-wrap: wrap; /* Allow the items to wrap */
+        flex-wrap: nowrap; /* Allow the items to wrap */
         gap: 0px; /* Add space between the form groups */
     }
 
@@ -102,7 +109,7 @@
     }
     
     .form-select-students {
-        width: 90%;
+        width: 100%;
         height: 300px;
         border: 1px solid #ccc;
         border-radius: 4px;
@@ -111,7 +118,7 @@
     }
     
     .form-select-content {
-        width: 90%;
+        width: 100%;
         height: 300px;
         border: 1px solid #ccc;
         border-radius: 4px;
@@ -120,7 +127,7 @@
     }
     
     .form-textarea-students {
-        width: 90%;
+        width: 100%;
         height: 300px;
         border: 1px solid #ccc;
         border-radius: 4px;
@@ -253,8 +260,6 @@
                                     <div class="list-controls">
                                         <button id="add-student" class="btn btn-primary" type="button">&rarr;</button>
                                         <button id="remove-student" class="btn btn-secondary" type="button">&larr;</button>
-                                        <!-- this button submits the new student assignments to the classroom -->
-                                        <button id="submit-student-assignments" class="btn btn-primary" type="button">&#10003;</button>
                                     </div>
                                 </div>                                
                                 <div class="form-group">
@@ -284,7 +289,6 @@
                                     <div class="list-controls">
                                         <button id="add-content" class="btn btn-primary" type="button">&rarr;</button>
                                         <button id="remove-content" class="btn btn-secondary" type="button">&larr;</button>
-                                        <button id="submit-content-assignment" class="btn btn-primary" type="button">&#10003;</button>
                                     </div>
                                 </div>
                                 <div class="form-group">
@@ -299,8 +303,91 @@
                                 </div>
                             </div>
                         </div>
+                        <div class="submit-button-group">
+                            <button id="submit-additions" class="dual-list-button" type="button">Submit Additions to Classroom</button>
+                        </div>
                         <div class="footnotes">
-                            <h2>Note: Removing students or content from the Added/Assigned lists does not remove from the classroom.</h2>
+                            <h5>Note: Removing students or content from the Added/Assigned lists does not remove from the classroom.</h5>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <!-- Remove From Classroom -->
+        <div class="row-container">
+            <div class="accordion-container">
+                <div class="accordion-header" onclick="toggleAccordion('accordion3')">Remove Students And Content From Classroom</div>
+                    <div class="accordion-body-middle" id="accordion3">
+                    <div class="selector-group">
+                        <div class="form-group">
+                            <label for="classroom-selector">Select Classroom:</label>
+                            <select id="classroom-selector-2" class="form-select">
+                                <option value="" disabled selected>Select Classroom</option>
+                            </select>
+                        </div>
+                    </div>
+                        <div class="dual-list-container">                    
+                            <div class="form-group-container">
+                                <div class="form-group">
+                                    <!-- Left Box: Assigned Student Emails -->
+                                    <div class="list-box">
+                                        <h5>Students Roster</h5>
+                                        <select id="assigned-students-2" class="form-select-students" multiple>
+                                            <!-- Placeholder items, will be dynamically updated -->
+                                            <option value=""></option>
+                                        </select>
+                                    </div>
+                                </div>
+                                <div class="form-group">
+                                    <!-- Control Buttons -->
+                                    <div class="list-controls">
+                                        <button id="add-student-2" class="btn btn-primary" type="button">&rarr;</button>
+                                        <button id="remove-student-2" class="btn btn-secondary" type="button">&larr;</button>
+                                    </div>
+                                </div>                                
+                                <div class="form-group">
+                                    <!-- Right Box: Students in Classroom -->
+                                    <div class="list-box">
+                                        <h5>Students Removed</h5>
+                                        <select id="removed-students" class="form-select-students" multiple>
+                                            <!-- Placeholder items, will be dynamically updated -->
+                                            <option value=""></option>
+                                        </select>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="form-group-container">
+                                <div class="form-group">
+                                    <!-- Left Box: Assigned Content Areas -->
+                                    <div class="list-box">
+                                        <h5>Assigned Content</h5>
+                                        <select id="assigned-content-2" class="form-select-content" multiple>
+                                            <!-- Placeholder items, will be dynamically updated -->
+                                            <option value=""></option>
+                                        </select>
+                                    </div>
+                                </div>
+                                <div class="form-group">
+                                    <!-- Control Buttons -->
+                                    <div class="list-controls">
+                                        <button id="add-content-2" class="btn btn-primary" type="button">&rarr;</button>
+                                        <button id="remove-content-2" class="btn btn-secondary" type="button">&larr;</button>
+                                    </div>
+                                </div>
+                                <div class="form-group">
+                                    <!-- Right Box: Assigned Content -->
+                                    <div class="list-box">
+                                        <h5>Removed Content</h5>
+                                        <select id="removed-content" class="form-select-content" multiple>
+                                            <!-- Placeholder items, will be dynamically updated -->
+                                            <option value=""></option>
+                                        </select>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="submit-button-group">
+                            <button id="submit-removals" class="dual-list-button" type="button">Submit Removals From Classroom</button>
                         </div>
                     </div>
                 </div>

@@ -919,6 +919,7 @@ def fetch_classroom_data(class_code, logger=None):
         # Fetch the user.id and admin status for filtering
         system_ids = session.get('system_ids')
         user_id = session.get('user_id')
+        role = session.get('role')
         
         # Access needed data from Classroom table
         classroom = Classroom.query.filter_by(code=class_code).first()
@@ -931,7 +932,7 @@ def fetch_classroom_data(class_code, logger=None):
         class_id = classroom.id
         
         # Verify the user.id is system or the creator of the class_code
-        if not (user_id == admin_id or user_id in system_ids):
+        if not (user_id == admin_id or role in ('system', 'teacher')):
             raise Exception(f"User does not have access to classroom {class_code}")
         
         # User CRUDHelper to get records via ClassroomUser
@@ -957,20 +958,19 @@ def fetch_classroom_data(class_code, logger=None):
         content_query = Content.query.filter(Content.id.in_(content_ids)).all()
         assigned_content = [c.content_id for c in content_query]
         
-        # Query all content areas where this admin is the creator + all system content
-        available_content = (
-            Content.query
-            .filter((Content.creator_id == user_id) | (Content.creator_id.in_(system_ids)))
-            .with_entities(Content.content_id)
-            .all()
-        )
+        # Query all content areas filtered for teachers - all for system admin
+        if role == 'system':
+            available_content = Content.query.with_entities(Content.content_id).all()
+        else:
+            available_content = (
+                Content.query
+                .filter((Content.creator_id == user_id) | (Content.creator_id.in_(system_ids)))
+                .with_entities(Content.content_id)
+                .all()
+            )
         
         available_content = [c[0] for c in available_content]
-        logger.debug(f"Available Content: {available_content}")
-        
-        
-        
-        
+        logger.debug(f"Available Content: {available_content} - System IDs: {system_ids}")
         
         logger.debug(f"Content: {content_ids}")
 
@@ -980,18 +980,18 @@ def fetch_classroom_data(class_code, logger=None):
         logger.debug(f"An unexpected error occurred: {e}")
         raise e
 
-def update_classroom_student_assignments(class_code, students=None, logger=None):
+def add_classroom_assignments(class_code, assignments, logger=None):
     '''
-    Write new student assignments for classrooms to the database
+    Write new student and assignments for classrooms to the database
     
-    Arg(s): class_code as string, students as array of email strings, logger as app.logger
+    Arg(s): class_code as string, assignments as dict, logger as app.logger
     
     Returns: status dictionary with further instructions for route server
     
     Notes:
-        - This function updates the student.id assigned to classroom.id
-        - This only updates the ClassroomUser pairings, not UserContent or UserCurriculum
-        - Currently this function only works to add students to a classroom, not remove students
+        - This function updates the student.id and content.id assigned to classroom.id
+        - This only updates the ClassroomUser and/or ClassroomContent
+        - This function only works to add students/content to a classroom, not remove
     '''
     
     # Get admin credentials
@@ -1001,24 +1001,25 @@ def update_classroom_student_assignments(class_code, students=None, logger=None)
     # Create a status dict to return
     status = {'error_msg': '', 'not_found_emails': []}
     
+    # Extract the assignments data
+    students = assignments['students']
+    content = assignments['content']
+    
+    # Create the classroom object here and pass as arg
+    # Fetch the classroom object by class_code
+    classroom = Classroom.query.filter_by(code=class_code).first()
+    
+    if not classroom:
+        status['error_msg'] = "Incorrect class_code"
+        raise Exception(f"{status['error_msg']}")
+        
+    # Extract the Classroom.id
+    class_id = classroom.id
+        
     try:
+        
         if students:
-            
-            # Fetch the classroom object by class_code
-            classroom = Classroom.query.filter_by(code=class_code).first()           
-            
-            if not classroom:
-                status['error_msg'] = "Incorrect class_code"
-                raise Exception(f"{status['error_msg']}")
-                
-            # Query content for this Classroom from ClassroomContent table
-            # content = ClassroomContent.query.filter_by(classroom_id=classroom.id).all()
-            # content_to_add = [c.content_id for c in content]
-            
-            # Query curriculum for content_to_add from the ContentCurriculum table
-            # curriculum = ContentCurriculum.query.filter(ContentCurriculum.content_id.in_(content_to_add)).all()
-            # curriculum_to_add = [c.curriculum_id for c in curriculum]
-
+        
             # Fetch all users in one query and create a dictionary
             user_dict = {user.email: user for user in User.query.filter(User.email.in_(students)).all()}
             
@@ -1037,51 +1038,8 @@ def update_classroom_student_assignments(class_code, students=None, logger=None)
                 classroom_user = ClassroomUser(classroom_id=classroom.id, user_id=user.id)
                 db.session.add(classroom_user)
                      
-            db.session.commit()
-            
-            # Need logic on what to do when a student is removed from a classroom
-            
-        return status
-    
-    except Exception as e:
-        # Log the error and update the error code
-        logger.debug(f"Error: {e}")
-        status['error_msg'] = f'{e}'
-        return status
-    
-def update_classroom_content_assignments(class_code, content=None, logger=None):
-    '''
-    Write new content assignments for classrooms to the database
-    
-    Arg(s): class_code as string, content as array, logger as app.logger
-    
-    Notes:
-        - This function updates the content.id assigned to classroom.id
-        - This only updates the ClassroomContent pairings, not UserContent or UserCurriculum
-        - Currently this function only works to add content to a classroom, not remove content
-    '''
-    
-    # Get admin credentials
-    user_id = session.get('user_id')
-    role = session.get('role')
-    
-    # Create a status dict to return
-    status = {'error_msg': '', 'no_content': []}
-    
-    try:
-        
         if content:
-            
-            # Fetch the classroom object by class_code
-            classroom = Classroom.query.filter_by(code=class_code).first()
-        
-            if not classroom:
-                status['error_msg'] = "Incorrect class_code"
-                raise Exception(f"{status['error_msg']}")
-        
-            # Extract the Classroom.id
-            class_id = classroom.id
-        
+    
             # Fetch the content objects
             content_records = db.session.query(Content).filter(Content.content_id.in_(content)).all()
             content_ids = [c.id for c in content_records]
@@ -1099,15 +1057,94 @@ def update_classroom_content_assignments(class_code, content=None, logger=None):
             # Bulk insert new entries
             if new_entries:
                 db.session.bulk_save_objects(new_entries)
-                db.session.commit()
-            
-            # Need logic on what to do when a content is removed from a classroom
-            
-        return status
-    
+        
     except Exception as e:
         # Log the error and update the error code
         logger.debug(f"Error: {e}")
+        status['error_msg'] = f'{e}'
+        return status
+    
+    db.session.commit()
+
+    return status    
+
+def remove_classroom_assignments(class_code, removals, logger=None):
+    '''
+    Remove student and content assignments for a classroom from the database
+    
+    Arg(s): class_code as string, removals as dict, logger as app.logger
+    
+    Returns: status dictionary with further instructions for route server
+    
+    Notes:
+        - This function updates the student.id and content.id assigned to classroom.id
+        - This only updates the ClassroomUser and/or ClassroomContent
+        - This function only works to remove students/content to a classroom, not add
+    '''
+    
+    # Get admin credentials
+    user_id = session.get('user_id')
+    role = session.get('role')
+    
+    # Create a status dict to return
+    status = {'error_msg': '', 'not_found_emails': []}
+    
+    # Extract the assignments data
+    students = removals['students']
+    content = removals['content']
+    
+    # Create the classroom object here and pass as arg
+    # Fetch the classroom object by class_code
+    classroom = Classroom.query.filter_by(code=class_code).first()
+    
+    if not classroom:
+        status['error_msg'] = "Incorrect class_code"
+        raise Exception(f"{status['error_msg']}")
+        
+    # Extract the Classroom.id
+    class_id = classroom.id
+        
+    try:
+        
+        if students:
+        
+            # Fetch all users in one query and create a dictionary
+            user_dict = {user.email: user for user in User.query.filter(User.email.in_(students)).all()}
+            
+            
+            # Iterate through the list of student emails
+            for email in students:
+                # Fetch the User object by email address
+                user = user_dict.get(email)
+                
+                if not user:
+                    # If not a user, append to the not_found_emails list
+                    status['not_found_emails'].append(email)
+                    continue
+                
+                # Delete the ClassroomUser record
+                db.session.query(ClassroomUser).filter_by(classroom_id=class_id, user_id=user.id).delete()
+        
+                     
+        if content:
+    
+            # Fetch the content objects
+            content_records = db.session.query(Content).filter(Content.content_id.in_(content)).all()
+            content_ids = [c.id for c in content_records]
+        
+            # Bulk delete content records from ClassroomContent
+            db.session.query(ClassroomContent).filter(
+                ClassroomContent.classroom_id == class_id,
+                ClassroomContent.content_id.in_(content_ids)
+            ).delete(synchronize_session=False)
+    
+        db.session.commit()
+
+        return status
+
+    except Exception as e:
+        # Log the error and update the error code
+        logger.debug(f"Error: {e}") if logger else print(f"Error: {e}")
         status['error_msg'] = f'{e}'
         return status
         

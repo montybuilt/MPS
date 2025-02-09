@@ -534,17 +534,19 @@ def classroom_data():
     except Exception as e:
         return jsonify({'error': f'Unexpected Error: {e}' })
 
-@app.route('/assign_students_to_classroom', methods=['POST'])
-def assign_students_to_classroom():
-    '''Route to change student classroom assignments'''
+@app.route('/assign_to_classroom', methods=['POST'])
+def assign_to_classroom():
+    '''Route to add students or content assignments to classroom'''
     
     # Extract the data
     data = request.get_json()
     class_code = data['classroom_code']
     students = data['students']  # student emails as list
+    content = data['content'] # Content_ids as a list
+    assignments = {'students': students, 'content': content}
     
     try:
-        status = update_classroom_student_assignments(class_code=class_code, students=students, logger=app.logger)
+        status = add_classroom_assignments(class_code, assignments, app.logger) #update_classroom_student_assignments(class_code=class_code, students=students, logger=app.logger)
 
         # Return message if some emails were not found
         if status['not_found_emails']:
@@ -558,26 +560,31 @@ def assign_students_to_classroom():
 
     except Exception as e:
         return jsonify({'error': f"Unexpected Error: {e}"}), 500
-
-@app.route('/assign_content_to_classroom', methods=['POST'])
-def assign_content_to_classroom():
-    '''Route to change classroom content assignments'''
     
-    #Extract the data
+@app.route('/remove_from_classroom', methods=['POST'])
+def remove_from_classroom():
+    '''Route to remove students or content assignments from classroom'''
+    
+    # Extract the data
     data = request.get_json()
     class_code = data['classroom_code']
-    content = data['content']
-    
-    app.logger.debug(f"Class Code: {class_code} - Content: {content}")
-    
+    students = data['students']  # student emails as list
+    content = data['content'] # Content_ids as a list
+    removals = {'students': students, 'content': content}
+    app.logger.debug(f"Removals: {removals}")
     try:
-        status = update_classroom_content_assignments(class_code=class_code, content=content, logger=app.logger)
+        status = remove_classroom_assignments(class_code, removals, app.logger) #update_classroom_student_assignments(class_code=class_code, students=students, logger=app.logger)
+
+        # Return message if some emails were not found
+        if status['not_found_emails']:
+            return jsonify({'message': f'Partial Update-The following emails were not found: {status["not_found_emails"]}'})
         
-        if status.get('error_msg'):
+        # Check if there's an error message and raise an exception
+        if status.get('error_msg'):  # Now checking error_msg
             raise Exception(status['error_msg'])
-            
+        
         return jsonify({'message': 'Data received!'}), 200
-    
+
     except Exception as e:
         return jsonify({'error': f"Unexpected Error: {e}"}), 500
         
