@@ -118,40 +118,40 @@ def login_required(f):
         return f(*args, **kwargs)  # Proceed with the original function if logged in
     return decorated_function
 
-def role_required(role=None, restricted=False):
-    def wrapper(func):
-        @wraps(func)
-        def inner(*args, **kwargs):
-            # Get the username from the session
-            username = session.get('username')  # Ensure that username is stored in the session
-            if not username:
-                return jsonify({"error": "Unauthorized"}), 401
+# def role_required(role=None, restricted=False):
+#     def wrapper(func):
+#         @wraps(func)
+#         def inner(*args, **kwargs):
+#             # Get the username from the session
+#             username = session.get('username')  # Ensure that username is stored in the session
+#             if not username:
+#                 return jsonify({"error": "Unauthorized"}), 401
             
-            # Get the user record
-            user = User.query.filter_by(username=username).first()
-            if not user:
-                return jsonify({"error": "User not found"}), 401
+#             # Get the user record
+#             user = User.query.filter_by(username=username).first()
+#             if not user:
+#                 return jsonify({"error": "User not found"}), 401
             
-            # Get the user's role from the Admin table
-            admin_record = Admin.query.filter_by(id=user.id).first()  # Assuming user.id = admin.id
-            if not admin_record:
-                return jsonify({"error": "Forbidden: User is not an admin"}), 403
+#             # Get the user's role from the Admin table
+#             admin_record = Admin.query.filter_by(id=user.id).first()  # Assuming user.id = admin.id
+#             if not admin_record:
+#                 return jsonify({"error": "Forbidden: User is not an admin"}), 403
             
-            # Check if the user's role is allowed
-            user_role = admin_record.role
-            if role and user_role not in role:
-                return jsonify({"error": "Forbidden: Insufficient role"}), 403
+#             # Check if the user's role is allowed
+#             user_role = admin_record.role
+#             if role and user_role not in role:
+#                 return jsonify({"error": "Forbidden: Insufficient role"}), 403
 
-            # Handle restricted access
-            if not restricted or admin_record.role == 'system':
-                kwargs = {}
-            else:
-                kwargs['user_id'] = user.id
-                kwargs['restricted'] = True            
+#             # Handle restricted access
+#             if not restricted or admin_record.role == 'system':
+#                 kwargs = {}
+#             else:
+#                 kwargs['user_id'] = user.id
+#                 kwargs['restricted'] = True            
             
-            return func(*args, **kwargs)
-        return inner
-    return wrapper
+#             return func(*args, **kwargs)
+#         return inner
+#     return wrapper
 
 
 ####################################################################################

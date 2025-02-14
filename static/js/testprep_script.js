@@ -137,6 +137,10 @@ function rickRoll() {
                 pcap: { xp_1: 0, xp_2: 0, xp_3: 0, xp_4: 0, xp_5: 0 },
                 pcep: { xp_1: 0, xp_2: 0, xp_3: 0, xp_4: 0 }
             }
+            courses: {
+                python1: {xp_1: 0, xp_2: 0, xp_3: 0, xp_4: 0, xp_5: 0, xp_6: 0, xp_7: 0},
+                python2: {xp_1: 0, xp_2: 0, xp_3: 0, xp_4: 0, xp_5: 0, xp_6: 0, xp_7: 0}
+            }
         };
         sessionStorage.setItem('xp', JSON.stringify(initialXP));
     }
@@ -828,7 +832,7 @@ function displayOutput(output) {
 document.getElementById("key-input").addEventListener("keypress", function(event) {
     const currentQuestionID = sessionStorage.getItem('currentQuestionId');
     if (event.key === "Enter") {
-        const keyInput = event.target.value.toLowerCase();
+        const keyInput = event.target.value  //.toLowerCase();
         fetchCurriculum(keyInput, true).then(() => {
             //stopTimer();
             updateSessionData();

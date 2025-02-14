@@ -276,7 +276,7 @@ def task_request():
     
     #Extract the key input from the request
     data = request.get_json()
-    question_id = data.get('key-input').lower()
+    question_id = data.get('key-input')  #formerly  .lower()
     
     # Determine if the task is a Question or a Project
     
@@ -295,7 +295,7 @@ def get_curriculum():
     #Extract the key input from the request
     data = request.get_json()
     if data.get('key-input'):
-        curriculum_id = data.get('key-input').lower()
+        curriculum_id = data.get('key-input')  # formerly made .lower()
         app.logger.debug(f"Curriculum ID: {curriculum_id}")
     else:
         return jsonify({"error": "No curriculum ID given"}), 400
@@ -477,7 +477,7 @@ def content_data():
     
     #Extract the question key from the request
     data = request.get_json()
-    question_id = data.get('questionKey').lower()
+    question_id = data.get('questionKey')  # formerly .lower()
     
     # Create a question object that retrieves the question data as an attribute
     question_data = fetch_question(question_id, app.logger)
