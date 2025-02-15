@@ -19,7 +19,7 @@ class TestChallenge(unittest.TestCase):
     
     "11": {
         "background": "images/cyborg/img3.webp",
-        "title": "Analyzing Their LMMs",
+        "title": "Analyzing Their LLMs",
         "prompt": "Write a function `char_counter(string)` that takes a string parameter and counts character occurrences (excluding spaces) - it returns a dictionary with the characters as keys and the counts as values.",
         "response": "Great! We can use this to identify which LLMs they are deploying!  Maybe we can use this!",
         "test_code": """
