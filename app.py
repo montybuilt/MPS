@@ -296,11 +296,11 @@ def final_screen():
 
     # Determine the background based on score
     if score_percentage >= 90:
-        background = "victory3.webp"
+        background = "images/cyborg/victory3.webp"
     elif score_percentage >= 60:
-        background = "struggle.webp"
+        background = "images/cyborg/struggle.webp"
     else:
-        background = "defeat.webp"
+        background = "images/cyborg/defeat.webp"
 
     return render_template("final.html", score=completed, total=total, background=background)
 
