@@ -3,6 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="icon" type="image/png" href="{{ url_for('static', filename='images/icon.png') }}">
     <title>Home</title>
     <link rel="stylesheet" href="../static/css/styles.css">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/3.1.9-1/crypto-js.js"></script>
@@ -31,14 +32,15 @@
         {% endif %}
     </div>
 
-    <h2>Welcome to Monty's Python App!</h2>
+    <h2>Welcome to Monty's Python App!</h2><br><br>
 
     <nav>
         <ul>
-            <li><a href="/testprep">Go to Test Preparation</a></li>
+            <li><a href="/cyborg_apocalypse">Go to Cyborg Apocalypse Challenge</a></li><br>
+            <li><a href="/testprep">Go to Test Preparation</a></li><br>
             <!-- Admin link displayed only if user is an admin -->
             {% if is_admin %}
-                <li><a href="/content">Create New Question</a></li>
+                <li><a href="/content">Create New Question</a></li><br>
             {% endif %}
         </ul>
     </nav>

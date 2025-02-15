@@ -1,0 +1,254 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="icon" type="image/png" href="{{ url_for('static', filename='images/icon.png') }}">
+    <title>Cyborg Apocalypse</title>
+
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@700&display=swap');
+        
+        body {
+            background-image: url("{{ url_for('static', filename='images/cyborg/home.webp') }}");
+            background-size: cover;
+            background-position: center;
+            background-repeat: no-repeat;
+            height: 100vh;
+            margin: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            flex-direction: column;
+            color: white;
+            text-align: center;
+            font-family: 'Orbitron', sans-serif;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.8);
+        }
+        
+        #logo-link {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            z-index: 1000;
+        }
+        
+        #logo {
+            width: 40px;
+            height: 40px
+            height: auto;
+            cursor: pointer;
+            transition: transform 0.2s ease-in-out;
+        }
+        
+        #logo:hover {
+            transform: scale(1.1);
+        }
+        
+        .crt-screen {
+            background-color: rgba(0, 0, 0, 0.8);
+            border: 3px solid #00ff00;
+            padding: 20px;
+            width: 60%;
+            height: 300px;
+            font-family: 'Courier New', Courier, monospace;
+            color: #00ff00;
+            font-size: 1.2em;
+            overflow: hidden;
+            white-space: pre-wrap;
+            text-align: left;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        @keyframes pulse {
+            0% {
+                transform: scale(1);
+                box-shadow: 0 0 10px rgba(255, 0, 0, 0.7);
+            }
+            50% {
+                transform: scale(1.1);
+                box-shadow: 0 0 20px rgba(255, 0, 0, 1);
+            }
+            100% {
+                transform: scale(1);
+                box-shadow: 0 0 10px rgba(255, 0, 0, 0.7);
+            }
+        }
+        
+        #launch-button {
+            display: none; /* Completely hides the button until it's ready */
+            opacity: 0;
+            transition: opacity 1s ease-in-out; /* Smooth fade-in effect */
+        }
+        
+        .launch-button {
+            margin-top: 20px;
+            padding: 15px 30px;
+            font-size: 1.5em;
+            background-color: #ff0000;
+            color: white;
+            border: none;
+            cursor: pointer;
+            font-family: 'Orbitron', sans-serif;
+            text-transform: uppercase;
+            box-shadow: 0px 0px 10px rgba(255, 0, 0, 0.8);
+            animation: pulse 1.5s infinite;
+        }
+        .launch-button:hover {
+            background-color: #cc0000;
+            box-shadow: 0px 0px 20px rgba(255, 0, 0, 1);
+        }
+            @import url('https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap');
+        
+        .cyborg-title {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 4em;
+            background: linear-gradient(135deg, 
+                #a0a0a0 10%,   /* Metallic gray */
+                #fdfdfd 30%,   /* Bright highlight */
+                #b0b0b0 50%,   /* Mid-tone */
+                #6cc0ff 70%,   /* Electric blue sheen */
+                #e0e0e0 90%    /* Soft chrome reflection */
+            );
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            text-shadow: 
+                2px 2px 5px rgba(255, 255, 255, 0.9),  /* Strong bright reflection */
+                -3px -3px 5px rgba(0, 0, 0, 0.8),      /* Dark lower shadow */
+                3px 3px 5px rgba(0, 0, 0, 0.8),        /* Dark upper shadow */
+                0px 0px 15px rgba(108, 192, 255, 0.8), /* Electric blue outer glow */
+                0px 0px 30px rgba(108, 192, 255, 0.6); /* Extended blue glow effect */
+            letter-spacing: 3px;
+            margin-bottom: 20px;
+            text-transform: uppercase;
+            mix-blend-mode: screen;
+        }
+        
+        #start-button {
+            position: fixed;
+            top: 50%;
+            font-size: 4em;
+            background-color: red;
+            color: white;
+            border: none;
+            cursor: pointer;
+            font-family: 'Orbitron', sans-serif;
+            text-transform: uppercase;
+            box-shadow: 0px 0px 20px rgba(255, 0, 0, 0.8);
+            animation: pulse 1.5s infinite;
+            text-align: center;
+            white-space: nowrap; /* Prevents unintended text wrapping */
+            width: auto; /* Prevents excessive width */
+        }
+       
+        #start-button:hover {
+            background-color: darkred;
+        }
+        
+        .moved-behind {
+            z-index: -1; /* Moves behind the CRT screen */
+        }
+        
+        #launch-button:disabled {
+            background-color: gray;
+            box-shadow: none;
+            cursor: not-allowed;
+        }
+        
+        #crt-message, #launch-button, #cyborg-title {
+            display: none; /* Hidden until START is clicked */
+        }
+        
+        .hidden {
+            display: none !important; /* Fully removes element from layout */
+        }
+
+
+    </style>
+</head>
+<body>
+    <a href="/" id="logo-link">
+        <img src="{{ url_for('static', filename='images/icon.png') }}" alt="Monty's Python Show" id="logo">
+    </a>
+    <button id="start-button" onclick="startMission()">START</button>
+    <h1 class="cyborg-title" id="cyborg-title">Cyborg Apocalypse!</h1>
+    <div class="crt-screen" id="crt-message"></div>
+    <button id="launch-button" class="launch-button" onclick="location.href='{{ url_for('challenge_page', challenge_id=1) }}'" disabled>Launch Mission</button>
+    
+    <audio id="bg-music" loop>
+        <source src="{{ url_for('static', filename='audio/open_AdobeStock_1120644630_preview.m4a') }}" type="audio/mpeg">
+    </audio>
+
+    <script>
+    
+        var numTasks = "{{ num_tasks }}";
+        localStorage.setItem("numTasks", numTasks);
+    
+        const message = `SOS... I don't know if anybody can read this.
+
+        The AI has taken control. Cyborgs are invading. They have deactivated all modern networks.
+        
+        But they forgot about these old transdyn hypernet systems from the late 70s.
+        
+        This will be their Achilles' heel! We can use these old systems to write code to deploy in the modern servers to shut them down.
+        
+        This is our LAST HOPE!
+        
+        `;
+        
+        let i = 0;
+        
+        function typeMessage() {
+            if (i < message.length) {
+                document.getElementById("crt-message").innerText += message[i];
+                i++;
+                setTimeout(typeMessage, 50);
+            }
+        }
+
+        function startMission() {
+            let audio = document.getElementById("bg-music");
+            let startButton = document.getElementById("start-button");
+            let launchButton = document.getElementById("launch-button");
+            let crtScreen = document.getElementById("crt-message");
+            let title = document.getElementById("cyborg-title");
+        
+            // Play audio
+            audio.volume = 0.5;
+            audio.play()
+                .then(() => {
+                    startButton.classList.add("hidden"); // Completely remove START button
+        
+                    // Make CRT screen and title visible immediately
+                    crtScreen.style.display = "block";
+                    title.style.display = "block";
+        
+                    // ⏳ Wait 2 seconds before starting the scrolling text
+                    setTimeout(() => {
+                        typeMessage();
+        
+                        // ⏳ Wait 5 more seconds before making the launch button visible
+                        setTimeout(() => {
+                            launchButton.style.display = "inline-block"; // Show button properly
+                            launchButton.style.opacity = "1"; // Fade in effect
+                            launchButton.removeAttribute("disabled"); // Enable button
+                        }, 10000);
+                    }, 2000);
+                })
+                .catch(error => console.log("Playback blocked:", error));
+        }
+
+
+        function playAudio() {
+            let audio = document.getElementById("bg-music");
+            audio.volume = 0.5;  // Adjust volume if needed
+            audio.play()
+                .then(() => document.getElementById("play-audio").style.display = "none")  // Hide button after playing
+                .catch(error => console.log("Playback failed:", error));
+        }
+
+    </script>
+</body>
+</html>

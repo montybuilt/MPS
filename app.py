@@ -1,11 +1,15 @@
 # Import packages
 from flask import Flask, render_template, request, jsonify, session, redirect, url_for, Response
 from modules.helpers import Question, Curriculum, verify, login_required
+from escape import CHALLENGES
+import unittest
 import subprocess
 import logging
 import secrets
 import os
 import json
+import sys
+import importlib.util
 
 # Create the flask object
 app = Flask(__name__)
@@ -21,6 +25,9 @@ logging.basicConfig(level=logging.DEBUG, format='%(asctime)s %(levelname)s: %(me
 
 # Path to content.json located in the data directory
 content_file_path = os.path.join('data', 'content.json')
+
+# Count the tasks for the cyborg apocalypse challenge
+num_tasks = len(CHALLENGES)
 
 @app.route('/')
 def index():
@@ -213,8 +220,89 @@ def content_data():
     response = jsonify(question_data)
     response.headers['Content-Type'] = 'application/json; charset=UTF-8'
     return response
-   
+  
+@app.route("/cyborg_apocalypse")
+def home():
+    #username = session.get('username')
+    if 'username' not in session:  # Check if the username is in the session
+        return redirect(url_for('index'))  # Redirect if not logged in
+    return render_template("home.html", challenges=CHALLENGES, num_tasks=num_tasks)
 
+@app.route("/<challenge_id>")
+def challenge_page(challenge_id):
+    if challenge_id not in CHALLENGES:
+        return "Challenge Not Found", 404
+    return render_template("challenge.html", challenge=CHALLENGES[challenge_id], challenge_id=challenge_id)
+
+@app.route("/submit/<challenge_id>", methods=["POST"])
+def check_answer(challenge_id):
+    if challenge_id not in CHALLENGES:
+        return jsonify({"correct": False, "message": "Invalid Challenge"}), 400
+
+    user_code = request.json.get("code", "")
+
+    # Write user code to a temporary file so unittest can import it
+    with open("student_code.py", "w") as f:
+        f.write(user_code)
+        
+    # Remove student_code from sys.modules before reloading
+    if "student_code" in sys.modules:
+        del sys.modules["student_code"]
+        
+    # Reload the module dynamically
+    spec = importlib.util.spec_from_file_location("student_code", "student_code.py")
+    student_code = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(student_code)
+
+    # Create a temporary namespace for test execution
+    namespace = {}
+    
+    # Try to run the code
+    try:
+        exec(CHALLENGES[challenge_id]["test_code"], namespace)
+        TestChallenge = namespace["TestChallenge"]  # Retrieve the unittest class
+    except Exception as e:
+        return jsonify({"correct": False, "message": f"Error defining tests: {str(e)}"})
+
+    # Run unittest
+    loader = unittest.TestLoader()
+    suite = unittest.TestSuite()
+    suite.addTests(loader.loadTestsFromTestCase(TestChallenge))
+
+    runner = unittest.TextTestRunner()
+    result = runner.run(suite)
+
+    if result.wasSuccessful():
+        return jsonify({"correct": True, "message": CHALLENGES[challenge_id]["response"]})
+    else:
+        return jsonify({"correct": False, "message": "That's not working, try again, HURRY!"})
+    
+@app.route("/final")
+def final_screen():
+    # Extract progress from the query parameters (GET request)
+    progress_data = request.args.get("progress", "{}")  
+    app.logger.debug(f"Progress Data: {progress_data}")
+    
+    try:
+        progress = json.loads(progress_data)  # Decode JSON safely
+    except json.JSONDecodeError:
+        progress = {}  # Ensure it remains a dictionary if decoding fails
+
+    completed = sum(progress.values())
+    total = num_tasks
+    score_percentage = (completed / total) * 100 if total > 0 else 0
+
+    app.logger.debug(f"Final Progress: {progress} - Score: {score_percentage}")
+
+    # Determine the background based on score
+    if score_percentage >= 90:
+        background = "victory3.webp"
+    elif score_percentage >= 60:
+        background = "struggle.webp"
+    else:
+        background = "defeat.webp"
+
+    return render_template("final.html", score=completed, total=total, background=background)
 
 
 

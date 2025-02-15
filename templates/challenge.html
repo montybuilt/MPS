@@ -1,0 +1,312 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="icon" type="image/png" href="{{ url_for('static', filename='images/icon.png') }}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.0/theme/3024-night.min.css">
+    <title>{{ challenge.title }}</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@700&display=swap');
+        @import url('https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap');
+        
+        body {
+            background-image: url("{{ url_for('static', filename=challenge.background) }}");
+            background-size: cover;
+            background-position: center;
+            background-repeat: no-repeat;
+            height: 100vh;
+            margin: 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-family: 'Orbitron', sans-serif;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.8);
+        }
+        
+        #logo-link {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            z-index: 1000;
+        }
+        
+        #logo {
+            width: 40px;
+            height: 40px
+            height: auto;
+            cursor: pointer;
+            transition: transform 0.2s ease-in-out;
+        }
+        
+        #logo:hover {
+            transform: scale(1.1);
+        }
+        
+        .crt-screen {
+            background-color: rgba(0, 0, 0, 0.8);
+            border: 3px solid #00ff00;
+            padding: 20px;
+            width: 985px;
+            height: 150px;
+            font-family: 'Courier New', Courier, monospace;
+            color: #00ff00;
+            font-size: 1.2em;
+            overflow: hidden;
+            white-space: pre-wrap;
+            text-align: left;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .code-container {
+            display: flex;
+            flex-direction: row;
+            align-items: flex-start;
+            gap: 20px;
+            margin-top: 20px;
+        }
+        .CodeMirror {
+            font-size: 13pt;
+            border: 3px solid #00ff00;
+        }
+        .launch-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 10px;
+        }
+        .launch-button {
+            padding: 15px 30px;
+            font-size: 1em;
+            background-color: #00ff00;
+            color: white;
+            border: none;
+            cursor: pointer;
+            font-family: 'Orbitron', sans-serif;
+            text-transform: uppercase;
+            box-shadow: 0px 0px 10px rgba(255, 0, 0, 0.8);
+            width: 200px;
+        }
+        .launch-button:hover {
+            background-color: #0000ff;
+            box-shadow: 0px 0px 20px rgba(255, 0, 0, 1);
+        }
+        
+        .pass-button {
+            padding: 15px 30px;
+            font-size: 1em;
+            background-color: #ff0000;
+            color: white;
+            border: none;
+            cursor: pointer;
+            font-family: 'Orbitron', sans-serif;
+            text-transform: uppercase;
+            box-shadow: 0px 0px 10px rgba(255, 0, 0, 0.8);
+            width: 200px;
+        }
+        .pass-button:hover {
+            background-color: #0000ff;
+            box-shadow: 0px 0px 20px rgba(255, 0, 0, 1);
+        }
+        
+        .output-crt {
+            background-color: rgba(0, 0, 0, 0.8);
+            border: 3px solid #00ff00;
+            padding: 10px;
+            width: 375px;
+            height: 248px;
+            font-family: 'Courier New', Courier, monospace;
+            color: #00ff00;
+            font-size: 1em;
+            overflow: hidden;
+            white-space: pre-wrap;
+            text-align: left;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .score-container {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            background: rgba(0, 0, 0, 0.8);
+            border: 3px solid #00ff00;
+            padding: 10px;
+            width: 200px;
+            font-family: 'Courier New', Courier, monospace;
+            color: #00ff00;
+            font-size: 1.2em;
+            text-align: center;
+        }
+
+    </style>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.0/codemirror.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.0/mode/python/python.min.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.0/codemirror.min.css">
+</head>
+<body>
+    <a href="/" id="logo-link">
+        <img src="{{ url_for('static', filename='images/icon.png') }}" alt="Monty's Python Show" id="logo">
+    </a>
+    <h1 class="cyborg-title">{{ challenge.title }}</h1>
+    <div class="crt-screen">{{ challenge.prompt }}</div>
+    
+    <div class="code-container">
+        <textarea id="editor"></textarea>
+        <div class="launch-container">
+            <div class="launch-buttons">
+                <button class="launch-button" onclick="submitCode()">Submit</button>
+                <button class="pass-button" onclick="nextTask()">Pass</button>
+            </div>
+            <div class="output-crt" id="result"></div>
+        </div>
+    </div>
+    <div class="score-container">
+        <p>Completed: <span id="completed-count">0</span></p>
+        <p>Attempted: <span id="total-attempted">0</span></p>
+    </div>
+    
+    <script>
+    
+        var editor = CodeMirror.fromTextArea(document.getElementById("editor"), {
+            mode: "python",
+            lineNumbers: true,
+            theme: "3024-night"
+        });
+
+        editor.setSize("600px", "330px");
+        editor.setValue("# Coding Terminal\n");
+
+        var challengeId = "{{ challenge_id }}";
+
+        function submitCode() {
+            var code = editor.getValue();
+            let challengeId = parseInt("{{ challenge_id }}");
+            let totalChallenges = parseInt(localStorage.getItem('numTasks') || "0");
+            console.log("Num Tasks:", totalChallenges, "Challenge ID", challengeId);
+        
+            // Retrieve or initialize the codeProgress dictionary
+            let codeProgress = JSON.parse(localStorage.getItem("codeProgress")) || {};
+            
+            // Store the submitted code for this challenge
+            codeProgress[challengeId] = code;
+            
+            // Save the updated codeProgress back to localStorage
+            localStorage.setItem("codeProgress", JSON.stringify(codeProgress));
+        
+            fetch("/submit/" + challengeId, {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ code: code })
+            })
+            .then(response => response.json())
+            .then(data => {
+                document.getElementById("result").innerText = data.message;
+        
+                if (data.correct) {
+                    logChallengeResult(challengeId, 1);
+        
+                    if (challengeId >= totalChallenges) {
+                        submitFinal();
+                    } else {
+                        setTimeout(() => window.location.href = "/" + (challengeId + 1), 2500);
+                    }
+                }
+            })
+            .catch(error => {
+                console.error("Error:", error);
+                document.getElementById("console-output").innerText = "Error communicating with server.";
+            });
+        }
+
+        
+        function submitFinal() {
+            let progress = localStorage.getItem("challengeProgress") || "{}";  // Get stored progress
+            let queryString = new URLSearchParams({ progress: progress }).toString(); // Encode as query string
+        
+            window.location.href = "/final?" + queryString;  // Redirect using GET request
+        }
+
+        function logChallengeResult(challengeId, result) {
+            let progress = JSON.parse(localStorage.getItem("challengeProgress")) || {};  // ✅ Always an object
+        
+            if (!(challengeId in progress) || result === 1) {
+                progress[challengeId] = result;
+                localStorage.setItem("challengeProgress", JSON.stringify(progress));
+                updateScore();
+            }
+        }
+        
+        // This function updates the score on screen
+        function updateScore() {
+            let progress = JSON.parse(localStorage.getItem("challengeProgress")) || {};  // Get stored progress or initialize
+        
+            let completed = Object.values(progress).reduce((sum, val) => sum + val, 0); // Sum of completed challenges
+            let total = Object.keys(progress).length; // Total attempted challenges
+        
+            // Ensure elements exist before updating
+            let completedElement = document.getElementById("completed-count");
+            let attemptedElement = document.getElementById("total-attempted");
+        
+            if (completedElement) {
+                completedElement.innerText = completed;
+            }
+            if (attemptedElement) {
+                attemptedElement.innerText = total;
+            }
+        }
+
+        
+        // This function handles the pass button
+        function nextTask() {
+            let progress = JSON.parse(localStorage.getItem("challengeProgress")) || {};
+            let challengeId = parseInt("{{ challenge_id }}");
+            let totalChallenges = parseInt(localStorage.getItem('numTasks') || "0");
+
+        
+            if (!(challengeId in progress)) {  
+                progress[challengeId] = 0;  // Log as failed attempt
+                localStorage.setItem("challengeProgress", JSON.stringify(progress));
+                updateScore();
+            }
+        
+            if (challengeId >= totalChallenges) {
+                submitFinal();
+            } else {
+                setTimeout(() => window.location.href = "/" + (challengeId + 1), 500);
+            }
+        }
+
+        // Add a listener for page load
+        document.addEventListener("DOMContentLoaded", function() {
+            if (!localStorage.getItem("challengeProgress")) {
+                localStorage.setItem("challengeProgress", JSON.stringify({}));  // Initialize once
+            }
+        
+            let challengeProgress = JSON.parse(localStorage.getItem("challengeProgress")) || {};  
+            let codeProgress = JSON.parse(localStorage.getItem("codeProgress")) || {};  
+        
+            // Preload saved code if available
+            if (challengeId in codeProgress) {
+                editor.setValue(codeProgress[challengeId]);  
+            } else {
+                editor.setValue("# Coding Terminal\n");
+            }
+        
+            // Check if task was completed
+            if (challengeId in challengeProgress && challengeProgress[challengeId] === 1) {
+                document.getElementById("result").innerText = "Task Complete";
+                
+            }
+        
+            updateScore();  // Ensure UI updates on page load
+        });
+
+
+    </script>
+</body>
+</html>
