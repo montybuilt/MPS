@@ -15,6 +15,19 @@
         gap: 10px; /* Adjust the gap between elements */
         width: 100%; /* Ensure the panel uses full width */
         align-items: center; /* Align items vertically in the center */
+        margin: 15px;
+    }
+    
+    #subject-panel {
+        display: flex;
+        flex-direction: row;
+        gap: 10px;
+        align-items: center;
+        margin: 15px;
+    }
+    
+    #subject-panel input {
+        width: 60px;
     }
     
     .form-select {
@@ -58,7 +71,7 @@
         </form>
     </div>
     
-    <h2>Question Editor</h2>
+    <!--<h2>Question Editor</h2>-->
 
     <!-- Navigation Panel -->
     <div class="content-page">
@@ -76,7 +89,19 @@
             <button class="navButton" id="newQuestion">New Question</button>
             <input type="text" id="newQuestionKey" placeholder="Enter new ID">
         </div>
-
+    </div>
+    
+    <div class="content-page">
+        <div id="subject-panel">
+                <label for="content-selector">Select Content Area:</label>
+                <select id="content-selector" class="form-select">
+                    <option value="" disabled selected>Select Content</option>
+                </select>
+            <label for="standard">Standard:</label>
+            <input type="number" id="standard" type="number" step="1" required oninput="this.value = this.value.replace(/[^0-9]/g, '')">
+            <label for="objective">Objective:</label>
+            <input type="number" id="objective" type="number" step="1" required oninput="this.value = this.value.replace(/[^0-9]/g, '')">  
+        </div>
     </div>
 
     <!-- Container for the form -->

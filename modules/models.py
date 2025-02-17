@@ -52,7 +52,11 @@ class XP(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     dXP = db.Column(db.Float)
     question_id = db.Column(db.String(120))
+    content_id = db.Column(db.String(50))
     curriculum_id = db.Column(db.String(50))
+    possible_xp = db.Column(db.Float)
+    difficulty = db.Column(db.Float)
+    tags = db.Column(db.JSON)
     elapsed_time = db.Column(db.Float, nullable=False)
     timestamp = db.Column(db.DateTime, default=datetime.utcnow)
 
@@ -76,8 +80,8 @@ class Curriculum(db.Model):
 class ContentCurriculum(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     content_id = db.Column(db.Integer, db.ForeignKey('content.id'), nullable=False)
-    curriculum_id = db.Column(db.Integer, db.ForeignKey('curriculum.id'), nullable=False)
-
+    curriculum_id = db.Column(db.Integer, db.ForeignKey('curriculum.id'), unique=True, nullable=False)
+    
     content = db.relationship('Content', backref='content_curriculums')
     curriculum = db.relationship('Curriculum', backref='curriculum_contents')
 
@@ -121,7 +125,7 @@ class ClassroomCurriculum(db.Model):
 class CurriculumQuestion(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     curriculum_id = db.Column(db.Integer, db.ForeignKey('curriculum.id'), nullable=False)
-    question_id = db.Column(db.Integer, db.ForeignKey('questions.id'), nullable=False)
+    question_id = db.Column(db.Integer, db.ForeignKey('questions.id'), unique=True, nullable=False)
 
     curriculum = db.relationship('Curriculum', backref='curriculum_questions')
     question = db.relationship('Questions', backref='question_curriculums')
@@ -140,6 +144,9 @@ class CurriculumProject(db.Model):
 class Questions(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     task_key = db.Column(db.String(120), unique=True, nullable=False, index=True)
+    content_id = db.Column(db.Integer, nullable=True, default=0)
+    standard = db.Column(db.Integer, nullable=True, default=0)
+    objective = db.Column(db.Integer, nullable=True, default=0)
     code = db.Column(db.Text())
     question = db.Column(db.String(200))
     answer = db.Column(db.String(120))

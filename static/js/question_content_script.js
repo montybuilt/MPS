@@ -10,6 +10,29 @@ const codeEditor = CodeMirror.fromTextArea(document.getElementById("code"), {
     matchBrackets: true
 });
 
+// Centralized error handling for fetch requests
+async function handleFetchError(response) {
+    if (!response.ok) {
+        const errorMessage = `Error: ${response.status} ${response.statusText}`;
+        console.error(errorMessage);
+        throw new Error(errorMessage); // Throwing error so that it can be handled in catch block
+    }
+    return response.json(); // Return the parsed JSON if successful
+}
+
+// function to load content, curriculum and question data on page load
+async function fetchCourseData() {
+    try {
+        const response = await fetch('/course_data');
+        const data = await handleFetchError(response); // Use the centralized error handler
+        // Save the data in session storage
+        sessionStorage.setItem('contentDict', JSON.stringify(data.content_dict));
+        console.log(data);
+    } catch (error) {
+        console.error('Failed to fetch course data:', error);
+    }
+}
+
 // Fetch question from the server
 function fetchQuestion(questionKey) {
     fetch('/content_data', {
@@ -26,8 +49,13 @@ function fetchQuestion(questionKey) {
     .then(data => {
         // Populate the form with the received question data
         const question = data; // Direct access to the data
+        console.log("Got Data:", question)
 
-        //document.getElementById("questionKey").value = questionKey;
+        document.getElementById("question-selector").value = questionKey;
+        document.getElementById("content-selector").value = question.Content;
+        document.getElementById("standard").value = question.Standard;
+        document.getElementById("objective").value = question.Objective;
+        document.getElementById("question-selector").value = questionKey;
         codeEditor.setValue(question.Code || "");
         document.getElementById("difficulty").value = question.Difficulty || "";
         document.getElementById("tags").value = (question.Tags || []).join(", ");
@@ -51,6 +79,8 @@ function fetchQuestion(questionKey) {
 function clearEntries() {
     questionKey = "";  // Reset the global questionKey
     document.getElementById("question-selector").value = "";  // Allow user to input a new key
+    document.getElementById("standard").value = "";
+    document.getElementById("objective").value = "";
     codeEditor.setValue("");  // Clear the code editor
     document.getElementById("difficulty").value = "";  // Clear difficulty
     document.getElementById("tags").value = "";  // Clear tags
@@ -63,6 +93,32 @@ function clearEntries() {
     document.getElementById("videoURL").value = "";  // Clear video URL
     document.getElementById("videoStart").value = "";  // Clear video start time
     document.getElementById("videoEnd").value = "";  // Clear video end time
+}
+
+// Populate the Select Content dropdown
+function populateContentDropdown() {
+    const contentDict = JSON.parse(sessionStorage.getItem('contentDict')) || {};
+    const keys = Object.keys(contentDict);
+    const dropdown = document.getElementById('content-selector');
+
+    // Clear existing options
+    while (dropdown.firstChild) {dropdown.removeChild(dropdown.firstChild)};
+
+    // Add default "Select Content" option
+    const defaultOption = document.createElement('option');
+    defaultOption.value = "";
+    defaultOption.textContent = "Select Content";
+    defaultOption.disabled = true; // Prevent selection
+    defaultOption.selected = true; // Make it the default selected option
+    dropdown.appendChild(defaultOption);
+
+    // Populate dropdown with dynamic options
+    keys.forEach(key => {
+        const option = document.createElement('option');
+        option.value = key;
+        option.textContent = key;
+        dropdown.appendChild(option);
+    });
 }
 
 // Function to prepare page for new question
@@ -83,6 +139,7 @@ function saveQuestion() {
     }
     
     if (!newKey) {
+        console.log("Key Problem", newKey);
         alert("Please enter a valid question key.");
         return;
     }
@@ -96,6 +153,9 @@ function saveQuestion() {
 
     const questionData = {
         key: newKey,
+        content_id: document.getElementById("content-selector").value,
+        standard: document.getElementById("standard").value,
+        objective: document.getElementById("objective").value,
         code: codeEditor.getValue(),
         difficulty: parseFloat(document.getElementById("difficulty").value) || 0,
         tags: document.getElementById("tags").value.split(",").map(tag => tag.trim()),
@@ -220,10 +280,27 @@ function getKeys() {
 
 getKeys(); // Load the keys when the page loads
 
-
-document.addEventListener('DOMContentLoaded', function() {
+document.addEventListener('DOMContentLoaded', async function() {
+    // First fetch the content areas
+    await fetchCourseData();
+    
+    // Populate content selector dropdown
+    populateContentDropdown();
+    
+    // Set up the listener for the submitQuestion button
     document.getElementById("submitQuestion").addEventListener("click", (event) => {
         event.preventDefault();  // Prevent default form submission
+        
+        // Validate required fields
+        let standard = document.getElementById("standard").value.trim();
+        let objective = document.getElementById("objective").value.trim();
+        let difficulut = document.getElementById("difficulty").value.trim();
+        
+        if (!standard || !objective || !difficulty) {
+            alert("Standard, Objective, and Difficulty are required fields");
+            return;
+        }
+        
         saveQuestion();  // Call the function to save the question
         newQuestion = false;  // Set the global newQuestion state to default
     });

@@ -381,14 +381,8 @@ function handleSubmitContentAssignment() {
         return;
     }
 
-    if (assignedCurriculums.length === 0) {
-        // Show confirmation dialog with custom message
-        const confirmAction = window.confirm('No curriculums assigned. Continuing will remove all curriculums for this content area. Are you sure?');
-        
-        if (!confirmAction) {
-            return;  // If user clicks "No", exit the function
-        }
-    }
+    alert("No curriculums assigned.");
+    return;
 
     // Prepare the payload
     const contentAssignments = { 'content_id': contentId, 'base_curriculums': assignedCurriculums };
@@ -429,14 +423,8 @@ function handleSubmitCurriculumAssignment() {
         return;
     }
 
-    if (assignedQuestions.length === 0) {
-        // Show confirmation dialog with custom message
-        const confirmAction = window.confirm('No tasks assigned. Continuing will remove all assigned tasks for this content area. Are you sure?');
-        
-        if (!confirmAction) {
-            return;  // If user clicks "No", exit the function
-        }
-    }
+    alert("No questions assigned.");
+    return;
 
     // Prepare the payload
     const curriculumAssignments = { 'curriculum_id': curriculumId, 'task_list': assignedQuestions };

@@ -118,42 +118,6 @@ def login_required(f):
         return f(*args, **kwargs)  # Proceed with the original function if logged in
     return decorated_function
 
-# def role_required(role=None, restricted=False):
-#     def wrapper(func):
-#         @wraps(func)
-#         def inner(*args, **kwargs):
-#             # Get the username from the session
-#             username = session.get('username')  # Ensure that username is stored in the session
-#             if not username:
-#                 return jsonify({"error": "Unauthorized"}), 401
-            
-#             # Get the user record
-#             user = User.query.filter_by(username=username).first()
-#             if not user:
-#                 return jsonify({"error": "User not found"}), 401
-            
-#             # Get the user's role from the Admin table
-#             admin_record = Admin.query.filter_by(id=user.id).first()  # Assuming user.id = admin.id
-#             if not admin_record:
-#                 return jsonify({"error": "Forbidden: User is not an admin"}), 403
-            
-#             # Check if the user's role is allowed
-#             user_role = admin_record.role
-#             if role and user_role not in role:
-#                 return jsonify({"error": "Forbidden: Insufficient role"}), 403
-
-#             # Handle restricted access
-#             if not restricted or admin_record.role == 'system':
-#                 kwargs = {}
-#             else:
-#                 kwargs['user_id'] = user.id
-#                 kwargs['restricted'] = True            
-            
-#             return func(*args, **kwargs)
-#         return inner
-#     return wrapper
-
-
 ####################################################################################
 #### Functions# ####################################################################
 ####################################################################################
@@ -676,14 +640,27 @@ def fetch_curriculum_task_list(curriculum_id, logger=None):
         raise e
 
 def fetch_question(question_id, logger=None):
-    '''Function to fetch question data from the database'''
-    ### No change needed for new schema ###
+    '''
+    Function to fetch question data from the database
+    
+    Notes: 2/16/25 adding content, subject, objective
+    
+    '''
     
     q_crud = CRUDHelper(Questions)
     q_content = {}
     
     try:
         record = q_crud.read(task_key = question_id)[0]
+        
+        # The content_id is Content.id - use that to get Content.content_id
+        #content_query = Content.query.filter_by(id=record.content_id).first()
+        #q_content['Content'] = content_query.content_id
+        
+        # The rest of the items come from the user CRUD
+        q_content['Content'] = record.content_id
+        q_content['Standard'] = record.standard
+        q_content['Objective'] = record.objective
         q_content['Code'] = record.code
         q_content['Question'] = record.question
         q_content['Answer'] = record.answer
@@ -701,11 +678,11 @@ def fetch_question(question_id, logger=None):
     else:
         return q_content
         
-def fetch_task_keys(user_id, logger):
+def fetch_task_keys(user_id, logger=None):
     ''' Fetches task keys'''
     ### CHANGE MIGHT BE needed for new schema ###
     
-    # Get the system_ids
+    # Get the session data
     system_ids = session.get("system_ids")
     
     if user_id in system_ids:
@@ -830,95 +807,98 @@ def fetch_xp_data(user_id, last_fetched_date, logger=None):
 
 def fetch_course_data(username, logger=None):
     '''
-    Fetch all course content, base curriculums and custom curriculums for a user.
-    
-    Arg(s): username as string, logger as app.logger object
+    Fetch content, base curriculums, and custom curriculums for an admin.
     
     Notes:
-        This function gets course data for a specified user, not the current user.
-        Data should be filtered and parsed based on current user admin status.
-        Teachers see only their + system content and curriculums
-        System admin see all content and curriculums      
+        - Teachers only see their own content, curriculums and questions
     '''
-    
     try:
         # Fetch the user.id for filtering
         user_id = session.get("user_id")
-        
-        # Query the student's id based on the username parameter
-        
-        # Fetch the user.ids of all system level admin
-        system_ids = session.get("system_ids")
-        
-        # Query all Content.id and Content.content_id from the Content table and place in a dictionary
-        # Filter if non system admin user
+        role = session.get("role")
+
+        # Query all Content.id and Content.content_id from the Content table
         content_data = db.session.query(Content.id, Content.content_id)
-        if user_id not in system_ids:
-            content_data = content_data.\
-                filter((Content.creator_id == user_id) | (Content.creator_id.in_(system_ids)))
-        content_data = content_data.all()
-        all_content_dict = {content_key: content_id for content_key, content_id in content_data}
-        
-        # Query all Curriculum.id and Curriculum.curriculum_id from Curriculum and place in dictionary
-        # Filter if non system admin user
+
+        if role == 'teacher':
+            content_data = content_data.filter(Content.creator_id == user_id).all()
+        elif role == 'system':
+            content_data = content_data.all()  # Fix: Don't overwrite, just execute query
+        else:
+            raise Unauthorized("User not authorized!")
+
+        # Convert query result to dictionary
+        all_content_dict = {content_id: content_key for content_id, content_key in content_data}
+
+        # Query all Curriculum.id and Curriculum.curriculum_id
         curriculum_data = db.session.query(Curriculum.id, Curriculum.curriculum_id)
-        if user_id not in system_ids:
-            curriculum_data = curriculum_data.\
-                filter((Curriculum.creator_id == user_id) | (Curriculum.creator_id.in_(system_ids)))
-        curriculum_data = curriculum_data.all()
-        all_curriculum_dict = {curriculum_key: curriculum_id for curriculum_key, curriculum_id in curriculum_data}
-        
-        # Query all ContentCurriculum assignments and place in dictionary
+
+        if role == 'teacher':
+            curriculum_data = curriculum_data.filter(Curriculum.creator_id == user_id).all()
+        elif role == 'system':
+            curriculum_data = curriculum_data.all()  # Fix: Don't overwrite
+        else:
+            raise Unauthorized("User not authorized!")
+
+        # Convert curriculum query result to dictionary
+        all_curriculum_dict = {curriculum_id: curriculum_key for curriculum_id, curriculum_key in curriculum_data}
+
+        # Query all ContentCurriculum assignments
         assignment_data = db.session.query(ContentCurriculum.content_id, ContentCurriculum.curriculum_id).all()
-        
-        # Build a dicionary of ContentCurriculum Assigments
+
+        # Build dictionary of ContentCurriculum Assignments
         all_assignment_dict = {}
         for content_id, curriculum_id in assignment_data:
-            # Use content_id to find the corresponding curriculum_id in the curriculum_dict
             if content_id not in all_assignment_dict:
                 all_assignment_dict[content_id] = []
-            all_assignment_dict[content_id].append(all_curriculum_dict.get(curriculum_id))
-            
+            all_assignment_dict[content_id].append(all_curriculum_dict.get(curriculum_id, None))  # Fix: Avoid KeyError
+
         # Build the content_dict
         content_dict = {}
-        for k, v in all_content_dict.items():
-            if k in all_assignment_dict:
-                content_dict[v] = all_assignment_dict[k]
-            else:
-                content_dict[v] = []
-                
-        # Sort content_dict alphabetically
-        #content_dict = dict(sorted(content_dict.items(), key=lambda item: item[0].lower()))
-                
-        # Get all curriculums as a list from the all_curriculum dictionary
+        for content_id, content_key in all_content_dict.items():
+            content_dict[content_key] = all_assignment_dict.get(content_id, [])  # Fix: Default empty list
+
+        # Get all curriculums as a list
         all_curriculums = list(all_curriculum_dict.values())
-        
+
         # Query all question IDs from Questions
-        # Filter if user is not system admin
         question_data = db.session.query(Questions.id, Questions.task_key)
-        if user_id not in system_ids:
-            question_data = question_data.\
-                filter((Questions.creator_id == user_id) | (Questions.creator_id.in_(system_ids)))
-        question_data = question_data.all()
-        
-        # Build the all_questions list from the query result
-        all_questions = [record.task_key for record in question_data]
-               
-        # Get the question assignments
-        #question_assignments = db.session.query(CurriculumQuestion.curriculum_id, CurriculumQuestion.question_id).all()
-       
-        # Future dev - build curriculum to task assignment dictionary 
-        curriculum_dict = {}
-        
-        return {"content_dict": content_dict,
-                "all_curriculums": all_curriculums,
-                "all_questions": all_questions,
-                "curriculum_dict": curriculum_dict}
-        
+
+        if role == 'teacher':
+            question_data = question_data.filter(Questions.creator_id == user_id)
+        elif role == 'system':
+            question_data = question_data.all()
+        else:
+            raise Unauthorized("User not authorized!")
+            
+        # Get a list of all questions using task_key
+        all_questions_dict = {question_id: question_key for question_id, question_key in question_data}
+        all_questions = list(all_questions_dict.values())
+    
+        # Query all CurriculumQuestion assignments
+        assignment_data = db.session.query(CurriculumQuestion.curriculum_id, CurriculumQuestion.question_id).all()
+
+        # Build dictionary of CurriculumQuestion Assignments
+        all_assignment_dict = {}
+        for curriculum_id, question_id in assignment_data:
+            curriculum = all_curriculum_dict[curriculum_id]
+            if curriculum not in all_assignment_dict:
+                all_assignment_dict[curriculum] = []
+            all_assignment_dict[curriculum].append(all_questions_dict.get(question_id, None))
+            
+        curriculum_dict = all_assignment_dict
+
+        return {
+            "content_dict": content_dict,
+            "all_curriculums": all_curriculums,
+            "all_questions": all_questions,
+            "curriculum_dict": curriculum_dict
+        }
+
     except Exception as e:
         if logger:
             logger.error(f"Problem getting course content: {e}")
-        return {}
+        raise
 
 def fetch_classrooms(logger=None):
     '''Fetches classrooms for the user if an admin'''
@@ -1209,7 +1189,7 @@ def add_new_content(item_id, table, username, logger=None):
             # Create helper for Curriculum table
             c_CRUD = CRUDHelper(Curriculum)
             # Add the new curriculum_id
-            c_CRUD.create(curriculum_id = item_id, task_list = [], creator_id=user.id)
+            c_CRUD.create(curriculum_id = item_id, creator_id=user.id)
             # Return a success message
             return f"curriculum_id {item_id} added to the database"
         
@@ -1225,39 +1205,115 @@ def add_new_content(item_id, table, username, logger=None):
 
 def update_content_assignments(data, logger=None):
     '''Function to update assignment of content to base_curriculums'''
-    ### CHANGE needed for new schema ###
-    
+
+    # Extract data from request
+    content_name = data.get("content_id")
+    base_curriculums = data.get("base_curriculums", [])
+
+    if not content_name or not isinstance(base_curriculums, list):
+        raise ValueError("Invalid input: 'content_id' must be a string and 'base_curriculums' must be a list.")
+
     try:
-        # Create the CRUD helper for content table
-        c_CRUD = CRUDHelper(Content)
-        
-        # Get the record matching the content_id
-        record = c_CRUD.read(content_id = data["content_id"])
-        
-        # Update the the base curriculum assignment
-        c_CRUD.update(record[0].id, base_curriculums = data["base_curriculums"])
-        logger.debug(f"Content: {data['content_id']} Base: {data['base_curriculums']}")
-        
+        # Fetch content_id from the Content table
+        content_query = Content.query.filter_by(content_id=content_name).first()
+        if not content_query:
+            raise ValueError(f"Content '{content_name}' not found.")
+
+        content_id = content_query.id
+
+        for curriculum_name in base_curriculums:
+            # Fetch curriculum_id from the Curriculum table
+            curriculum_query = Curriculum.query.filter_by(curriculum_id=curriculum_name).first()
+            
+            if not curriculum_query:
+                logger.warning(f"Curriculum '{curriculum_name}' not found. Skipping.")
+                continue  # Skip missing curriculums instead of failing
+
+            curriculum_id = curriculum_query.id
+
+            # Check for existing assignment to avoid duplicates
+            existing_entry = ContentCurriculum.query.filter_by(
+                content_id=content_id, curriculum_id=curriculum_id
+            ).first()
+            if existing_entry:
+                logger.info(f"Skipping existing entry: Content ID {content_id}, Curriculum ID {curriculum_id}")
+                continue
+
+            # Insert new entry into ContentCurriculum
+            new_entry = ContentCurriculum(content_id=content_id, curriculum_id=curriculum_id)
+            db.session.add(new_entry)
+
+        # Commit changes to the database
+        db.session.commit()
+        logger.info("Content assignments successfully updated.")
+
+    except ValueError as ve:
+        if logger:
+            logger.error(f"Value Error: {ve}")
+        raise
+
     except Exception as e:
-        logger.debug(f"Error: {e}")
+        if logger:
+            logger.error(f"Unexpected Database Error: {e}")
+        db.session.rollback()  # Rollback in case of failure
+        raise
         
 def update_curriculum_assignments(data, logger=None):
     '''Function to update assignment of tasks to curriculums'''
-    ### CHANGE needed for new schema ###
     
+    # Extract the curriculum assignment data
+    curriculum_name = data.get('curriculum_id')
+    task_list = data.get('task_list', [])
+    
+    if not curriculum_name or not isinstance(task_list, list):
+        raise ValueError("Invalid input: 'curriculum_id' must be a string and 'task_list' must be a list.")
+
     try:
-        # Create the CRUD helper for content table
-        c_CRUD = CRUDHelper(Curriculum)
         
-        # Get the record matching the content_id
-        record = c_CRUD.read(curriculum_id = data["curriculum_id"])
+        # Get the Curriculum.id from curriculum_name
+        curriculum_query = Curriculum.query.filter_by(curriculum_id=curriculum_name).first()
+        if not curriculum_query:
+            raise ValueError(f"Curriculum '{curriculum_name}' not found.")
+        curriculum_id = curriculum_query.id
         
-        # Update the the base curriculum assignment
-        c_CRUD.update(record[0].id, task_list = data["task_list"])
-        logger.debug(f"Content: {data['curriculum_id']} Base: {data['task_list']}")
-        
+        for task in task_list:
+            # Fetch question_id from the Questions table
+            logger.debug("I'm here")
+            task_query = Questions.query.filter_by(task_key=task).first()
+            
+            if not task_query:
+                logger.warning(f"Task '{task}' not found. Skipping.")
+                continue  # Skip missing questions instead of failing
+
+            question_id = task_query.id
+
+            # Check for existing assignment to avoid duplicates
+            existing_entry = CurriculumQuestion.query.filter_by(
+                curriculum_id=curriculum_id, question_id=question_id
+            ).first()
+            if existing_entry:
+                logger.info(f"Skipping existing entry: Curriculum ID {curriculum_id}, Question ID {question_id}")
+                continue
+
+            # Insert new entry into ContentCurriculum
+            new_entry = CurriculumQuestion(curriculum_id=curriculum_id, question_id=question_id)
+            db.session.add(new_entry)
+
+        # Commit changes to the database
+        db.session.commit()
+        logger.info("Curriculum assignments successfully updated.")
+
+    except ValueError as ve:
+        if logger:
+            logger.error(f"Value Error: {ve}")
+        raise
+
     except Exception as e:
-        logger.debug(f"Error: {e}")
+        if logger:
+            logger.error(f"Unexpected Database Error: {e}")
+        db.session.rollback()  # Rollback in case of failure
+        raise
+        
 
 def add_new_classroom(class_code, class_description, logger=None):
     '''Function to write new classroom code and description to database'''

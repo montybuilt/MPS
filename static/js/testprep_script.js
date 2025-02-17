@@ -128,6 +128,7 @@ function rickRoll() {
 //--------------------------------------------------------------------------------------
 
 // Initialize XP structure in local storage if it doesn't already exist
+// Currently deactivated
 
 (function initializeXP() {
     if (!sessionStorage.getItem('xp')) {
@@ -136,7 +137,7 @@ function rickRoll() {
             certifications: {
                 pcap: { xp_1: 0, xp_2: 0, xp_3: 0, xp_4: 0, xp_5: 0 },
                 pcep: { xp_1: 0, xp_2: 0, xp_3: 0, xp_4: 0 }
-            }
+            },
             courses: {
                 python1: {xp_1: 0, xp_2: 0, xp_3: 0, xp_4: 0, xp_5: 0, xp_6: 0, xp_7: 0},
                 python2: {xp_1: 0, xp_2: 0, xp_3: 0, xp_4: 0, xp_5: 0, xp_6: 0, xp_7: 0}
@@ -255,6 +256,7 @@ function updateContentScores(contentId, XP_earned, XP_possible) {
 //------------------------------------------------------------------------------------------
 
 // Function to calculate the XP change and update the XP storage
+// Switching to ignore sessionStorage of xp and work only with database
 
 function updateXP(questionId, content, subject, difficulty, status) {
     console.log("Updating XP");

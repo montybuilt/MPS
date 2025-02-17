@@ -365,7 +365,7 @@ def question_content_page():
 
 @app.route('/new_content_or_curriculum', methods=['GET', 'POST'])
 def new_content_or_curriculum():
-    '''Route to add new content IDs'''
+    '''Route to add new content or curriculum IDs'''
     
     # Retrieve the username from session
     username = session.get('username')
@@ -394,44 +394,57 @@ def question_keys():
     except Exception as e:
         return jsonify({"error": f"Failed to load keys: {e}"}), 500
 
-@app.route('/assign_curriculum_to_content', methods=['GET', 'POST'])
+@app.route('/assign_curriculum_to_content', methods=['POST'])
 def assign_curriculum_to_content():
     '''Route to write content + base curriculum assignments to database'''
-    
+
     # Check if the user is an admin
     if not session.get('is_admin'):
-        return redirect(url_for('index'))  # Redirect non-admin users
-    
-    # Extract the content_id and curriculum assignments
-    content_assignments = request.get_json()
-    content_id = content_assignments['content_id']
-    base_curriculums = content_assignments['base_curriculums']
-    
-    # Call the helper function to write to the database
-    update_content_assignments(content_assignments, app.logger)
-    
-    app.logger.debug(f"Content ID: {content_id} - Base C: {base_curriculums}")
-    
-    return jsonify({'content': 'Request received'}), 200
+        return jsonify({'error': 'Unauthorized access'}), 403  # Return 403 Forbidden instead of redirect
+
+    # Extract data safely
+    try:
+        content_assignments = request.get_json()
+        content_id = content_assignments.get('content_id')
+        base_curriculums = content_assignments.get('base_curriculums', [])
+
+        if not content_id or not isinstance(base_curriculums, list):
+            return jsonify({'error': 'Invalid request format'}), 400  # Return 400 Bad Request
+
+        # Call the helper function to write to the database
+        update_content_assignments(content_assignments, app.logger)
+
+        return jsonify({'message': 'Content assignments updated successfully'}), 200
+
+    except ValueError as ve:
+        app.logger.error(f"Value Error: {ve}")
+        return jsonify({'error': str(ve)}), 400  # Return a meaningful error
+
+    except KeyError as ke:
+        app.logger.error(f"Missing Key Error: {ke}")
+        return jsonify({'error': f'Missing key: {ke}'}), 400  # Return missing key error
+
+    except Exception as e:
+        app.logger.error(f"Unexpected Error: {e}")
+        return jsonify({'error': 'Internal server error'}), 500  # Generic internal error
 
 @app.route('/assign_tasks_to_curriculum', methods=['GET', 'POST'])
-def assign_tasks_to_content():
-    '''Route to write content + base curriculum assignments to database'''
+def assign_tasks_to_curriculum():
+    '''Route to assign tasks to a curriculum in the database'''
     
     # # Check if the user is an admin
     if not session.get('is_admin'):
         return redirect(url_for('index'))  # Redirect non-admin users
     
-    # Extract the content_id and curriculum assignments
+    # Extract the curriculum_id and task_list
     curriculum_assignments = request.get_json()
     curriculum_id = curriculum_assignments['curriculum_id']
     task_list = curriculum_assignments['task_list']
+    app.logger.debug(f"Curriculum: {curriculum_id} Tasks: {task_list}")
     
     # Call the helper function to write to the database
     update_curriculum_assignments(curriculum_assignments, app.logger)
-    
-    app.logger.debug(f"Content ID: {curriculum_id} - Base C: {task_list}")
-    
+        
     return jsonify({'content': 'Request received'}), 200
 
 @app.route('/submit_question', methods=['POST'])
@@ -441,6 +454,7 @@ def submit_question():
     try:
         # Authorization check
         username = session.get('username')
+        user_id = session.get('user_id')
         if not session.get('is_admin'):
             app.logger.warning("Unauthorized access attempt to submit_question.")
             return jsonify({"error": "Unauthorized access."}), 401
@@ -454,7 +468,7 @@ def submit_question():
             return jsonify({"error": "Missing question key."}), 400
 
         # Determine if it's a new question or an update
-        is_new = question_key not in fetch_task_keys()
+        is_new = question_key not in fetch_task_keys(user_id, app.logger)
         app.logger.debug(f"New question? {is_new}")
 
         if is_new:
