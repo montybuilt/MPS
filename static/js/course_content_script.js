@@ -29,9 +29,9 @@ async function fetchCourseData() {
         // Save the data in session storage
         sessionStorage.setItem('contentDict', JSON.stringify(data.content_dict));
         sessionStorage.setItem('allCurriculums', JSON.stringify(data.all_curriculums));
+        sessionStorage.setItem('filteredCurriculums', JSON.stringify(data.filtered_curriculums));
         sessionStorage.setItem('allQuestions', JSON.stringify(data.all_questions));
         sessionStorage.setItem('curriculumDict', JSON.stringify(data.curriculum_dict))
-        console.log(data);
     } catch (error) {
         console.error('Failed to fetch course data:', error);
     }
@@ -105,7 +105,7 @@ function populateCurriculumDropdown() {
 function populateCurriculumsLists(contentId) {
     // Retrieve contentDict and allCurriculums from sessionStorage
     const contentDict = JSON.parse(sessionStorage.getItem('contentDict')) || {};
-    const allCurriculums = JSON.parse(sessionStorage.getItem('allCurriculums')) || [];
+    const allCurriculums = JSON.parse(sessionStorage.getItem('filteredCurriculums')) || [];
 
     // Get assigned curriculums for the given contentId
     const assignedCurriculums = contentDict[contentId] || [];
@@ -201,7 +201,6 @@ document.getElementById('submit-new-content').addEventListener('click', function
         });
     })
     .then(data => {
-        console.log('Success:', data);
         // Update contentDict in sessionStorage
         let contentDict = JSON.parse(sessionStorage.getItem('contentDict')) || {};
         contentDict[newContent] = [];
@@ -209,6 +208,12 @@ document.getElementById('submit-new-content').addEventListener('click', function
         // Clear the new-content entry box and alert the user
         document.getElementById('new-content').value = '';
         alert("New content added successfully!");
+        // Store the open accordion container name in sessionStorage
+        pageState = JSON.parse(sessionStorage.getItem('pageState')) || [];
+        if (!pageState.includes('accordion-container')) { pageState.push('accordion-container')};
+        sessionStorage.setItem('pageState', JSON.stringify(pageState));           
+        // Refresh the page
+        location.reload();
     })
     .catch((error) => {
         // Handle errors
@@ -216,7 +221,6 @@ document.getElementById('submit-new-content').addEventListener('click', function
         alert(error.message || "An Unexpected Error Occurred.");
     });
 });
-
 
 // Event Listener to update database with new curriculum upon pressing submit-new-curriculum button
 document.getElementById('submit-new-curriculum').addEventListener('click', function() {
@@ -257,6 +261,12 @@ document.getElementById('submit-new-curriculum').addEventListener('click', funct
         // Clear the new-curriculum entry box and alert the user
         document.getElementById('new-curriculum').value = '';
         alert("New curriculum added successfully!");
+        // Store the open accordion container name in sessionStorage
+        pageState = JSON.parse(sessionStorage.getItem('pageState')) || [];
+        if (!pageState.includes('accordion-container')) { pageState.push('accordion-container')};
+        sessionStorage.setItem('pageState', JSON.stringify(pageState));           
+        // Refresh the page
+        location.reload();
     })
     .catch((error) => {
         // Handle errors
@@ -375,14 +385,11 @@ function handleSubmitContentAssignment() {
     // Get the content_id and array of curriculums assigned
     const contentId = document.getElementById('content-selector')?.value;
     const assignedCurriculums = Array.from(document.getElementById('assigned-curriculums')?.children || []).map(item => item.value);
-
+    console.log("contentID", contentId, "assignedCurriculums", assignedCurriculums)
     if (!contentId) {
         alert('Please select a content item.');
         return;
     }
-
-    alert("No curriculums assigned.");
-    return;
 
     // Prepare the payload
     const contentAssignments = { 'content_id': contentId, 'base_curriculums': assignedCurriculums };
@@ -406,6 +413,12 @@ function handleSubmitContentAssignment() {
             contentDict[contentId] = assignedCurriculums;
             sessionStorage.setItem('contentDict', JSON.stringify(contentDict));
             alert('Content and curriculum assignments updated successfully!');
+            // Store the open accordion container name in sessionStorage
+            pageState = JSON.parse(sessionStorage.getItem('pageState')) || [];
+            if (!pageState.includes('accordion2')) { pageState.push('accordion2')};
+            sessionStorage.setItem('pageState', JSON.stringify(pageState));           
+            // Refresh the page
+            location.reload();
         })
         .catch(error => {
             console.error('Error:', error);
@@ -422,9 +435,6 @@ function handleSubmitCurriculumAssignment() {
         alert('Please select a curriculum item.');
         return;
     }
-
-    alert("No questions assigned.");
-    return;
 
     // Prepare the payload
     const curriculumAssignments = { 'curriculum_id': curriculumId, 'task_list': assignedQuestions };
@@ -448,6 +458,12 @@ function handleSubmitCurriculumAssignment() {
             curriculumDict[curriculumId] = assignedQuestions;
             sessionStorage.setItem('curriculumDict', JSON.stringify(curriculumDict));
             alert('Curriculum and task assignments updated successfully!');
+            // Store the open accordion container name in sessionStorage
+            pageState = JSON.parse(sessionStorage.getItem('pageState')) || [];
+            if (!pageState.includes('accordion3')) { pageState.push('accordion3')};
+            sessionStorage.setItem('pageState', JSON.stringify(pageState));           
+            // Refresh the page
+            location.reload();
         })
         .catch(error => {
             console.error('Error:', error);
@@ -460,4 +476,16 @@ document.addEventListener('DOMContentLoaded', function () {
     fetchCourseData();
     assignAddRemoveButtons(); // For add/remove curriculum
     assignAssignmentButtons();    // For submit content or curriculum assignment
+
+    // Retreive prior page state
+    const pageState = JSON.parse(sessionStorage.getItem('pageState')) || [];
+    
+    if (pageState) {
+        pageState.forEach(accordionId => {
+            toggleAccordion(accordionId);
+        });
+    }
+     
+    // Remove the page state
+    sessionStorage.removeItem('pageState');
 });

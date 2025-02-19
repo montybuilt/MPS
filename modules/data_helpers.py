@@ -811,6 +811,9 @@ def fetch_course_data(username, logger=None):
     
     Notes:
         - Teachers only see their own content, curriculums and questions
+        - Only unassigned curriculums and questions are shown to avoid duplicaiton
+        - Curriculums can be assigned to only one Content
+        - Questions can be assigned to only one Curriculum
     '''
     try:
         # Fetch the user.id for filtering
@@ -826,10 +829,11 @@ def fetch_course_data(username, logger=None):
             content_data = content_data.all()  # Fix: Don't overwrite, just execute query
         else:
             raise Unauthorized("User not authorized!")
-
+        
         # Convert query result to dictionary
         all_content_dict = {content_id: content_key for content_id, content_key in content_data}
-
+        
+        
         # Query all Curriculum.id and Curriculum.curriculum_id
         curriculum_data = db.session.query(Curriculum.id, Curriculum.curriculum_id)
 
@@ -842,7 +846,7 @@ def fetch_course_data(username, logger=None):
 
         # Convert curriculum query result to dictionary
         all_curriculum_dict = {curriculum_id: curriculum_key for curriculum_id, curriculum_key in curriculum_data}
-
+        
         # Query all ContentCurriculum assignments
         assignment_data = db.session.query(ContentCurriculum.content_id, ContentCurriculum.curriculum_id).all()
 
@@ -852,7 +856,7 @@ def fetch_course_data(username, logger=None):
             if content_id not in all_assignment_dict:
                 all_assignment_dict[content_id] = []
             all_assignment_dict[content_id].append(all_curriculum_dict.get(curriculum_id, None))  # Fix: Avoid KeyError
-
+        
         # Build the content_dict
         content_dict = {}
         for content_id, content_key in all_content_dict.items():
@@ -860,17 +864,28 @@ def fetch_course_data(username, logger=None):
 
         # Get all curriculums as a list
         all_curriculums = list(all_curriculum_dict.values())
+        
+        # Filter out any curriculum that is already assigned to a content
+        assigned_curriculums = set()
+        for assigned_list in all_assignment_dict.values():
+            assigned_curriculums.update(assigned_list)
+        filtered_curriculums = [c for c in all_curriculums if c not in assigned_curriculums]
 
         # Query all question IDs from Questions
         question_data = db.session.query(Questions.id, Questions.task_key)
 
         if role == 'teacher':
-            question_data = question_data.filter(Questions.creator_id == user_id)
+            # Get Admin ID that matches the current User ID
+            admin_query = Admin.query.filter_by(id=user_id).first()
+            if admin_query:
+                question_data = question_data.filter(Questions.creator_id == admin_query.id)
+            else:
+                return []  # Return empty list if no matching Admin record
         elif role == 'system':
             question_data = question_data.all()
         else:
             raise Unauthorized("User not authorized!")
-            
+                   
         # Get a list of all questions using task_key
         all_questions_dict = {question_id: question_key for question_id, question_key in question_data}
         all_questions = list(all_questions_dict.values())
@@ -881,17 +896,25 @@ def fetch_course_data(username, logger=None):
         # Build dictionary of CurriculumQuestion Assignments
         all_assignment_dict = {}
         for curriculum_id, question_id in assignment_data:
-            curriculum = all_curriculum_dict[curriculum_id]
-            if curriculum not in all_assignment_dict:
-                all_assignment_dict[curriculum] = []
-            all_assignment_dict[curriculum].append(all_questions_dict.get(question_id, None))
-            
+            if (curriculum_id in all_curriculum_dict and question_id in all_questions_dict):
+                curriculum = all_curriculum_dict[curriculum_id]
+                if curriculum not in all_assignment_dict:
+                    all_assignment_dict[curriculum] = []
+                all_assignment_dict[curriculum].append(all_questions_dict.get(question_id, None))
+        
+        # Filter out any question that is already assigned to a curriculum
+        assigned_questions = set()
+        for assigned_list in all_assignment_dict.values():
+            assigned_questions.update(assigned_list)
+        filtered_questions = [c for c in all_questions if c not in assigned_questions]     
+        
         curriculum_dict = all_assignment_dict
 
         return {
             "content_dict": content_dict,
             "all_curriculums": all_curriculums,
-            "all_questions": all_questions,
+            "filtered_curriculums": filtered_curriculums,
+            "all_questions": filtered_questions,
             "curriculum_dict": curriculum_dict
         }
 
@@ -1204,7 +1227,15 @@ def add_new_content(item_id, table, username, logger=None):
         raise e
 
 def update_content_assignments(data, logger=None):
-    '''Function to update assignment of content to base_curriculums'''
+    '''
+    Function to update assignment of content to base_curriculums
+    
+    Arg(s): data as dict, keys: content_id as string, values: base_curriculums as list
+    
+    Notes:
+        This function will equalize the ContentCurriculum pairings to match
+        This means that new pairings will be added and missing pairings will be removed
+    '''
 
     # Extract data from request
     content_name = data.get("content_id")
@@ -1221,6 +1252,13 @@ def update_content_assignments(data, logger=None):
 
         content_id = content_query.id
 
+        # Fetch existing pairings from the ContentCurriculum table
+        existing_pairings = ContentCurriculum.query.filter_by(content_id=content_id).all()
+        existing_curriculum_ids = {pairing.curriculum_id for pairing in existing_pairings}
+
+        # Create a set of new curriculum_ids from the input dictionary
+        new_curriculum_ids = set()
+
         for curriculum_name in base_curriculums:
             # Fetch curriculum_id from the Curriculum table
             curriculum_query = Curriculum.query.filter_by(curriculum_id=curriculum_name).first()
@@ -1230,18 +1268,22 @@ def update_content_assignments(data, logger=None):
                 continue  # Skip missing curriculums instead of failing
 
             curriculum_id = curriculum_query.id
+            new_curriculum_ids.add(curriculum_id)
 
             # Check for existing assignment to avoid duplicates
-            existing_entry = ContentCurriculum.query.filter_by(
-                content_id=content_id, curriculum_id=curriculum_id
-            ).first()
-            if existing_entry:
+            if curriculum_id in existing_curriculum_ids:
                 logger.info(f"Skipping existing entry: Content ID {content_id}, Curriculum ID {curriculum_id}")
                 continue
 
             # Insert new entry into ContentCurriculum
             new_entry = ContentCurriculum(content_id=content_id, curriculum_id=curriculum_id)
             db.session.add(new_entry)
+
+        # Remove pairings that are not in the input dictionary
+        for pairing in existing_pairings:
+            if pairing.curriculum_id not in new_curriculum_ids:
+                db.session.delete(pairing)
+                logger.info(f"Removed pairing: Content ID {content_id}, Curriculum ID {pairing.curriculum_id}")
 
         # Commit changes to the database
         db.session.commit()
@@ -1259,26 +1301,40 @@ def update_content_assignments(data, logger=None):
         raise
         
 def update_curriculum_assignments(data, logger=None):
-    '''Function to update assignment of tasks to curriculums'''
+    '''
+    Function to update assignment of tasks to curriculums
     
+    Args:
+        data (dict): keys: curriculum_id as string, values: task_list as list
+    
+    Notes:
+        This function will equalize the CurriculumQuestion pairings to match
+        This means that new pairings will be added and missing pairings will be removed
+    '''
+
     # Extract the curriculum assignment data
     curriculum_name = data.get('curriculum_id')
     task_list = data.get('task_list', [])
-    
+
     if not curriculum_name or not isinstance(task_list, list):
         raise ValueError("Invalid input: 'curriculum_id' must be a string and 'task_list' must be a list.")
 
     try:
-        
         # Get the Curriculum.id from curriculum_name
         curriculum_query = Curriculum.query.filter_by(curriculum_id=curriculum_name).first()
         if not curriculum_query:
             raise ValueError(f"Curriculum '{curriculum_name}' not found.")
         curriculum_id = curriculum_query.id
-        
+
+        # Fetch existing pairings from the CurriculumQuestion table
+        existing_pairings = CurriculumQuestion.query.filter_by(curriculum_id=curriculum_id).all()
+        existing_question_ids = {pairing.question_id for pairing in existing_pairings}
+
+        # Create a set of new question_ids from the input dictionary
+        new_question_ids = set()
+
         for task in task_list:
             # Fetch question_id from the Questions table
-            logger.debug("I'm here")
             task_query = Questions.query.filter_by(task_key=task).first()
             
             if not task_query:
@@ -1286,18 +1342,22 @@ def update_curriculum_assignments(data, logger=None):
                 continue  # Skip missing questions instead of failing
 
             question_id = task_query.id
+            new_question_ids.add(question_id)
 
             # Check for existing assignment to avoid duplicates
-            existing_entry = CurriculumQuestion.query.filter_by(
-                curriculum_id=curriculum_id, question_id=question_id
-            ).first()
-            if existing_entry:
+            if question_id in existing_question_ids:
                 logger.info(f"Skipping existing entry: Curriculum ID {curriculum_id}, Question ID {question_id}")
                 continue
 
-            # Insert new entry into ContentCurriculum
+            # Insert new entry into CurriculumQuestion
             new_entry = CurriculumQuestion(curriculum_id=curriculum_id, question_id=question_id)
             db.session.add(new_entry)
+
+        # Remove pairings that are not in the input dictionary
+        for pairing in existing_pairings:
+            if pairing.question_id not in new_question_ids:
+                db.session.delete(pairing)
+                logger.info(f"Removed pairing: Curriculum ID {curriculum_id}, Question ID {pairing.question_id}")
 
         # Commit changes to the database
         db.session.commit()
@@ -1314,7 +1374,6 @@ def update_curriculum_assignments(data, logger=None):
         db.session.rollback()  # Rollback in case of failure
         raise
         
-
 def add_new_classroom(class_code, class_description, logger=None):
     '''Function to write new classroom code and description to database'''
     ### No change needed for new schema ###
