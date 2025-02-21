@@ -2,6 +2,10 @@ let totalXP = 0;
 let xpLevel = "Beginner";
 let xpScore = 0;
 let xpCompletion = 0;
+let myContent;
+let myCurriculums;
+
+
 
 //-----------------------------------------------------------------------------------------------------------------
 // Function to initialize or check xp_last_fetched_datetime in localStorage
@@ -22,12 +26,12 @@ function checkAndInitializeLastFetchedDatetime() {
 }
 
 //-----------------------------------------------------------------------------------------------------------------
-// Function to fetch historical XP data if not updated
-async function fetchXPData() {
+// Function to fetch XP and user content/curriculum data if not updated
+async function fetchData() {
     let lastFetchedDatetime = localStorage.getItem("xpLastFetchedDatetime");
 
     try {
-        const response = await fetch('/get_xp', {
+        const response = await fetch('/get_dashboard', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ lastFetchedDatetime })
@@ -213,7 +217,7 @@ function updateKPI(id, value, condition) {
 // Main initialization function
 async function initializePage() {
     checkAndInitializeLastFetchedDatetime();
-    await fetchXPData();
+    await fetchData();
     processXP();
     displayKPIData();
     drawAreaChart();

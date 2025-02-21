@@ -81,17 +81,25 @@ def dashboard():
     username = session['username']
     return render_template('dashboard.html', username=username)
 
-@app.route('/get_xp', methods=['POST'])
+@app.route('/get_dashboard', methods=['POST'])
 @login_required
-def get_xp():
+def get_dashboard():
+    '''Route to handle request for all data on dashboard page'''
+    
+    # get the username
+    username = session.get('username')
+    
     # get the last fetched datetime from request
     last_fetched_datetime = request.json.get('lastFetchedDatetime')
     
-    # get the username from session
-    username = session['username']
-    
-    # query the database for data (if needed)
+    # Get the xp history update for the user
     xp_data = fetch_xp_data(username, last_fetched_datetime, app.logger)
+    app.logger.debug("XP Data: {xp_data}")
+    
+    # Get the content assignments for the user
+    
+    # Get the curriculum assignmetns for the user
+    
     
     if xp_data:
     
@@ -232,6 +240,9 @@ def get_user_data():
     if session.get('is_admin'):
     
         username = request.args.get('username')
+        
+        #test = get_user_assignments(1, app.logger)
+        
         try:
             user_data = fetch_user_data(username, app.logger)
             if user_data:
@@ -609,7 +620,6 @@ def update_xp():
         xp_data = request.get_json()
         
         # Update the xp_data to include username
-        xp_data.update({'user_id': session.get('username')})
         app.logger.debug(f"In Route: {xp_data}")
         
         # Call call the data helper function to update the database

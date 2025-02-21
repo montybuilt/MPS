@@ -35,7 +35,7 @@
         
         .form-group {
             display: flex;
-            flex-direction: column;
+            flex-direction: row;
             flex: 1 1 200px; /* Allow elements to grow/shrink with a base of 200px */
             max-width: 600px; /* Optional: Prevent elements from growing too wide */
             min-width: 200px; /* Ensures reasonable minimum size */
@@ -43,43 +43,56 @@
         }
         
         .dual-list-container {
-            display: flex; /* Enables flexbox layout for the parent container */
-            flex-direction: row; /* Aligns form-group elements horizontally */
-            justify-content: center; /* Centers form-group elements horizontally */
-            align-items: center; /* Aligns form-group elements vertically */
-            gap: 50px; /* Adds spacing between form-group sections (content and curriculum) */
+            display: flex;
+            flex-direction: row;
+            justify-content: center;
+            align-items: center;
+            gap: 50px;
             padding: 20px;
+            width: 100%;
         }
         
         .dual-list-container .form-group {
-            display: flex; /* Handles layout of child elements inside each form-group */
-            flex: 1 1 200px;
-            min-width: 400px;
-            flex-direction: row; /* Aligns child elements horizontally */
-            align-items: center; /* Aligns child elements vertically */
-            gap: 1rem; /* Adds spacing between child elements */
+            gap: 4rem;
         }
         
         .list-controls {
             position: relative;
             top: 10%;
-            display: flex; /* Make the container a flexbox */
-            flex-direction: column; /* Arrange buttons vertically */
-            justify-content: flex-start; /* Align buttons starting at the top */
-            align-items: center; /* Center buttons horizontally */
-            gap: 0.5rem; /* Add spacing between the buttons */
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        
+        .list-controls button {
+            height: 80px;
+            width: 80px;
+            font-size: 23px;
+            text-align: center;
+            border-radius: 4px;
+            cursor: pointer;
+            padding-inline: 0px;
+        }
+        
+        .list-controls .btn-primary {
+            background-color: green;
+            color: white;
+        }
+        
+        .list-controls .btn-secondary {
+            background-color: red;
+            
+            color: white;
         }
         
         .list-box {
             width: 150px;
         }
         
-        .form-select-content {
-            height: 300px; /* Adjust height of content-related select elements */
-        }
-        
         .form-select-curriculums {
-            height: 300px; /* Adjust height of curriculum-related select elements */
+            height: 350px; /* Adjust height of curriculum-related select elements */
         }
         
         .accordion-container {
@@ -235,57 +248,33 @@
         <!-- Fifth row container for content assignments -->
         <div class="row-container">
           <div class="accordion-container">
-            <div class="accordion-header" onclick="toggleAccordion('accordion4')">Add Custom Content Assignments - (won't affect classroom assignments)</div>
+            <div class="accordion-header" onclick="toggleAccordion('accordion4')">Add Custom Curriculum Assignments - (won't affect classroom assignments)</div>
             <div class="accordion-body" id="accordion4">
-              <div class="dual-list-container">
-                <!-- Left Box: Available Content Areas -->
-                <div class="form-group">
-                    <div class="list-box">
-                      <h5>Available Content Areas</h5>
-                      <select id="available-content" class="form-select-content" multiple>
-                        <!-- Placeholder items, will be dynamically generated -->
-                        <option value="content_1"></option>
-                      </select>
-                    </div>
-            
-                    <!-- Control Buttons -->
-                    <div class="list-controls">
-                      <button id="add-content" class="btn btn-primary" type="button">&rarr;</button>
-                      <button id="remove-content" class="btn btn-secondary" type="button">&larr;</button>
-                    </div>
-            
-                    <!-- Right Box: Assigned Content Areas -->
-                    <div class="list-box">
-                      <h5>Assigned Content Areas</h5>
-                      <select id="assigned-content" class="form-select-content" multiple>
-                        <!-- Placeholder items, will be dynamically updated -->
-                        <option value="content_2"></option>
-                      </select>
-                    </div>
-                </div>
-                <!-- Left Box: Available Curriculums -->
-                <div class="form-group">
-                    <div class="list-box">
-                      <h5>Available Curriculums</h5>
-                      <select id="available-curriculums" class="form-select-curriculums" multiple>
-                        <!-- Placeholder items, will be dynamically generated -->
-                        <option value="curriculum_1"></option>
-                      </select>
-                    </div>
-            
-                    <!-- Control Buttons -->
-                    <div class="list-controls">
-                      <button id="add-curriculum" class="btn btn-primary" type="button">&rarr;</button>
-                      <button id="remove-curriculum" class="btn btn-secondary" type="button">&larr;</button>
-                    </div>
-            
-                    <!-- Right Box: Assigned Curriculums -->
-                    <div class="list-box">
-                      <h5>Assigned Curriculums</h5>
-                      <select id="assigned-curriculums" class="form-select-curriculums" multiple>
-                        <!-- Placeholder items, will be dynamically updated -->
-                        <option value=""></option>
-                      </select>
+                <div class="dual-list-container" id="fifth-row-container">
+                    <!-- Left Box: Available Curriculums -->
+                    <div class="form-group">
+                        <div class="list-box">
+                          <h5>Available Curriculums</h5>
+                          <select id="available-curriculums" class="form-select-curriculums" multiple>
+                            <!-- Placeholder items, will be dynamically generated -->
+                            <option value="curriculum_1"></option>
+                          </select>
+                        </div>
+                
+                        <!-- Control Buttons -->
+                        <div class="list-controls">
+                          <button id="add-curriculum" class="btn btn-primary" type="button">&rarr;</button>
+                          <button id="remove-curriculum" class="btn btn-secondary" type="button">&larr;</button>
+                        </div>
+                
+                        <!-- Right Box: Assigned Curriculums -->
+                        <div class="list-box">
+                          <h5>Assigned Curriculums</h5>
+                          <select id="assigned-curriculums" class="form-select-curriculums" multiple>
+                            <!-- Placeholder items, will be dynamically updated -->
+                            <option value=""></option>
+                          </select>
+                        </div>
                     </div>
                 </div>
               </div>
@@ -297,55 +286,31 @@
           <div class="accordion-container">
             <div class="accordion-header" onclick="toggleAccordion('accordion5')">Remove Custom Content Assignments - (won't affect clasroom assignments)</div>
             <div class="accordion-body" id="accordion5">
-              <div class="dual-list-container">
-                <!-- Left Box: Assigned Content Areas -->
-                <div class="form-group">
-                    <div class="list-box">
-                      <h5>Assigned Content</h5>
-                      <select id="assigned-content-2" class="form-select-content" multiple>
-                        <!-- Placeholder items, will be dynamically generated -->
-                        <option value="content_1"></option>
-                      </select>
-                    </div>
-            
-                    <!-- Control Buttons -->
-                    <div class="list-controls">
-                      <button id="add-content-2" class="btn btn-primary" type="button">&rarr;</button>
-                      <button id="remove-content-2" class="btn btn-secondary" type="button">&larr;</button>
-                    </div>
-            
-                    <!-- Right Box: Content Areas To Remove -->
-                    <div class="list-box">
-                      <h5>Remove Content</h5>
-                      <select id="removed-content" class="form-select-content" multiple>
-                        <!-- Placeholder items, will be dynamically updated -->
-                        <option value="content_2"></option>
-                      </select>
-                    </div>
-                </div>
-                <!-- Left Box: Available Curriculums -->
-                <div class="form-group">
-                    <div class="list-box">
-                      <h5>Assigned Curriculums</h5>
-                      <select id="assigned-curriculums-2" class="form-select-curriculums" multiple>
-                        <!-- Placeholder items, will be dynamically generated -->
-                        <option value="curriculum_1"></option>
-                      </select>
-                    </div>
-            
-                    <!-- Control Buttons -->
-                    <div class="list-controls">
-                      <button id="add-curriculum-2" class="btn btn-primary" type="button">&rarr;</button>
-                      <button id="remove-curriculum-2" class="btn btn-secondary" type="button">&larr;</button>
-                    </div>
-            
-                    <!-- Right Box: Assigned Curriculums -->
-                    <div class="list-box">
-                      <h5>Remove Curriculums</h5>
-                      <select id="removed-curriculums" class="form-select-curriculums" multiple>
-                        <!-- Placeholder items, will be dynamically updated -->
-                        <option value=""></option>
-                      </select>
+                <div class="dual-list-container" id="fifth-row-container">
+                    <!-- Left Box: Available Curriculums -->
+                    <div class="form-group">
+                        <div class="list-box">
+                          <h5>Assigned Curriculums</h5>
+                          <select id="assigned-curriculums-2" class="form-select-curriculums" multiple>
+                            <!-- Placeholder items, will be dynamically generated -->
+                            <option value="curriculum_1"></option>
+                          </select>
+                        </div>
+                
+                        <!-- Control Buttons -->
+                        <div class="list-controls">
+                          <button id="add-curriculum-2" class="btn btn-primary" type="button">&rarr;</button>
+                          <button id="remove-curriculum-2" class="btn btn-secondary" type="button">&larr;</button>
+                        </div>
+                
+                        <!-- Right Box: Assigned Curriculums -->
+                        <div class="list-box">
+                          <h5>Remove Curriculums</h5>
+                          <select id="removed-curriculums" class="form-select-curriculums" multiple>
+                            <!-- Placeholder items, will be dynamically updated -->
+                            <option value=""></option>
+                          </select>
+                        </div>
                     </div>
                 </div>
               </div>

@@ -56,6 +56,8 @@ class XP(db.Model):
     curriculum_id = db.Column(db.String(50))
     possible_xp = db.Column(db.Float)
     difficulty = db.Column(db.Float)
+    standard = db.Column(db.Integer)
+    objective = db.Column(db.Integer)
     tags = db.Column(db.JSON)
     elapsed_time = db.Column(db.Float, nullable=False)
     timestamp = db.Column(db.DateTime, default=datetime.utcnow)

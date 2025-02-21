@@ -7,6 +7,7 @@ from sqlalchemy.orm.attributes import flag_modified
 from datetime import datetime
 from functools import wraps
 from werkzeug.exceptions import Forbidden, BadRequest, Unauthorized
+from collections import defaultdict
 
 ####################################################################################
 #### Default Variables #############################################################
@@ -425,6 +426,101 @@ def create_new_user(username, password, email):
     except Exception as e:
         raise e
 
+def get_user_assignments(user_id, logger=None):
+    '''
+    Function to build a dictionary of all user content/curriculum assignments
+
+    Arg(s): user_id as int (User.id), logger as app.logger
+    
+    Returns:
+        Nested Dictionary where outer keys are assigned content
+        Inner keys are assigned curriculums
+        Values are lists of task keys
+        
+    Notes:
+        - The function first accessed assigned content from classroom assignments via ClassroomContent & ClassroomUser
+        - Then custom content and curriculum assignments are accessed from UserContent & UserCurriclum
+        - task_key are accessed from curriculum_question
+        
+
+    '''
+    
+    # A set to hold unique Content.content_id values for the user.
+    user_content_ids = set()
+
+    # 1. Get Content assigned via classrooms.
+    classroom_contents = (
+        db.session.query(Content)
+        .join(ClassroomContent, ClassroomContent.content_id == Content.id)
+        .join(Classroom, Classroom.id == ClassroomContent.classroom_id)
+        .join(ClassroomUser, ClassroomUser.classroom_id == Classroom.id)
+        .filter(ClassroomUser.user_id == user_id)
+        .all()
+    )
+    for content in classroom_contents:
+        user_content_ids.add(content.content_id)
+
+    # 2. Get Content assigned directly to the user.
+    direct_contents = (
+        db.session.query(Content)
+        .join(UserContent, UserContent.content_id == Content.id)
+        .filter(UserContent.user_id == user_id)
+        .all()
+    )
+    for content in direct_contents:
+        user_content_ids.add(content.content_id)
+
+    # Prepare the result dictionary.
+    # Outer keys: Content.content_id (strings), plus a "custom" key for curricula not tied to any Content.
+    result = {content_id: {} for content_id in user_content_ids}
+
+    # 3. For each Content, get the associated curriculums via ContentCurriculum.
+    for content_id in user_content_ids:
+        # Retrieve the Content row (we assume content_id is unique in Content).
+        content_obj = db.session.query(Content).filter_by(content_id=content_id).first()
+        if not content_obj:
+            continue
+
+        # Get curriculums assigned to this content.
+        content_curricula = (
+            db.session.query(Curriculum)
+            .join(ContentCurriculum, ContentCurriculum.curriculum_id == Curriculum.id)
+            .filter(ContentCurriculum.content_id == content_obj.id)
+            .all()
+        )
+        for curriculum in content_curricula:
+            # For each curriculum, get the Questions.task_key values via CurriculumQuestion.
+            question_keys = (
+                db.session.query(Questions.task_key)
+                .join(CurriculumQuestion, CurriculumQuestion.question_id == Questions.id)
+                .filter(CurriculumQuestion.curriculum_id == curriculum.id)
+                .all()
+            )
+            # Extract the task_key strings from the tuples.
+            result[content_id][curriculum.curriculum_id] = [qk for (qk,) in question_keys]
+
+    # 4. Handle custom curricula: these are assigned to the user via UserCurriculum.
+    custom_curricula = (
+        db.session.query(Curriculum)
+        .join(UserCurriculum, UserCurriculum.curriculum_id == Curriculum.id)
+        .filter(UserCurriculum.user_id == user_id)
+        .all()
+    )
+    custom_dict = {}
+    for curriculum in custom_curricula:
+        question_keys = (
+            db.session.query(Questions.task_key)
+            .join(CurriculumQuestion, CurriculumQuestion.question_id == Questions.id)
+            .filter(CurriculumQuestion.curriculum_id == curriculum.id)
+            .all()
+        )
+        custom_dict[curriculum.curriculum_id] = [qk for (qk,) in question_keys]
+
+    # Place custom curricula under the "custom" key in the outer dictionary.
+    result["custom"] = custom_dict
+
+    return result
+
 def fetch_user_data(username, logger=None):
     '''
     Function to fetch user data by username
@@ -437,32 +533,35 @@ def fetch_user_data(username, logger=None):
     # Fetch the user_id belonging to the student username passed
     user_id = db.session.query(User.id).filter_by(username = username).scalar()
     
+    user_assignments = get_user_assignments(user_id, logger)
     
-    # Get Content.id array assigned in UserContent
-    content_ids = db.session.query(UserContent.content_id).filter_by(user_id=user_id).all()
-    content_ids = [c[0] for c in content_ids]
+    # Get Content.id array assigned in UserContent - these are the content not assigned via classroom
+    user_content_ids = (
+        db.session.query(Content.content_id)
+        .join(UserContent, Content.id == UserContent.content_id)
+        .filter(UserContent.user_id == user_id)
+        .all()
+    )
+
+    custom_content = [c.content_id for c in user_content_ids]
+    all_content = [content for content in user_assignments.keys()]
     
-    # Fetch the corresponding content_id from the Content table
-    contents = db.session.query(Content.content_id).filter(Content.id.in_(content_ids)).all()
-    contents = [c for c in contents]
+    logger.debug(f"All content: {all_content}")
+    logger.debug(f"Custom content: {custom_content}")
     
-    # Get Curriculum.id array assigned in UserCurriculum
-    curriculum_ids = db.session.query(UserCurriculum.curriculum_id).filter_by(user_id=user_id).all()
-    curriculum_ids = [c[0] for c in curriculum_ids]
+    all_curriculums = [curriculum for inner in user_assignments.values() for curriculum in inner.keys()]
+    custom_curriculums = list(user_assignments['custom'].keys())
+    logger.debug(f"User Assignments: {user_assignments}")
+    logger.debug(f"All curriculums: {all_curriculums}")
+    logger.debug(f"Custom curriculums: {custom_curriculums}")
     
-    # Fetch the corresponding curriculum_id data from the Curriculum table
-    curriculums = db.session.query(Curriculum.curriculum_id).filter(Curriculum.id.in_(curriculum_ids)).all()
-    curriculums = [c for c in curriculums]
-    
-    # Query the username of the student
+    # Query the User table for this user
     user = User.query.filter_by(username=username).first()
-    
-    assigned_content = [c[0] for c in contents]
-            
+
     if user:
         user_data = {
             'email': user.email,
-            'assigned_curriculums': [c[0] for c in curriculums],
+            'custom_curriculums': custom_curriculums,
             'completed_curriculums': user.completed_curriculums,
             'content_scores': user.content_scores,
             'correct_answers': user.correct_answers,
@@ -471,7 +570,7 @@ def fetch_user_data(username, logger=None):
             'curriculum_scores': user.curriculum_scores,
             'incorrect_answers': user.incorrect_answers,
             'xp': user.xp,
-            'assigned_content': [c[0] for c in contents]
+            'assigned_content': custom_content
         }
         return user_data
     else:
@@ -494,9 +593,9 @@ def update_user_data(username, changes, logger=None):
     user_id = db.session.query(User.id).filter_by(username = username).scalar()
     
     # Break out assigned_curriculum and assigned_content from changes    
-    assigned_content = changes.pop('assigned_content')
+    #assigned_content = changes.pop('assigned_content')
     assigned_curriculums = changes.pop('assigned_curriculums')
-    removed_content = changes.pop('removed_content')
+    #removed_content = changes.pop('removed_content')
     removed_curriculums = changes.pop('removed_curriculums')    
     
     user_crud = CRUDHelper(User)
@@ -520,25 +619,25 @@ def update_user_data(username, changes, logger=None):
             
         updates["updated_at"] = now
         
-    if assigned_content:
-        # Query existing user-content relationships
-        existing_content_ids = {uc.content_id for uc in db.session.query(UserContent.content_id)
-                                .filter(UserContent.user_id == user_id, UserContent.content_id.in_(
-            db.session.query(Content.id).filter(Content.content_id.in_(assigned_content))
-        )).all()}
+    # if assigned_content:
+    #     # Query existing user-content relationships
+    #     existing_content_ids = {uc.content_id for uc in db.session.query(UserContent.content_id)
+    #                             .filter(UserContent.user_id == user_id, UserContent.content_id.in_(
+    #         db.session.query(Content.id).filter(Content.content_id.in_(assigned_content))
+    #     )).all()}
     
-        # Get content.id values
-        content_records = db.session.query(Content.id).filter(Content.content_id.in_(assigned_content)).all()
-        content_ids_map = {record.id for record in content_records}
+    #     # Get content.id values
+    #     content_records = db.session.query(Content.id).filter(Content.content_id.in_(assigned_content)).all()
+    #     content_ids_map = {record.id for record in content_records}
     
-        # Determine which content_ids are new (not in existing_content_ids)
-        new_content_ids = content_ids_map - existing_content_ids
+    #     # Determine which content_ids are new (not in existing_content_ids)
+    #     new_content_ids = content_ids_map - existing_content_ids
     
-        # Insert only new entries
-        user_content_entries = [UserContent(user_id=user_id, content_id=content_id) for content_id in new_content_ids]
+    #     # Insert only new entries
+    #     user_content_entries = [UserContent(user_id=user_id, content_id=content_id) for content_id in new_content_ids]
         
-        if user_content_entries:
-            db.session.bulk_save_objects(user_content_entries)
+    #     if user_content_entries:
+    #         db.session.bulk_save_objects(user_content_entries)
 
     if assigned_curriculums:
         # Query existing user-curriculum relationships
@@ -560,17 +659,17 @@ def update_user_data(username, changes, logger=None):
         if user_curriculum_entries:
             db.session.bulk_save_objects(user_curriculum_entries)
             
-    if removed_content:
+    # if removed_content:
         
-        # First fetch the Content.id for each of the Content.content_id contained in the removed_content list
-        content_query = db.session.query(Content.id).filter(Content.content_id.in_(removed_content)).all()
-        content_ids = [c[0] for c in content_query]
+    #     # First fetch the Content.id for each of the Content.content_id contained in the removed_content list
+    #     content_query = db.session.query(Content.id).filter(Content.content_id.in_(removed_content)).all()
+    #     content_ids = [c[0] for c in content_query]
         
-        # Remove the each of the Content.id for User.id in the ContentUser table
-        db.session.query(UserContent).filter(
-            UserContent.user_id == user_id,
-            UserContent.content_id.in_(content_ids)
-        ).delete(synchronize_session=False)        
+    #     # Remove the each of the Content.id for User.id in the ContentUser table
+    #     db.session.query(UserContent).filter(
+    #         UserContent.user_id == user_id,
+    #         UserContent.content_id.in_(content_ids)
+    #     ).delete(synchronize_session=False)        
         
     if removed_curriculums:
         
@@ -584,7 +683,7 @@ def update_user_data(username, changes, logger=None):
             UserCurriculum.curriculum_id.in_(curriculum_ids)
         ).delete(synchronize_session=False)
     
-    if assigned_content or assigned_curriculums or removed_content or removed_curriculums:
+    if assigned_curriculums or removed_curriculums:
         db.session.commit()
 
     if updates:
@@ -745,10 +844,26 @@ def new_question(question_data, username, logger=None):
         logger.error(f"Error adding new question: {e}")
         
 def update_xp_data(xp_data, logger=None):
-    '''Function to update the XP table'''
-    ### No change needed for new schema ###
+    '''
+    Function to update the XP table
+    
+    Args: xp_data as dict, logger as app.logger
+    
+    Notes:
+        The required contents of the xp_dict are:
+        dXP: float, question_id: string, elapsed_time: float, difficulty: float, possible_xp: float
+        
+        Function queries the content_id, curriculum_id, standard, objective, tags    
+    '''
     
     try:
+        
+        # Get username
+        user_id = session.get('user_id')
+        
+        # Add username to the xp_data dictionary
+        xp_data.update({'user_id': user_id})
+        
         # Create the CRUDHelper for XP table
         xp_crud = CRUDHelper(XP)
         xp_crud.create(**xp_data)
@@ -763,9 +878,17 @@ def update_xp_data(xp_data, logger=None):
         logger.error(f"Unexpected Error: {e}")
         raise
 
-def fetch_xp_data(user_id, last_fetched_date, logger=None):
-    """Function to fetch incremental XP data for a user."""
-    ### No change needed for new schema ###
+def fetch_xp_data(username, last_fetched_date, logger=None):
+    """
+    Function to fetch incremental XP data for a user
+    
+    Arg(s): last_fetched_date as datetime, logger as app.logger
+    
+    Returns:
+        - dXP as float, curriculum_id as string, elapsed_time as float,
+        - content_id as string, p
+    
+    """
     
     try:
         # Query the XP table for the user_id and filter by timestamp greater than last_fetched_date
@@ -775,7 +898,7 @@ def fetch_xp_data(user_id, last_fetched_date, logger=None):
         last_fetched_datetime = datetime.fromisoformat(last_fetched_date.replace('Z', '')).replace(tzinfo=None)
                 
         # Query the XP table for entries with a timestamp greater than last_fetched_datetime
-        new_xp_entries = xp_crud.read(user_id=user_id, timestamp=('gt', last_fetched_datetime))
+        new_xp_entries = xp_crud.read(user_id=username, timestamp=('gt', last_fetched_datetime))
         
         # Check if there are any new entries
         if new_xp_entries:

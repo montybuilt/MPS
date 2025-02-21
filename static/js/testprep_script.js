@@ -4,9 +4,12 @@
 let correctAnswer;
 let keyInput;
 let content;
+let curriculum;
+let tags;
 let subject;
 let objective;
 let difficulty;
+let dXP_possible;
 let questionStartTime;
 let timeLimit;
 let timerInterval;
@@ -268,7 +271,7 @@ function updateXP(questionId, content, subject, difficulty, status) {
     let multiplier = 1; // Default multiplier
     if (status === 'correct') {
         if (correctAnswers.includes(questionId)) {
-            multiplier = 0.10; // Previously answered correctly
+            multiplier = 0.05; // Previously answered correctly
         } else if (incorrectAnswers.includes(questionId)) {
             multiplier = 0.5;  // Previously answered incorrectly
         }
@@ -281,7 +284,7 @@ function updateXP(questionId, content, subject, difficulty, status) {
     dXP = dXP * multiplier;
     dXP = Math.round(dXP * 100) / 100;
     let dXP_accrued = Math.max(dXP, 0);
-    let dXP_possible = ((Number(difficulty) / 3) * multiplier);
+    dXP_possible = ((Number(difficulty) / 3) * multiplier);
 
     // Get the current XP data from sessionStorage, or initialize it if it doesn't exist
     let xpData = JSON.parse(sessionStorage.getItem('xp')) || {
@@ -1045,11 +1048,12 @@ function showResultDialog(isCorrect, dXP) {
 //------------------------------------------------------------------------------------------------------------------
 
 // Function to handle posting the XP data to the server for datbase storage
-function postXP(dXP, questionId, elapsedTime, curriculumId) {
+function postXP(dXP, questionId, elapsedTime, difficulty, dXP_possible) {
     const XPData = {'dXP': dXP,
                     'question_id': questionId,
-                    'curriculum_id': curriculumId,
-                    'elapsed_time': elapsedTime};
+                    'elapsed_time': elapsedTime,
+                    'difficulty': difficulty,
+                    'possible_xp': dXP_possible};
     // POST the jsonified data to the server
     console.log("Sending XP data to datbase:", XPData);  // Log to console
 
@@ -1121,7 +1125,7 @@ document.getElementById("submit-answer").onclick = async function() {
         }
         
         // Post XP Data to the server
-        postXP(dXP, currentQuestionId, elapsedTime, currentCurriculum);
+        postXP(dXP, currentQuestionId, elapsedTime, difficulty, dXP_possible);
         
         // Call this function to load the progress bar when the question is answered
         loadProgressBar();  //here last
