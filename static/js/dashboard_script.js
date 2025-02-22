@@ -2,6 +2,7 @@ let totalXP = 0;
 let xpLevel = "Beginner";
 let xpScore = 0;
 let xpCompletion = 0;
+let myAssignments;
 let myContent;
 let myCurriculums;
 
@@ -37,7 +38,9 @@ async function fetchData() {
             body: JSON.stringify({ lastFetchedDatetime })
         });
 
-        const data = await response.json();
+        const all_data = await response.json();
+        const data = all_data['data']
+        console.log("Data:", data)
 
         if (data.xpData) {
         
@@ -55,6 +58,11 @@ async function fetchData() {
         } else {
             console.log("No XP Data update needed.");
         }
+        
+        // Extract the userAssignments and save in global variable
+        myAssignments = data.userAssignments;
+        console.log("My Assignments", myAssignments)
+        
     } catch (error) {
         console.error('Error fetching XP data:', error);
     }

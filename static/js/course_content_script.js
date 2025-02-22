@@ -24,7 +24,7 @@ async function handleFetchError(response) {
 // function to load content, curriculum and question data on page load
 async function fetchCourseData() {
     try {
-        const response = await fetch('/course_data');
+        const response = await fetch('/admin_content');
         const data = await handleFetchError(response); // Use the centralized error handler
         // Save the data in session storage
         sessionStorage.setItem('contentDict', JSON.stringify(data.content_dict));
@@ -438,7 +438,7 @@ function handleSubmitCurriculumAssignment() {
 
     // Prepare the payload
     const curriculumAssignments = { 'curriculum_id': curriculumId, 'task_list': assignedQuestions };
-
+    console.log("Curriculum Assignments:", curriculumAssignments)
     // Send the POST request using Fetch API
     fetch('/assign_tasks_to_curriculum', {
         method: 'POST',
@@ -476,6 +476,7 @@ document.addEventListener('DOMContentLoaded', function () {
     fetchCourseData();
     assignAddRemoveButtons(); // For add/remove curriculum
     assignAssignmentButtons();    // For submit content or curriculum assignment
+    if (userRole === 'teacher') {console.log("Role is working")};
 
     // Retreive prior page state
     const pageState = JSON.parse(sessionStorage.getItem('pageState')) || [];
@@ -488,4 +489,20 @@ document.addEventListener('DOMContentLoaded', function () {
      
     // Remove the page state
     sessionStorage.removeItem('pageState');
+    
+    // Role-based element control:
+    // Assume user_role is defined on the page (e.g., set by your server template)
+    if (typeof userRole !== 'undefined' && userRole.trim() === 'teacher') {
+        // 1) Hide the new-content label/input/button inside accordion1.
+        // For example, wrap those elements in a container with id "new-content-group".
+        const newContentGroup = document.getElementById('system-group-1');
+        if (newContentGroup) {
+            newContentGroup.style.display = 'none';
+        }
+        // 2) Hide the entire accordion2 group.
+        const accordion2Group = document.getElementById('system-group-2');
+        if (accordion2Group) {
+            accordion2Group.style.display = 'none';
+        }
+    }
 });

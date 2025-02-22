@@ -287,6 +287,9 @@ def initialize_user_sessionStorage_data(logger=None):
         # Get the user.id from session data
         user_id = session.get('user_id')
         
+        # Call the fetch_user_data function to get all programming for user
+        
+        
         # Query all classrooms this user is enrolled in
         all_classrooms = {c.classroom_id for c in ClassroomUser.query.with_entities(ClassroomUser.classroom_id).filter_by(user_id=user_id).all()}
         
@@ -325,8 +328,17 @@ def initialize_user_sessionStorage_data(logger=None):
 
         # Query the User table for the other session data
         user = User.query.filter_by(id=user_id).first()
-        logger.debug(f"")
         
+        logger.debug(f"assignedContent: {assigned_content}")
+        logger.debug(f"assignedCurriculums: {assigned_curriculums}")
+        logger.debug(f"completedCurriculums: {user.completed_curriculums}")
+        logger.debug(f"contentScores: {user.content_scores}")
+        logger.debug(f"correctAnswers: {user.correct_answers}")
+        logger.debug(f"currentQuestion: {user.current_question}")
+        logger.debug(f"curriculumScores: {user.curriculum_scores}")
+        logger.debug(f"incorrectAnswers: {user.incorrect_answers}")
+        logger.debug(f"xp: {user.xp}")
+        logger.debug(f"updatedAt: {user.updated_at}")
         
         # Update session data with the basic fields
         session_data = {
@@ -426,7 +438,7 @@ def create_new_user(username, password, email):
     except Exception as e:
         raise e
 
-def get_user_assignments(user_id, logger=None):
+def fetch_user_assignments(user_id, logger=None):
     '''
     Function to build a dictionary of all user content/curriculum assignments
 
@@ -448,7 +460,7 @@ def get_user_assignments(user_id, logger=None):
     # A set to hold unique Content.content_id values for the user.
     user_content_ids = set()
 
-    # 1. Get Content assigned via classrooms.
+    # Get Content assigned via classrooms.
     classroom_contents = (
         db.session.query(Content)
         .join(ClassroomContent, ClassroomContent.content_id == Content.id)
@@ -460,7 +472,7 @@ def get_user_assignments(user_id, logger=None):
     for content in classroom_contents:
         user_content_ids.add(content.content_id)
 
-    # 2. Get Content assigned directly to the user.
+    # Get Content assigned directly to the user.
     direct_contents = (
         db.session.query(Content)
         .join(UserContent, UserContent.content_id == Content.id)
@@ -499,7 +511,7 @@ def get_user_assignments(user_id, logger=None):
             # Extract the task_key strings from the tuples.
             result[content_id][curriculum.curriculum_id] = [qk for (qk,) in question_keys]
 
-    # 4. Handle custom curricula: these are assigned to the user via UserCurriculum.
+    # Handle custom curricula: these are assigned to the user via UserCurriculum.
     custom_curricula = (
         db.session.query(Curriculum)
         .join(UserCurriculum, UserCurriculum.curriculum_id == Curriculum.id)
@@ -517,7 +529,8 @@ def get_user_assignments(user_id, logger=None):
         custom_dict[curriculum.curriculum_id] = [qk for (qk,) in question_keys]
 
     # Place custom curricula under the "custom" key in the outer dictionary.
-    result["custom"] = custom_dict
+    if custom_dict:
+        result["custom"] = custom_dict
 
     return result
 
@@ -533,7 +546,7 @@ def fetch_user_data(username, logger=None):
     # Fetch the user_id belonging to the student username passed
     user_id = db.session.query(User.id).filter_by(username = username).scalar()
     
-    user_assignments = get_user_assignments(user_id, logger)
+    user_assignments = fetch_user_assignments(user_id, logger)
     
     # Get Content.id array assigned in UserContent - these are the content not assigned via classroom
     user_content_ids = (
@@ -546,14 +559,9 @@ def fetch_user_data(username, logger=None):
     custom_content = [c.content_id for c in user_content_ids]
     all_content = [content for content in user_assignments.keys()]
     
-    logger.debug(f"All content: {all_content}")
-    logger.debug(f"Custom content: {custom_content}")
-    
     all_curriculums = [curriculum for inner in user_assignments.values() for curriculum in inner.keys()]
-    custom_curriculums = list(user_assignments['custom'].keys())
-    logger.debug(f"User Assignments: {user_assignments}")
-    logger.debug(f"All curriculums: {all_curriculums}")
-    logger.debug(f"Custom curriculums: {custom_curriculums}")
+    
+    custom_curriculums = list(user_assignments['custom'].keys()) if 'custom' in user_assignments.keys() else []
     
     # Query the User table for this user
     user = User.query.filter_by(username=username).first()
@@ -569,8 +577,7 @@ def fetch_user_data(username, logger=None):
             'current_question': user.current_question,
             'curriculum_scores': user.curriculum_scores,
             'incorrect_answers': user.incorrect_answers,
-            'xp': user.xp,
-            'assigned_content': custom_content
+            'xp': user.xp
         }
         return user_data
     else:
@@ -593,9 +600,7 @@ def update_user_data(username, changes, logger=None):
     user_id = db.session.query(User.id).filter_by(username = username).scalar()
     
     # Break out assigned_curriculum and assigned_content from changes    
-    #assigned_content = changes.pop('assigned_content')
     assigned_curriculums = changes.pop('assigned_curriculums')
-    #removed_content = changes.pop('removed_content')
     removed_curriculums = changes.pop('removed_curriculums')    
     
     user_crud = CRUDHelper(User)
@@ -618,26 +623,6 @@ def update_user_data(username, changes, logger=None):
             updates[key] = value
             
         updates["updated_at"] = now
-        
-    # if assigned_content:
-    #     # Query existing user-content relationships
-    #     existing_content_ids = {uc.content_id for uc in db.session.query(UserContent.content_id)
-    #                             .filter(UserContent.user_id == user_id, UserContent.content_id.in_(
-    #         db.session.query(Content.id).filter(Content.content_id.in_(assigned_content))
-    #     )).all()}
-    
-    #     # Get content.id values
-    #     content_records = db.session.query(Content.id).filter(Content.content_id.in_(assigned_content)).all()
-    #     content_ids_map = {record.id for record in content_records}
-    
-    #     # Determine which content_ids are new (not in existing_content_ids)
-    #     new_content_ids = content_ids_map - existing_content_ids
-    
-    #     # Insert only new entries
-    #     user_content_entries = [UserContent(user_id=user_id, content_id=content_id) for content_id in new_content_ids]
-        
-    #     if user_content_entries:
-    #         db.session.bulk_save_objects(user_content_entries)
 
     if assigned_curriculums:
         # Query existing user-curriculum relationships
@@ -658,18 +643,6 @@ def update_user_data(username, changes, logger=None):
         
         if user_curriculum_entries:
             db.session.bulk_save_objects(user_curriculum_entries)
-            
-    # if removed_content:
-        
-    #     # First fetch the Content.id for each of the Content.content_id contained in the removed_content list
-    #     content_query = db.session.query(Content.id).filter(Content.content_id.in_(removed_content)).all()
-    #     content_ids = [c[0] for c in content_query]
-        
-    #     # Remove the each of the Content.id for User.id in the ContentUser table
-    #     db.session.query(UserContent).filter(
-    #         UserContent.user_id == user_id,
-    #         UserContent.content_id.in_(content_ids)
-    #     ).delete(synchronize_session=False)        
         
     if removed_curriculums:
         
@@ -779,20 +752,19 @@ def fetch_question(question_id, logger=None):
         
 def fetch_task_keys(user_id, logger=None):
     ''' Fetches task keys'''
-    ### CHANGE MIGHT BE needed for new schema ###
     
     # Get the session data
-    system_ids = session.get("system_ids")
+    role = session.get('role')
     
-    if user_id in system_ids:
+    if role == 'system':
         # system users see all task_keys
         task_keys = Questions.query.with_entities(Questions.task_key).all()
         
     else:
-        # teachers see their task_keys and all system task_keys
+        # teachers see only their task_keys
         task_keys = (
             Questions.query
-            .filter((Questions.creator_id == user_id) | (Questions.creator_id.in_(system_ids)))
+            .filter(Questions.creator_id == user_id)
             .with_entities(Questions.task_key)
             .all()
         )
@@ -928,12 +900,12 @@ def fetch_xp_data(username, last_fetched_date, logger=None):
         print(f"Error fetching XP data: {e}")
         return None
 
-def fetch_course_data(username, logger=None):
+def fetch_admin_content(username, logger=None):
     '''
     Fetch content, base curriculums, and custom curriculums for an admin.
     
     Notes:
-        - Teachers only see their own content, curriculums and questions
+        - Teachers see their own content, curriculums and questions
         - Only unassigned curriculums and questions are shown to avoid duplicaiton
         - Curriculums can be assigned to only one Content
         - Questions can be assigned to only one Curriculum
@@ -947,16 +919,26 @@ def fetch_course_data(username, logger=None):
         content_data = db.session.query(Content.id, Content.content_id)
 
         if role == 'teacher':
-            content_data = content_data.filter(Content.creator_id == user_id).all()
+            # Teachers content is content assigned to their classrooms
+
+            # Get Content assigned via classrooms.
+            content_data = (
+                db.session.query(Content.id, Content.content_id)
+                .join(ClassroomContent, ClassroomContent.content_id == Content.id)
+                .join(Classroom, Classroom.id == ClassroomContent.classroom_id)
+                .filter(Classroom.admin_id == user_id)
+                .distinct()
+                .all()
+            )
+            
         elif role == 'system':
-            content_data = content_data.all()  # Fix: Don't overwrite, just execute query
+            content_data = db.session.query(Content.id, Content.content_id).all()
         else:
             raise Unauthorized("User not authorized!")
         
         # Convert query result to dictionary
         all_content_dict = {content_id: content_key for content_id, content_key in content_data}
-        
-        
+        logger.debug(f"All Content Dict: {all_content_dict}")
         # Query all Curriculum.id and Curriculum.curriculum_id
         curriculum_data = db.session.query(Curriculum.id, Curriculum.curriculum_id)
 
@@ -992,7 +974,7 @@ def fetch_course_data(username, logger=None):
         assigned_curriculums = set()
         for assigned_list in all_assignment_dict.values():
             assigned_curriculums.update(assigned_list)
-        filtered_curriculums = [c for c in all_curriculums if c not in assigned_curriculums]
+        custom_curriculums = [c for c in all_curriculums if c not in assigned_curriculums]
 
         # Query all question IDs from Questions
         question_data = db.session.query(Questions.id, Questions.task_key)
@@ -1032,11 +1014,17 @@ def fetch_course_data(username, logger=None):
         filtered_questions = [c for c in all_questions if c not in assigned_questions]     
         
         curriculum_dict = all_assignment_dict
+        
+        logger.debug(f"content_dict: {content_dict}")
+        logger.debug(f"all_curriculums: {all_curriculums}")
+        logger.debug(f"custom_curriculums: {custom_curriculums}")
+        logger.debug(f"curriculum_dict: {curriculum_dict}")
+
 
         return {
             "content_dict": content_dict,
             "all_curriculums": all_curriculums,
-            "filtered_curriculums": filtered_curriculums,
+            "custom_curriculums": custom_curriculums,
             "all_questions": filtered_questions,
             "curriculum_dict": curriculum_dict
         }
@@ -1438,6 +1426,7 @@ def update_curriculum_assignments(data, logger=None):
     # Extract the curriculum assignment data
     curriculum_name = data.get('curriculum_id')
     task_list = data.get('task_list', [])
+    logger.debug(f"Curriculum: {curriculum_name} Tasks: {task_list}")
 
     if not curriculum_name or not isinstance(task_list, list):
         raise ValueError("Invalid input: 'curriculum_id' must be a string and 'task_list' must be a list.")

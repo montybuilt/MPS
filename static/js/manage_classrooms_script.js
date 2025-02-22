@@ -208,6 +208,51 @@ function populateAvailableContent() {
 
 }
 
+// Event Listener to update database with new classroom upon pressing submit-new-classroom button
+document.getElementById('submit-new-classroom').addEventListener('click', function() {
+    // Get the values from the input fields
+    const newClassroom = document.getElementById('new-classroom').value;
+    const newClassroomDescription = document.getElementById('new-classroom-description').value;
+
+    // Prepare the data to be sent in the POST request
+    const data = { data: [newClassroom, newClassroomDescription], table: 'classroom' };
+
+    // Send the POST request using the Fetch API
+    fetch('/new_classroom', {
+        method: 'POST', // Use the POST method
+        headers: {
+            'Content-Type': 'application/json' // Send as JSON
+        },
+        body: JSON.stringify(data) // Convert data object to JSON string
+    })
+    .then(response => {
+        // Parse JSON and check response status
+        return response.json().then(jsonData => {
+            if (!response.ok) {
+                // Targeted error handling based on server response
+                if (response.status === 409 && jsonData.error?.includes('UNIQUE constraint')) {
+                    throw new Error("Database Error: Make sure your content ID is unique.");
+                } else {
+                    throw new Error(jsonData.error || "An Unexpected Error Occurred.");
+                }
+            }
+            return jsonData;
+        });
+    })
+    .then(data => {
+        console.log('Success:', data);        
+        // Clear the new-content entry box and alert the user
+        document.getElementById('new-classroom').value = '';
+        document.getElementById('new-classroom-description').value = '';
+        alert("New classroom added successfully!");
+        window.location.reload(true);
+    })
+    .catch((error) => {
+        // Handle errors
+        console.error('Error:', error);
+        alert(error.message || "An Unexpected Error Occurred.");
+    });
+});
 
 function assignMoveButtons() {
     // Student assignment buttons
@@ -432,6 +477,12 @@ function handleSubmitAdditions() {
     // Get the classroom_code and array of student emails assigned
     const classroomCode = document.getElementById('classroom-selector')?.value;
     
+    // Verify that a classroom has been selected
+    if (!classroomCode) { 
+        alert("You must select a classroom.");
+        return;
+    }
+    
     // Get the student additions information
     const assignedStudents = Array.from(document.getElementById('assigned-students')?.children || []).map(item => item.value);
     const existingStudents = classroomData['students'] || [];
@@ -486,6 +537,12 @@ function handleSubmitRemovals() {
      
     // Get the classroom_code and array of student emails assigned
     const classroomCode = document.getElementById('classroom-selector-2')?.value;
+    
+    // Verify that a classroom has been selected
+    if (!classroomCode) { 
+        alert("You must select a classroom.");
+        return;
+    }
     
     // Get the student removals information
     const removedStudents = Array.from(document.getElementById('removed-students')?.children || []).map(item => item.value);

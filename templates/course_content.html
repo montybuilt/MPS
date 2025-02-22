@@ -45,6 +45,7 @@
             align-items: center;
             gap: 15px;
         }
+    
         
         .list-controls {
             display: flex;
@@ -104,6 +105,7 @@
             margin: 5px auto;
         }
         
+        
         .accordion-header {
             background-color: #f1f1f1;
             padding: 10px;
@@ -124,6 +126,7 @@
             gap: 10px;
         }
         
+        
         .accordion-body-middle {
             display: none;
             width: 100%;
@@ -140,15 +143,33 @@
             display: flex; /* Shows the content when active */
         }
         
+        #system-group-2 {
+            display: block;
+            width: 100%;
+        }
+        
         label {
             margin-bottom: 10px; /* Small spacing between label and input */
         }
         
-        input, select {
+        select {
             padding: 8px;
             font-size: 14px;
             width: 100%; /* Ensures input fills the form group */
             box-sizing: border-box;
+        }
+        
+        .form-group input {
+            padding: 10px;
+            font-size: 14px;
+            width: 300px;
+            box-sizing: border-box;
+        }
+        
+        #accordion1 button {
+            color: white;
+            background: green;
+            width: 150px;
         }
         
         h5 {
@@ -189,10 +210,12 @@
             <div class="accordion-container">
                 <div class="accordion-header" onclick="toggleAccordion('accordion1')">Add New Content or Curriculum</div>
                     <div class="accordion-body" id="accordion1">
-                        <div class="form-group">
-                            <label for="new-content">Add New Content Area:</label>
-                            <input type="text" id="new-content" name="new-content">
-                            <button id="submit-new-content" class="button" type="button">Submit</button>
+                        <div id="system-group-1">
+                            <div class="form-group">
+                                <label for="new-content">Add New Content Area:</label>
+                                <input type="text" id="new-content" name="new-content">
+                                <button id="submit-new-content" class="button" type="button">Submit</button>
+                            </div>
                         </div>
                         <div class="form-group">
                             <label for="new-curriculum">Add New Curriculum:</label>
@@ -204,45 +227,47 @@
             </div>
         </div>
         <!-- Select and edit curriculum to content assignments container -->
-        <div class="row-container">
-            <div class="accordion-container">
-                <div class="accordion-header" onclick="toggleAccordion('accordion2')">Assign Curriculums to Content Areas</div>
-                    <div class="accordion-body-middle" id="accordion2">
-                        <div class="dual-list-container">                    
-                            <div class="form-group">
-                                <label for="content-selector">Select Content Area:</label>
-                                <select id="content-selector" class="form-select">
-                                    <option value="" disabled selected>Select Content</option>
-                                </select>
-                            </div>
-                            <div class="form-group">
-                                <!-- Left Box: Available Curriculum Areas -->
-                                <div class="list-box">
-                                    <h5>Available Curriculums</h5>
-                                    <select id="available-curriculums" class="form-select-curriculums" multiple>
-                                        <!-- Placeholder items, will be dynamically updated -->
-                                        <option value="curriculum_1"></option>
+        <div id="system-group-2">
+            <div class="row-container">
+                <div class="accordion-container">
+                    <div class="accordion-header" onclick="toggleAccordion('accordion2')">Assign Curriculums to Content Areas</div>
+                        <div class="accordion-body-middle" id="accordion2">
+                            <div class="dual-list-container">                    
+                                <div class="form-group">
+                                    <label for="content-selector">Select Content Area:</label>
+                                    <select id="content-selector" class="form-select">
+                                        <option value="" disabled selected>Select Content</option>
                                     </select>
                                 </div>
-                            </div>
-                            <div class="form-group">
-                                <!-- Control Buttons -->
-                                <div class="list-controls">
-                                    <button id="add-curriculum" class="btn btn-primary" type="button">&rarr;</button>
-                                    <button id="remove-curriculum" class="btn btn-secondary" type="button">&larr;</button>
-                                    <!-- this button submits the new base curriculum assignments to a content area -->
-                                    <button id="submit-content-assignment" class="btn btn-primary" type="button">Submit</button>
+                                <div class="form-group">
+                                    <!-- Left Box: Available Curriculum Areas -->
+                                    <div class="list-box">
+                                        <h5>Available Curriculums</h5>
+                                        <select id="available-curriculums" class="form-select-curriculums" multiple>
+                                            <!-- Placeholder items, will be dynamically updated -->
+                                            <option value="curriculum_1"></option>
+                                        </select>
+                                    </div>
                                 </div>
-                            </div>
-                            
-                            <div class="form-group">
-                                <!-- Right Box: Assigned Curriculums -->
-                                <div class="list-box">
-                                    <h5>Base Curriculums</h5>
-                                    <select id="assigned-curriculums" class="form-select-curriculums" multiple>
-                                        <!-- Placeholder items, will be dynamically updated -->
-                                        <option value=""></option>
-                                    </select>
+                                <div class="form-group">
+                                    <!-- Control Buttons -->
+                                    <div class="list-controls">
+                                        <button id="add-curriculum" class="btn btn-primary" type="button">&rarr;</button>
+                                        <button id="remove-curriculum" class="btn btn-secondary" type="button">&larr;</button>
+                                        <!-- this button submits the new base curriculum assignments to a content area -->
+                                        <button id="submit-content-assignment" class="btn btn-primary" type="button">Submit</button>
+                                    </div>
+                                </div>
+                                
+                                <div class="form-group">
+                                    <!-- Right Box: Assigned Curriculums -->
+                                    <div class="list-box">
+                                        <h5>Base Curriculums</h5>
+                                        <select id="assigned-curriculums" class="form-select-curriculums" multiple>
+                                            <!-- Placeholder items, will be dynamically updated -->
+                                            <option value=""></option>
+                                        </select>
+                                    </div>
                                 </div>
                             </div>
                         </div>
@@ -299,6 +324,10 @@
         <!-- Hidden fields to capture initial values -->
     </form>
     <!-- Import Java Script -->
+    <script>
+    let userRole;
+    userRole = "{{ user_role }}";
+    </script>
     <script src="{{ url_for('static', filename='js/course_content_script.js') }}"></script>
 </body>
 </html>

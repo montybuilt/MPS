@@ -5,6 +5,7 @@ let xpEditor;
 var updatedContentScores = {};
 var updatedCurriculumScores = {};
 var updatedXp = {};
+let existingCurriculumAssignments;
 
 
 function toggleAccordion(accordionId) {
@@ -82,10 +83,11 @@ async function fetchAndPopulateUsers() {
     }
 }
 
-
+// Function to fetch the curriculums available to the admin user
+// Teachers get only their custom curriculums, system users get all curriculums
 async function fetchCourseData() {
     try {
-        const response = await fetch('/course_data');
+        const response = await fetch('/admin_content');
         if (!response.ok) {
             throw new Error(`HTTP error! Status: ${response.status}`);
         }
@@ -94,9 +96,10 @@ async function fetchCourseData() {
         
         // Save the data in session storage
         sessionStorage.setItem('allCurriculums', JSON.stringify(data.all_curriculums));
+        test = sessionStorage.getItem('allCurriculums');
         
         // Call the populateSelectionElements after data is successfully loaded
-        populateAvailableSelectionElements();
+        // populateAvailableSelectionElements();
 
     } catch (error) {
         console.error('Error fetching course data:', error);
@@ -106,28 +109,33 @@ async function fetchCourseData() {
 function populateAvailableSelectionElements() {
     // Retrieve available content and curriculums from sessionStorage
     const availableCurriculums = JSON.parse(sessionStorage.getItem('allCurriculums')) || [];
-    
 
     // Get references to the selection elements
     const curriculumSelect = document.getElementById('available-curriculums');
     const assignedCurriculumSelect = document.getElementById('assigned-curriculums');
+    
 
     // Clear existing options
     curriculumSelect.innerHTML = '';
-    assignedCurriculumSelect.innerHTML = '';
-
+    
+    const availableToShow = availableCurriculums.filter(
+        curriculum => !existingCurriculumAssignments.includes(curriculum)
+    );
+    
     // Populate curriculum selection element
-    availableCurriculums.forEach(curriculum => {
+    availableToShow.forEach(curriculum => {
         const option = new Option(curriculum, curriculum);
         curriculumSelect.appendChild(option);
     });
 }
 
-function populateAssignedSelectionElements(studentAssignedCurriculums) {        
+function populateAssignedSelectionElements() {        
     // Get references to the selection elements
     const assignedCurriculumSelect = document.getElementById('assigned-curriculums');
     const assignedCurriculumSelect2 = document.getElementById('assigned-curriculums-2');
     const removedCurriculums = document.getElementById('removed-curriculums');
+    
+    studentAssignedCurriculums = existingCurriculumAssignments;
     
     // Clear existing options
     assignedCurriculumSelect.innerHTML = '';
@@ -157,7 +165,6 @@ function fetchUserData() {
 
     var username = document.getElementById('username').value;
     if (username) {
-    console.log("Fetch Data for :", username)
         fetch('/get_user_data?username=' + username)
         .then(response => response.json())
         .then(data => {
@@ -183,7 +190,9 @@ function fetchUserData() {
             document.getElementById('initial_incorrect_answers').value = data.incorrect_answers || '';
 
             // Call the function to populate the assigned content and curriculums selection boxes
-            populateAssignedSelectionElements(data.custom_curriculums);
+            existingCurriculumAssignments = data.custom_curriculums || []
+            populateAssignedSelectionElements();
+            populateAvailableSelectionElements();
 
             // Reinitialize the editors and populate them with the data
             initializeEditors();  // Ensure the editors are initialized before setting data
@@ -251,8 +260,6 @@ function submitForm() {
         
         const mappingDict = {"assigned_curriculums": "assignedCurriculums",
                              "completed_curriculums": "completedCurriculums"}
-
-        console.log('Changes to be sent:', changes);
 
         fetch('/update_user', {
             method: 'POST',

@@ -86,35 +86,36 @@ def dashboard():
 def get_dashboard():
     '''Route to handle request for all data on dashboard page'''
     
-    # get the username
+    # get the username and user_id
     username = session.get('username')
+    user_id = session.get('user_id')
     
     # get the last fetched datetime from request
     last_fetched_datetime = request.json.get('lastFetchedDatetime')
     
     # Get the xp history update for the user
     xp_data = fetch_xp_data(username, last_fetched_datetime, app.logger)
-    app.logger.debug("XP Data: {xp_data}")
     
-    # Get the content assignments for the user
+    # Get the content and curriculum assignments for the user
+    user_assignments = fetch_user_assignments(user_id, app.logger)
     
-    # Get the curriculum assignmetns for the user
-    
+    response = {'userAssignments': user_assignments}
     
     if xp_data:
     
         # organize the response dictionary
-        response = {
-                    'xpData': xp_data['xpData'],
-                    'xpLastFetchedDatetime': xp_data['mostRecentDatetime'],
-                    'xpUsername': username}
+        response.update({'xpData': xp_data['xpData'],
+                         'xpLastFetchedDatetime': xp_data['mostRecentDatetime'],
+                         'xpUsername': username
+        })
         
         # Return the XP data to the client (or None if no data)
-        return jsonify(response)
+        return jsonify({"data": response, "message": "XP data found", "username": username})
     
     else:
-        return jsonify({"message": "No new XP data", "username": username})
-
+        
+        return jsonify({"data": response, "message": "No new XP Data", "username": username})
+    
 @app.route('/admin', methods=['GET'])
 @login_required
 def admin():
@@ -240,9 +241,7 @@ def get_user_data():
     if session.get('is_admin'):
     
         username = request.args.get('username')
-        
-        #test = get_user_assignments(1, app.logger)
-        
+                
         try:
             user_data = fetch_user_data(username, app.logger)
             if user_data:
@@ -355,12 +354,13 @@ def manage_classrooms():
 def course_content():
     '''Route to draw the course_content page'''
     username = session.get('username')
+    user_role = session.get('role')
     
     # Check if the user is an admin
     if not session.get('is_admin'):
         return redirect(url_for('index'))  # Redirect non-admin users
 
-    return render_template('course_content.html', username=username)  # Render the content creation page
+    return render_template('course_content.html', username=username, user_role=user_role)  # Render the content creation page
     
 # Route to the admin content creation page "content"
 @app.route('/question_content', methods=['GET'])
@@ -451,7 +451,6 @@ def assign_tasks_to_curriculum():
     curriculum_assignments = request.get_json()
     curriculum_id = curriculum_assignments['curriculum_id']
     task_list = curriculum_assignments['task_list']
-    app.logger.debug(f"Curriculum: {curriculum_id} Tasks: {task_list}")
     
     # Call the helper function to write to the database
     update_curriculum_assignments(curriculum_assignments, app.logger)
@@ -496,8 +495,8 @@ def submit_question():
         app.logger.error(f"Error in /submit_question: {e}")
         return jsonify({"error": "An unexpected error occurred."}), 500
 
-@app.route('/content_data', methods=['POST'])
-def content_data():
+@app.route('/question_content', methods=['POST'])
+def question_content():
     '''This function gets a question for the testprep page'''
     
     #Extract the question key from the request
@@ -631,20 +630,34 @@ def update_xp():
     except Exception as e:
         return jsonify({"status": "error", "message":str(e)}), 500
     
-@app.route('/course_data', methods=['GET'])
-def course_data():
+@app.route('/admin_content', methods=['GET'])
+def admin_content():
     '''Gets content/curriculum pairings from database'''
     
     # Extract the username
     username = session.get('username')    
     
     try:
-        course_content = fetch_course_data(username, app.logger)
+        course_content = fetch_admin_content(username, app.logger)
         
         return jsonify(course_content), 200
     except Exception as e:
         app.logger.error(f"Error in /course_data: {e}")
         return jsonify({'message': 'Error fetching course data'}), 500
+
+@app.route('/student_assignments', methods=['GET', 'POST'])
+def student_assignments():
+    
+    # Get user_id from session
+    user_id = session.get("user_id")
+    
+    try:
+        # Call the fetch_user_assignments function
+        assignments = fetch_user_assignments(user_id, app.logger)
+        return jsonify({'assignments': assignments}), 200
+    
+    except Exception as e:
+        return jsonify({'error': f"Unexpected Error: {e}"}), 500
 
 #------------------------------------------------------------------------------------------#
 

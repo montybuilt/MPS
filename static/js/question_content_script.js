@@ -2,6 +2,7 @@
 let questionKey = '';  // To store the current questionKey
 let questionKeys = []; // To store all question keys
 let newQuestion = false; // Monitor if a new question is being added
+let teacherContent;
 
 // Initialize CodeMirror
 const codeEditor = CodeMirror.fromTextArea(document.getElementById("code"), {
@@ -20,14 +21,17 @@ async function handleFetchError(response) {
     return response.json(); // Return the parsed JSON if successful
 }
 
-// function to load content, curriculum and question data on page load
+// function to load content for the admin
+// Represents all content areas admin user has assigned via classroom
+// System user gets all content areas in the database
 async function fetchCourseData() {
     try {
-        const response = await fetch('/course_data');
+        const response = await fetch('/admin_content');
         const data = await handleFetchError(response); // Use the centralized error handler
         // Save the data in session storage
-        sessionStorage.setItem('contentDict', JSON.stringify(data.content_dict));
-        console.log(data);
+        teacherContent = Object.keys(data.content_dict);
+        if (data.custom_curriculums) { teacherContent.push("custom") };
+        
     } catch (error) {
         console.error('Failed to fetch course data:', error);
     }
@@ -35,7 +39,7 @@ async function fetchCourseData() {
 
 // Fetch question from the server
 function fetchQuestion(questionKey) {
-    fetch('/content_data', {
+    fetch('/question_content', {
         method: 'POST',
         headers: {'Content-Type': 'application/json'},
         body: JSON.stringify({'questionKey': questionKey})
@@ -49,7 +53,6 @@ function fetchQuestion(questionKey) {
     .then(data => {
         // Populate the form with the received question data
         const question = data; // Direct access to the data
-        console.log("Got Data:", question)
 
         document.getElementById("question-selector").value = questionKey;
         document.getElementById("content-selector").value = question.Content;
@@ -97,8 +100,7 @@ function clearEntries() {
 
 // Populate the Select Content dropdown
 function populateContentDropdown() {
-    const contentDict = JSON.parse(sessionStorage.getItem('contentDict')) || {};
-    const keys = Object.keys(contentDict);
+    const keys = teacherContent;
     const dropdown = document.getElementById('content-selector');
 
     // Clear existing options
@@ -139,7 +141,6 @@ function saveQuestion() {
     }
     
     if (!newKey) {
-        console.log("Key Problem", newKey);
         alert("Please enter a valid question key.");
         return;
     }

@@ -15,6 +15,7 @@ let timeLimit;
 let timerInterval;
 let description;
 let video;
+let studentAssignments;
 
 //--------------------------------------------------------------------------------------
 
@@ -834,6 +835,7 @@ function displayOutput(output) {
 
 //---------------------------------------------------------------------------------------------
 
+// Function that runs when user enters a curriculum id in the lesson code entry
 document.getElementById("key-input").addEventListener("keypress", function(event) {
     const currentQuestionID = sessionStorage.getItem('currentQuestionId');
     if (event.key === "Enter") {
@@ -885,6 +887,7 @@ var editor = CodeMirror.fromTextArea(document.getElementById("code"), {
 
 //------------------------------------------------------------------------------------------------------------------
 
+// Function to run when the Run Code button is pressed
 document.getElementById("run").onclick = function() {
     var code = editor.getValue();
 
@@ -1146,7 +1149,38 @@ function nextQuestionButton() {
 
 //--------------------------------------------------------------------------------------
 
-// Listener for the Next Question button
+// Function to fetch user content/curriculum/question assignments and create global variables
+function fetchStudentAssignments() {
+
+    fetch('/student_assignments')
+      .then(response => {
+        if (!response.ok) {
+          throw new Error('Network response was not ok: ' + response.status);
+        }
+        return response.json();
+      })
+      .then(data => {
+        console.log('Student Assignments:', data.assignments);
+        
+        // Set the global variable for the student assignments dictionary
+        studentAssignments = data.assignments || {}
+        
+        
+        
+      })
+      .catch(error => {
+        console.error('Fetch error:', error);
+      });
+
+}
+
+//--------------------------------------------------------------------------------------
+
+
+
+
+
+// Things to do on page load
 document.addEventListener("DOMContentLoaded", function() {
     // Add event listener to Next Question button
     const nextButton = document.getElementById("next-question-btn");
