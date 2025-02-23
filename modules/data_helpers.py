@@ -342,10 +342,10 @@ def initialize_user_sessionStorage_data(logger=None):
         
         # Update session data with the basic fields
         session_data = {
-                        "assignedContent": assigned_content,
-                        "assignedCurriculums": assigned_curriculums,
-                        "completedCurriculums": user.completed_curriculums,
-                        "contentScores": user.content_scores,
+                        #"assignedContent": assigned_content,
+                        #"assignedCurriculums": assigned_curriculums,
+                        #"completedCurriculums": user.completed_curriculums,
+                        #"contentScores": user.content_scores,
                         "correctAnswers": user.correct_answers,
                         "currentCurriculum": user.current_curriculum,
                         "currentQuestionId": user.current_question,
@@ -863,14 +863,16 @@ def fetch_xp_data(username, last_fetched_date, logger=None):
     """
     
     try:
-        # Query the XP table for the user_id and filter by timestamp greater than last_fetched_date
-        xp_crud = CRUDHelper(XP)
+        
+        logger.debug(f"Last update: {last_fetched_date} type: {type(last_fetched_date)}")
+        last_fetched_date = datetime.fromisoformat(last_fetched_date)
                 
-        # Convert last_fetched_date to a datetime object and make it naive (remove timezone)
-        last_fetched_datetime = datetime.fromisoformat(last_fetched_date.replace('Z', '')).replace(tzinfo=None)
-                
-        # Query the XP table for entries with a timestamp greater than last_fetched_datetime
-        new_xp_entries = xp_crud.read(user_id=username, timestamp=('gt', last_fetched_datetime))
+        new_xp_entries = (
+            db.session.query(XP)
+            .join(User)
+            .filter(User.username==username, XP.timestamp > last_fetched_date)
+            .all()
+        )
         
         # Check if there are any new entries
         if new_xp_entries:

@@ -81,17 +81,30 @@ def dashboard():
     username = session['username']
     return render_template('dashboard.html', username=username)
 
-@app.route('/get_dashboard', methods=['POST'])
+@app.route('/test_xp', methods=['GET'])
+def text_xp():
+    username = session.get('username')
+    xp_test(username, app.logger)
+
+@app.route('/get_student_profile', methods=['GET', 'POST'])
 @login_required
-def get_dashboard():
-    '''Route to handle request for all data on dashboard page'''
+def get_student_profile():
+    '''
+    Handles request for entire student profile for dashboard and testprep pages
+    
+    Notes:
+        - Returns entire student assignment dictionary
+        - Returns entire xp history
+    
+    '''
     
     # get the username and user_id
     username = session.get('username')
     user_id = session.get('user_id')
     
-    # get the last fetched datetime from request
-    last_fetched_datetime = request.json.get('lastFetchedDatetime')
+    # get the last fetched datetime and xpUsername from request
+    last_fetched_datetime = request.args.get('lastUpdate')
+    xp_username = request.args.get('xpUsername')
     
     # Get the xp history update for the user
     xp_data = fetch_xp_data(username, last_fetched_datetime, app.logger)
@@ -99,14 +112,13 @@ def get_dashboard():
     # Get the content and curriculum assignments for the user
     user_assignments = fetch_user_assignments(user_id, app.logger)
     
-    response = {'userAssignments': user_assignments}
+    response = {'userAssignments': user_assignments, 'xpUsername': username}
     
     if xp_data:
     
         # organize the response dictionary
         response.update({'xpData': xp_data['xpData'],
-                         'xpLastFetchedDatetime': xp_data['mostRecentDatetime'],
-                         'xpUsername': username
+                         'xpLastFetchedDatetime': xp_data['mostRecentDatetime']
         })
         
         # Return the XP data to the client (or None if no data)

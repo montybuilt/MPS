@@ -9,62 +9,69 @@ let myCurriculums;
 
 
 //-----------------------------------------------------------------------------------------------------------------
-// Function to initialize or check xp_last_fetched_datetime in localStorage
-function checkAndInitializeLastFetchedDatetime() {
-    let lastFetchedDatetime = localStorage.getItem('xpLastFetchedDatetime');
-    const current_user = sessionStorage.getItem('username')
-    const prior_user = localStorage.getItem('xpUsername')
-    if (!lastFetchedDatetime || !prior_user || current_user != prior_user) {
-        if(current_user != prior_user) {
-            console.log("New User:", current_user);
-            localStorage.removeItem('xpData');
-        };
-        localStorage.setItem('xpLastFetchedDatetime', new Date('1970-01-01T00:00:00.000Z').toISOString());
-        console.log("No previous XP data found. Initializing with placeholder datetime.");
-    } else {
-        console.log("Last fetched datetime:", lastFetchedDatetime);
+
+// Function to fetch user content/curriculum/question assignments and create global variables
+// Function will also save the xp history for the student in sessionStorage
+async function setupDashboardSession() {
+    // Retrieve parameters from localStorage or define defaults.
+    const lastUpdate = localStorage.getItem("xpLastFetchedDatetime") || "1970-01-01";
+    const xpUsername = localStorage.getItem("xpUsername") || "default_xpusername";
+    const username = sessionStorage.getItem("username") || "default_username";
+    
+    // Reset the xpData if the current user is not the same as the stored xpData
+    if (xpUsername !== username) {
+        localStorage.removeItem("xpLastFetchedDatetime");
+        localStorage.removeItem("xpUsername");
+        localStorage.removeItem("xpData");
     }
-}
-
-//-----------------------------------------------------------------------------------------------------------------
-// Function to fetch XP and user content/curriculum data if not updated
-async function fetchData() {
-    let lastFetchedDatetime = localStorage.getItem("xpLastFetchedDatetime");
-
+  
+    // Build query parameters.
+    const params = new URLSearchParams({
+        lastUpdate: lastUpdate,
+        xpUsername: xpUsername
+    });
+  
     try {
-        const response = await fetch('/get_dashboard', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ lastFetchedDatetime })
+        // Use GET with query parameters.
+        const response = await fetch(`/get_student_profile?${params.toString()}`, {
+            method: 'GET'
         });
-
-        const all_data = await response.json();
-        const data = all_data['data']
-        console.log("Data:", data)
-
-        if (data.xpData) {
+    
+        if (!response.ok) {
+            throw new Error('Network response was not ok: ' + response.status);
+        }
+    
+        const data = await response.json();
+        // Note: Adjusting to match your Flask response structure (data.data)
+        console.log('Student Assignments:', data.data.userAssignments);
         
-            // Retrieve existing xpData
+        // Save the student assignments dictionary into sessionStorage.
+        const studentAssignments = data.data.userAssignments || {};
+        sessionStorage.setItem('studentAssignments', JSON.stringify(studentAssignments));
+        
+        // Extract all content areas (keys) from the student assignments.
+        const assignedContent = Object.keys(studentAssignments) || [];
+        
+        // Process XP data if available.
+        if (data.data.xpData) {
+            // Retrieve existing XP data from localStorage.
             const existingXPData = JSON.parse(localStorage.getItem("xpData")) || [];
             
-            // Merge existing and new xpData
-            const mergedXPData = [...existingXPData, ...data.xpData];
+            // Merge the existing XP data with the new data.
+            const mergedXPData = [...existingXPData, ...data.data.xpData];
             
-            // Store the merged xpData and other items back into localStorage
+            // Store the merged XP data and the new last fetched datetime in localStorage.
             localStorage.setItem("xpData", JSON.stringify(mergedXPData));
-            localStorage.setItem("xpLastFetchedDatetime", data.xpLastFetchedDatetime);
-            localStorage.setItem("xpUsername", data.xpUsername);
+            localStorage.setItem("xpLastFetchedDatetime", data.data.xpLastFetchedDatetime);
             console.log("XP Data updated and stored.");
         } else {
             console.log("No XP Data update needed.");
         }
         
-        // Extract the userAssignments and save in global variable
-        myAssignments = data.userAssignments;
-        console.log("My Assignments", myAssignments)
-        
+        // Update the xpUsername in localStorage.
+        localStorage.setItem("xpUsername", data.data.xpUsername);
     } catch (error) {
-        console.error('Error fetching XP data:', error);
+        console.error('Fetch error:', error);
     }
 }
 
@@ -224,8 +231,7 @@ function updateKPI(id, value, condition) {
 //-----------------------------------------------------------------------------------------------------------------
 // Main initialization function
 async function initializePage() {
-    checkAndInitializeLastFetchedDatetime();
-    await fetchData();
+    await setupDashboardSession();
     processXP();
     displayKPIData();
     drawAreaChart();
@@ -236,3 +242,5 @@ async function initializePage() {
 window.onload = function() {
     initializePage();
 };
+
+//-----------------------------------------------------------------------------------------------------------------

@@ -6,6 +6,7 @@ var updatedContentScores = {};
 var updatedCurriculumScores = {};
 var updatedXp = {};
 let existingCurriculumAssignments;
+let customCurriculums;
 
 
 function toggleAccordion(accordionId) {
@@ -95,8 +96,7 @@ async function fetchCourseData() {
         const data = await response.json();
         
         // Save the data in session storage
-        sessionStorage.setItem('allCurriculums', JSON.stringify(data.all_curriculums));
-        test = sessionStorage.getItem('allCurriculums');
+        customCurriculums = JSON.stringify(data.custom_curriculums);
         
         // Call the populateSelectionElements after data is successfully loaded
         // populateAvailableSelectionElements();
@@ -108,7 +108,7 @@ async function fetchCourseData() {
 
 function populateAvailableSelectionElements() {
     // Retrieve available content and curriculums from sessionStorage
-    const availableCurriculums = JSON.parse(sessionStorage.getItem('allCurriculums')) || [];
+    const availableCurriculums = JSON.parse(customCurriculums) || [];
 
     // Get references to the selection elements
     const curriculumSelect = document.getElementById('available-curriculums');

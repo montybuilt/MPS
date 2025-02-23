@@ -102,6 +102,70 @@ function getCurrentIndex(parsedQuestionsList, currentQuestionId) {
 
 //--------------------------------------------------------------------------------------
 
+// function to find an inner key from a value in a nested dictionary
+function findInnerKeyByValue(data, targetValue) {
+    for (const outerKey in data) {
+        const innerObject = data[outerKey];
+        for (const innerKey in innerObject) {
+            if (innerObject[innerKey].includes(targetValue)) {
+            return innerKey;
+            }
+        }
+    }
+    return null; // Return null if not found.
+}
+
+function findOuterKeyByInnerKey(data, targetInnerKey) {
+    for (const outerKey in data) {
+        if (data[outerKey].hasOwnProperty(targetInnerKey)) {
+        return outerKey;
+        }
+    }
+    return null; // Return null if not found.
+}
+
+//--------------------------------------------------------------------------------------
+
+function processPriorAnswers(xpData, questions) {
+  // If xpData is empty, store empty arrays in sessionStorage and return.
+  if (!xpData || xpData.length === 0) {
+    sessionStorage.setItem("correctAnswers", JSON.stringify([]));
+    sessionStorage.setItem("incorrectAnswers", JSON.stringify([]));
+    return;
+  }
+
+  const correctAnswersSet = new Set();
+  const incorrectAnswersSet = new Set();
+
+  xpData.forEach(record => {
+    // Check if record.question_id is in the questions array.
+    if (questions.includes(record.question_id)) {
+      // If dXP is positive, add question_id value to correctAnswers.
+      if (record.dXP > 0) {
+        correctAnswersSet.add(record.question_id);
+      }
+      // If dXP is negative, add question_id value to incorrectAnswers.
+      else if (record.dXP < 0) {
+        incorrectAnswersSet.add(record.question_id);
+      }
+      // (If key2 is zero or another value, decide what to do.)
+    }
+  });
+
+  // Save the arrays in sessionStorage
+  const correctAnswers = [...correctAnswersSet];
+  const incorrectAnswers = [...incorrectAnswersSet];
+  sessionStorage.setItem("correctAnswers", JSON.stringify(correctAnswers));
+  sessionStorage.setItem("incorrectAnswers", JSON.stringify(incorrectAnswers));
+  
+}
+
+//--------------------------------------------------------------------------------------
+
+
+
+//--------------------------------------------------------------------------------------
+
 // This section handles video loading
 
 function updateVideo() {
@@ -720,39 +784,32 @@ function findNextQuestion() {
 
 //--------------------------------------------------------------------------------------
 
-async function fetchCurriculum(keyInput, isNew = true) {
-    try {
-        console.log("Fetching curriculum for:", keyInput);  // Log to console
-
-        const response = await fetch('/get_curriculum', {
-            method: 'POST',
-            headers: { 
-                'Content-Type': 'application/json' 
-            },
-            body: JSON.stringify({ 'key-input': keyInput })  // Ensure the key is 'key-input'
-        });
-
-        if (!response.ok) throw new Error("Network response was not ok");
-
-        const questionsList = await response.json();  // The list of question IDs returned by Flask
-        console.log("Received questions list");
-
-        // Save the questions list and curriculum name to local storage
-        sessionStorage.setItem("questionsList", JSON.stringify(questionsList));
-        sessionStorage.setItem("currentCurriculum", keyInput);
-
-        // Now that we have curriculum data, load the question
-        // If the curriculum is changed, find unanswered or incorrect questions
-        if (isNew === false) {
-            const currentQuestionId = sessionStorage.getItem('currentQuestionId');
-            nextQuestion(currentQuestionId);
-        } else {
-            nextQuestion(findNextQuestion());
-        }
+async function fetchCurriculum(curriculumId, isNew = true) {
         
-    } catch (error) {
-        console.error("Error fetching curriculum:", error);
-        alert("An error occurred while loading the curriculum. Please try again.");
+    // Given the curriculum, find the content area
+    studentAssignments = JSON.parse(sessionStorage.getItem("studentAssignments")) || {}
+    console.log("studentAssignments", studentAssignments, "curriculum:", curriculumId);
+    xpData = JSON.parse(localStorage.getItem("xpData")) || [];
+    content_area = findOuterKeyByInnerKey(studentAssignments, curriculumId);
+
+    // Given the curriculum, find the questions list
+    questionsList = studentAssignments[content_area][curriculumId] || [];
+    console.log("Questions", questionsList);
+
+    // Save the questions list and curriculum name to local storage
+    sessionStorage.setItem("questionsList", JSON.stringify(questionsList));
+    sessionStorage.setItem("currentCurriculum", curriculumId);
+    
+    // Build the questions answered arrays
+    processPriorAnswers(xpData, questionsList)
+
+    // Now that we have curriculum data, load the question
+    // If the curriculum is changed, find unanswered or incorrect questions
+    if (isNew === false) {
+        const currentQuestionId = sessionStorage.getItem('currentQuestionId');
+        nextQuestion(currentQuestionId);
+    } else {
+        nextQuestion(findNextQuestion());
     }
 }
 
@@ -1150,42 +1207,96 @@ function nextQuestionButton() {
 //--------------------------------------------------------------------------------------
 
 // Function to fetch user content/curriculum/question assignments and create global variables
-function fetchStudentAssignments() {
-
-    fetch('/student_assignments')
-      .then(response => {
+// Function will also save the xp history for the student in sessionStorage
+async function setupTestprepSession() {
+    // Retrieve parameters from localStorage or define defaults.
+    const lastUpdate = localStorage.getItem("xpLastFetchedDatetime") || "1970-01-01";
+    const xpUsername = localStorage.getItem("xpUsername") || "default_xpusername";
+    const username = sessionStorage.getItem("username") || "default_username";
+    
+    // Reset the xpData if the current user is not the same as the stored xpData
+    if (xpUsername !== username) {
+        localStorage.removeItem("xpLastFetchedDatetime");
+        localStorage.removeItem("xpUsername");
+        localStorage.removeItem("xpData");
+    }
+  
+    // Build query parameters.
+    const params = new URLSearchParams({
+        lastUpdate: lastUpdate,
+        xpUsername: xpUsername
+    });
+  
+    try {
+        // Use GET with query parameters.
+        const response = await fetch(`/get_student_profile?${params.toString()}`, {
+            method: 'GET'
+        });
+    
         if (!response.ok) {
-          throw new Error('Network response was not ok: ' + response.status);
+            throw new Error('Network response was not ok: ' + response.status);
         }
-        return response.json();
-      })
-      .then(data => {
-        console.log('Student Assignments:', data.assignments);
+    
+        const data = await response.json();
+        // Note: Adjusting to match your Flask response structure (data.data)
+        console.log('Student Assignments:', data.data.userAssignments);
         
-        // Set the global variable for the student assignments dictionary
-        studentAssignments = data.assignments || {}
+        // Save the student assignments dictionary into sessionStorage.
+        const studentAssignments = data.data.userAssignments || {};
+        sessionStorage.setItem('studentAssignments', JSON.stringify(studentAssignments));
         
+        // Extract all content areas (keys) from the student assignments.
+        const assignedContent = Object.keys(studentAssignments) || [];
         
+        // Process XP data if available.
+        if (data.data.xpData) {
+            // Retrieve existing XP data from localStorage.
+            const existingXPData = JSON.parse(localStorage.getItem("xpData")) || [];
+            
+            // Merge the existing XP data with the new data.
+            const mergedXPData = [...existingXPData, ...data.data.xpData];
+            
+            // Store the merged XP data and the new last fetched datetime in localStorage.
+            localStorage.setItem("xpData", JSON.stringify(mergedXPData));
+            localStorage.setItem("xpLastFetchedDatetime", data.data.xpLastFetchedDatetime);
+            console.log("XP Data updated and stored.");
+        } else {
+            console.log("No XP Data update needed.");
+        }
         
-      })
-      .catch(error => {
-        console.error('Fetch error:', error);
-      });
+        // Update the xpUsername in localStorage.
+        localStorage.setItem("xpUsername", data.data.xpUsername);
 
+    } catch (error) {
+        console.error('Fetch error:', error);
+    }
 }
 
 //--------------------------------------------------------------------------------------
 
+// Initialize the correcAnswers and incorrectAnswers collections from xpData
 
 
 
+//--------------------------------------------------------------------------------------
+
+// Main initialization function
+async function initializePage() {
+    await setupTestprepSession();
+    
+}
+
+
+
+//--------------------------------------------------------------------------------------
 
 // Things to do on page load
 document.addEventListener("DOMContentLoaded", function() {
     // Add event listener to Next Question button
     const nextButton = document.getElementById("next-question-btn");
     
-    // Initialize the session data and progress bar
+    // Initialize the session
+    initializePage();
     //updateSessionData();  // Recent add here (all 3)
     //checkCurriculumStatus;
     //loadProgressBar();
