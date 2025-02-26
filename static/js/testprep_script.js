@@ -6,7 +6,7 @@ let keyInput;
 let content;
 let curriculum;
 let tags;
-let subject;
+let standard;
 let objective;
 let difficulty;
 let dXP_possible;
@@ -125,40 +125,6 @@ function findOuterKeyByInnerKey(data, targetInnerKey) {
 }
 
 //--------------------------------------------------------------------------------------
-
-function processPriorAnswers(xpData, questions) {
-  // If xpData is empty, store empty arrays in sessionStorage and return.
-  if (!xpData || xpData.length === 0) {
-    sessionStorage.setItem("correctAnswers", JSON.stringify([]));
-    sessionStorage.setItem("incorrectAnswers", JSON.stringify([]));
-    return;
-  }
-
-  const correctAnswersSet = new Set();
-  const incorrectAnswersSet = new Set();
-
-  xpData.forEach(record => {
-    // Check if record.question_id is in the questions array.
-    if (questions.includes(record.question_id)) {
-      // If dXP is positive, add question_id value to correctAnswers.
-      if (record.dXP > 0) {
-        correctAnswersSet.add(record.question_id);
-      }
-      // If dXP is negative, add question_id value to incorrectAnswers.
-      else if (record.dXP < 0) {
-        incorrectAnswersSet.add(record.question_id);
-      }
-      // (If key2 is zero or another value, decide what to do.)
-    }
-  });
-
-  // Save the arrays in sessionStorage
-  const correctAnswers = [...correctAnswersSet];
-  const incorrectAnswers = [...incorrectAnswersSet];
-  sessionStorage.setItem("correctAnswers", JSON.stringify(correctAnswers));
-  sessionStorage.setItem("incorrectAnswers", JSON.stringify(incorrectAnswers));
-  
-}
 
 //--------------------------------------------------------------------------------------
 
@@ -326,7 +292,7 @@ function updateContentScores(contentId, XP_earned, XP_possible) {
 // Function to calculate the XP change and update the XP storage
 // Switching to ignore sessionStorage of xp and work only with database
 
-function updateXP(questionId, content, subject, difficulty, status) {
+function updateXP(questionId, content, standard, difficulty, status) {
     console.log("Updating XP");
     // Get the list of correct and incorrect answers from sessionStorage
     let correctAnswers = JSON.parse(sessionStorage.getItem('correctAnswers')) || [];
@@ -361,12 +327,12 @@ function updateXP(questionId, content, subject, difficulty, status) {
     if (!xpData.certifications[content]) {
         xpData.certifications[content] = {}; // Initialize the content (e.g., PCAP or PCEP)
     }
-    if (!xpData.certifications[content][`xp_${subject}`]) {
-        xpData.certifications[content][`xp_${subject}`] = 0; // Initialize XP for the specific category
+    if (!xpData.certifications[content][`xp_${standard}`]) {
+        xpData.certifications[content][`xp_${standard}`] = 0; // Initialize XP for the specific category
     }
 
     // Update the XP for the specified content and category
-    xpData.certifications[content][`xp_${subject}`] += dXP;
+    xpData.certifications[content][`xp_${standard}`] += dXP;
 
     // Update the overall XP (if applicable)
     xpData.overallXP += dXP;
@@ -403,7 +369,7 @@ function updateNavbarData(questionId) {
     const statusClass = isCompleted === "Completed" ? "completed" : "not-completed";
     
     // Update the navbar with category/objective/difficulty
-    const questionInfo = `Content:${content}  |  Objective:${subject}.${objective}  |  Difficulty:${difficulty}  | Status: <span class="${statusClass}">${isCompleted}</span>  | `;
+    const questionInfo = `Content:${content}  |  Objective:${standard}.${objective}  |  Difficulty:${difficulty}  | Status: <span class="${statusClass}">${isCompleted}</span>  | `;
     document.getElementById('question-info').innerHTML = questionInfo;
 }
 
@@ -786,11 +752,13 @@ function findNextQuestion() {
 
 async function fetchCurriculum(curriculumId, isNew = true) {
         
-    // Given the curriculum, find the content area
+    // Given the curriculum, find the content area and set global variable
     studentAssignments = JSON.parse(sessionStorage.getItem("studentAssignments")) || {}
     console.log("studentAssignments", studentAssignments, "curriculum:", curriculumId);
     xpData = JSON.parse(localStorage.getItem("xpData")) || [];
     content_area = findOuterKeyByInnerKey(studentAssignments, curriculumId);
+    content = content_area;
+    console.log("Content Area:", content);
 
     // Given the curriculum, find the questions list
     questionsList = studentAssignments[content_area][curriculumId] || [];
@@ -840,10 +808,8 @@ function fetchAndUpdateQuestion(keyInput) {
     })
     .then(data => {
         // Get the content data
-        parsed_key = keyInput.split(".");
-        content = parsed_key[0].toLowerCase();
-        subject = parsed_key[1];
-        objective = parsed_key[2];
+        standard = data.Standard;
+        objective = data.Objective;
         description = data.Description;
         difficulty = data.Difficulty;
         video = data.Video;
@@ -894,18 +860,18 @@ function displayOutput(output) {
 
 // Function that runs when user enters a curriculum id in the lesson code entry
 document.getElementById("key-input").addEventListener("keypress", function(event) {
-    const currentQuestionID = sessionStorage.getItem('currentQuestionId');
+    sessionStorage.setItem("currentCurriculum", keyInput)
     if (event.key === "Enter") {
         const keyInput = event.target.value  //.toLowerCase();
         fetchCurriculum(keyInput, true).then(() => {
             //stopTimer();
-            updateSessionData();
+            //updateSessionData();
             //checkCurriculumStatus();
             //loadQuestion(currentQuestionId);
             //loadProgressBar();
         });
     }
-});
+})
 
 //--------------------------------------------------------------------------------------------
 
@@ -916,13 +882,13 @@ window.onload = function() {
     
     // If a current curriculum is set, put the text in the lesson code entry
     if (currentCurriculum && currentQuestionId) {
-        fetchCurriculum(currentCurriculum, false).then(() => {
+        //fetchCurriculum(currentCurriculum, false).then(() => {
             //stopTimer();
-            updateSessionData();
+            //updateSessionData();
             //checkCurriculumStatus();
             //nextQuestion(currentQuestionId);
             //loadProgressBar();
-        });
+        //});
         
         document.getElementById("key-input").value = currentCurriculum;
     }
@@ -1158,14 +1124,14 @@ document.getElementById("submit-answer").onclick = async function() {
             
             if (answeredOnTime) {
                 // Update XP and show alert for correct answer within time limit
-                dXP = updateXP(currentQuestionId, content, subject, difficulty, 'correct');
+                dXP = updateXP(currentQuestionId, content, standard, difficulty, 'correct');
                 // Display the description and the video button
                 updateDescription();
                 updateAnswerStatus(currentQuestionId, "correct");
                 await showResultDialog(true, dXP);               
             } else {
                 // Handle case where correct answer is given but not within time limit
-                dXP = updateXP(currentQuestionId, content, subject, 0, 'correct');
+                dXP = updateXP(currentQuestionId, content, standard, 0, 'correct');
                 // Display the description and the video button
                 updateDescription();
                 await showResultDialog("late", dXP);
@@ -1175,7 +1141,7 @@ document.getElementById("submit-answer").onclick = async function() {
             document.getElementById("submit-answer").disabled = true;
         } else {
             // Incorrect answer handling (timing doesn't matter)
-            dXP = updateXP(currentQuestionId, content, subject, difficulty, 'incorrect');
+            dXP = updateXP(currentQuestionId, content, standard, difficulty, 'incorrect');
             // Display the description and the video button
             updateDescription();
             updateAnswerStatus(currentQuestionId, "incorrect");
@@ -1210,15 +1176,18 @@ function nextQuestionButton() {
 // Function will also save the xp history for the student in sessionStorage
 async function setupTestprepSession() {
     // Retrieve parameters from localStorage or define defaults.
-    const lastUpdate = localStorage.getItem("xpLastFetchedDatetime") || "1970-01-01";
-    const xpUsername = localStorage.getItem("xpUsername") || "default_xpusername";
+    let lastUpdate = localStorage.getItem("xpLastFetchedDatetime") || "1970-01-01";
+    let xpUsername = localStorage.getItem("xpUsername") || "default_xpusername";
     const username = sessionStorage.getItem("username") || "default_username";
     
     // Reset the xpData if the current user is not the same as the stored xpData
     if (xpUsername !== username) {
-        localStorage.removeItem("xpLastFetchedDatetime");
-        localStorage.removeItem("xpUsername");
+        console.log("NEW USER ALERT!");
+        localStorage.setItem("xpLastFetchedDatetime", "1970-01-01");
+        localStorage.setItem("xpUsername", username);
         localStorage.removeItem("xpData");
+        xpUsername = username;
+        lastUpdate = "1970-01-01";
     }
   
     // Build query parameters.
@@ -1274,15 +1243,62 @@ async function setupTestprepSession() {
 
 //--------------------------------------------------------------------------------------
 
+// Function to determine the content of the current curriculum and set global variable
+function determineContent() {
+    currentCurriculum = sessionStorage.getItem('currentCurriculum');
+    
+    content = findOuterKeyByInnerKey(data, targetInnerKey)
+
+}
+
+//--------------------------------------------------------------------------------------
+
 // Initialize the correcAnswers and incorrectAnswers collections from xpData
+// Implies that curriculum is known and questions list has been created
 
+function processPriorAnswers(xpData, questions) {
+    
+    // If xpData is empty, store empty arrays in sessionStorage and return.
+    if (!xpData || xpData.length === 0) {
+        sessionStorage.setItem("correctAnswers", JSON.stringify([]));
+        sessionStorage.setItem("incorrectAnswers", JSON.stringify([]));
+        return;
+    }
 
+    const correctAnswersSet = new Set();
+    const incorrectAnswersSet = new Set();
+    
+    xpData.forEach(record => {
+        // Check if record.question_id is in the questions array.
+        if (questions.includes(record.question_id)) {
+            // If dXP is positive, add question_id value to correctAnswers.
+            if (record.dXP > 0) {
+              correctAnswersSet.add(record.question_id);
+            }
+            // If dXP is negative, add question_id value to incorrectAnswers.
+            else if (record.dXP < 0) {
+              incorrectAnswersSet.add(record.question_id);
+            }
+            // (If key2 is zero or another value, decide what to do.)
+        }
+    });
+
+  // Save the arrays in sessionStorage
+  const correctAnswers = [...correctAnswersSet];
+  const incorrectAnswers = [...incorrectAnswersSet];
+  sessionStorage.setItem("correctAnswers", JSON.stringify(correctAnswers));
+  sessionStorage.setItem("incorrectAnswers", JSON.stringify(incorrectAnswers));
+  
+}
 
 //--------------------------------------------------------------------------------------
 
 // Main initialization function
 async function initializePage() {
+    // Get currentCurriculum from session
+    currentCurriculumId = sessionStorage.getItem('currentCurriculum');
     await setupTestprepSession();
+    fetchCurriculum(currentCurriculumId);
     
 }
 
@@ -1290,7 +1306,7 @@ async function initializePage() {
 
 //--------------------------------------------------------------------------------------
 
-// Things to do on page load
+// Things to do after DOM load
 document.addEventListener("DOMContentLoaded", function() {
     // Add event listener to Next Question button
     const nextButton = document.getElementById("next-question-btn");

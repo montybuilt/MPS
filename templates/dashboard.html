@@ -8,8 +8,42 @@
     <link rel="stylesheet" href="../static/css/dashboard_styles.css">
     <!-- Include the script file -->
     <script src="../static/js/dashboard_script.js"></script>
-    <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
-    <link rel="icon" type="image/png" sizes="32x32" href="../static/images/watermark.png">    
+    <script src="https://cdn.plot.ly/plotly-3.0.1.min.js"></script>
+    <link rel="icon" type="image/png" sizes="32x32" href="../static/images/watermark.png">
+<style>
+    #content-panel {
+        margin: 20px;
+    }
+    
+    .content-row {
+        display: flex;
+        flex-wrap: wrap;
+        align-items: center;
+        margin-bottom: 15px;
+    }
+    
+    .content-row .content-title {
+        flex: 0 0 150px;
+        font-weight: bold;
+        margin-right: 10px;
+        color: white;
+    }
+    
+    .content-row .curriculum-box {
+        flex: 1;
+        background-color: #444;
+        color: white;
+        padding: 10px;
+        margin-right: 5px;
+        text-align: center;
+        border-radius: 4px;
+    }
+    
+    .content-row .curriculum-box:last-child {
+        margin-right: 0;
+    }
+    
+    </style>
 </head>
 <body>
 
@@ -35,6 +69,9 @@
         <div class="kpi-item">Skill Level: <span id="xp-level"></span></div>
         <div class="kpi-item">Total Score: <span id="xp-score"></span></div>
     </div>
+    
+    <!-- Content Panel -->
+    <div id="content-panel">Content Area Summary</div>
     
     <!-- XP Chart Container -->
     <div id="chart-container">

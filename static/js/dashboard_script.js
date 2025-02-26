@@ -14,22 +14,27 @@ let myCurriculums;
 // Function will also save the xp history for the student in sessionStorage
 async function setupDashboardSession() {
     // Retrieve parameters from localStorage or define defaults.
-    const lastUpdate = localStorage.getItem("xpLastFetchedDatetime") || "1970-01-01";
-    const xpUsername = localStorage.getItem("xpUsername") || "default_xpusername";
+    let lastUpdate = localStorage.getItem("xpLastFetchedDatetime") || "1970-01-01";
+    let xpUsername = localStorage.getItem("xpUsername") || "default_xpusername";
     const username = sessionStorage.getItem("username") || "default_username";
     
     // Reset the xpData if the current user is not the same as the stored xpData
     if (xpUsername !== username) {
-        localStorage.removeItem("xpLastFetchedDatetime");
-        localStorage.removeItem("xpUsername");
+        console.log("NEW USER ALERT!");
+        localStorage.setItem("xpLastFetchedDatetime", "1970-01-01");
+        localStorage.setItem("xpUsername", username);
         localStorage.removeItem("xpData");
+        xpUsername = username;
+        lastUpdate = "1970-01-01";
     }
-  
+    
     // Build query parameters.
     const params = new URLSearchParams({
         lastUpdate: lastUpdate,
         xpUsername: xpUsername
     });
+    
+    console.log("Search Params:", lastUpdate, xpUsername);
   
     try {
         // Use GET with query parameters.
@@ -144,6 +149,61 @@ function getXPDataForChart() {
 }
 
 //-----------------------------------------------------------------------------------------------------------------
+function processPriorAnswers(xpData, questions) {
+    
+    // If xpData is empty, store empty arrays in sessionStorage and return.
+    if (!xpData || xpData.length === 0) {
+        sessionStorage.setItem("correctAnswers", JSON.stringify([]));
+        sessionStorage.setItem("incorrectAnswers", JSON.stringify([]));
+        return;
+    }
+
+    const correctAnswersSet = new Set();
+    const incorrectAnswersSet = new Set();
+    
+    xpData.forEach(record => {
+        // Check if record.question_id is in the questions array.
+        if (questions.includes(record.question_id)) {
+            // If dXP is positive, add question_id value to correctAnswers.
+            if (record.dXP > 0) {
+              correctAnswersSet.add(record.question_id);
+            }
+            // If dXP is negative, add question_id value to incorrectAnswers.
+            else if (record.dXP < 0) {
+              incorrectAnswersSet.add(record.question_id);
+            }
+            // (If key2 is zero or another value, decide what to do.)
+        }
+    });
+
+  // Save the arrays in sessionStorage
+  const correctAnswers = [...correctAnswersSet];
+  const incorrectAnswers = [...incorrectAnswersSet];
+  sessionStorage.setItem("correctAnswers", JSON.stringify(correctAnswers));
+  sessionStorage.setItem("incorrectAnswers", JSON.stringify(incorrectAnswers));
+  
+}
+
+//-----------------------------------------------------------------------------------------------------------------
+// Function to choose the next question
+function chooseNextQuestion(questions, correctAnswers, incorrectAnswers) {
+    // First question not in correctAnswers.
+    for (let q of questions) {
+        if (!correctAnswers.includes(q)) {
+            return q;
+        }
+    }
+    // If all are correct, choose the first that is in incorrectAnswers.
+    for (let q of questions) {
+        if (incorrectAnswers.includes(q)) {
+            return q;
+        }
+    }
+    // Default to the first question.
+    return questions[0];
+}
+
+//-----------------------------------------------------------------------------------------------------------------
 // Helper function to generate bright random colors for the series
 function getRandomBrightColor() {
     const r = Math.floor(200 + Math.random() * 55);
@@ -228,19 +288,86 @@ function updateKPI(id, value, condition) {
     }
 }
 
+
+//-----------------------------------------------------------------------------------------------------------------
+// Function reads userAssignments and draws the content/curriculum assignments
+function renderContentPanel() {
+  const assignments = JSON.parse(sessionStorage.getItem("studentAssignments"));
+  const completed = JSON.parse(sessionStorage.getItem("completedCurriculums")) || [];
+  const xpData = JSON.parse(localStorage.getItem("xpData")) || [];
+  const panel = document.getElementById("content-panel");
+  panel.innerHTML = '';
+
+  for (let content in assignments) {
+    const row = document.createElement("div");
+    row.classList.add("content-row");
+
+    const title = document.createElement("div");
+    title.classList.add("content-title");
+    title.textContent = content;
+    row.appendChild(title);
+
+    const curricula = assignments[content];
+    for (let curriculum in curricula) {
+      const box = document.createElement("div");
+      box.classList.add("curriculum-box");
+      box.textContent = curriculum;
+
+      // Determine box color:
+      if (completed.includes(curriculum)) {
+        box.style.backgroundColor = "green";
+      } else {
+        const questions = assignments[content][curriculum];
+        // Check if any question exists in xpData
+        const answered = xpData.some(record => questions.includes(record.question_id));
+        box.style.backgroundColor = answered ? "yellow" : "grey";
+      }
+
+      box.addEventListener("click", () => {
+        sessionStorage.setItem("currentCurriculum", curriculum);
+        const questions = assignments[content][curriculum];
+        processPriorAnswers(xpData, questions);
+        const correctAnswers = JSON.parse(sessionStorage.getItem("correctAnswers")) || [];
+        const incorrectAnswers = JSON.parse(sessionStorage.getItem("incorrectAnswers")) || [];
+        const nextQuestion = chooseNextQuestion(questions, correctAnswers, incorrectAnswers);
+        sessionStorage.setItem("currentQuestionId", nextQuestion);
+        window.location.href = "testprep";
+      });
+
+      row.appendChild(box);
+    }
+    panel.appendChild(row);
+  }
+}
+
 //-----------------------------------------------------------------------------------------------------------------
 // Main initialization function
 async function initializePage() {
     await setupDashboardSession();
+    console.log("Processing XP")
     processXP();
+    console.log("Displaying KPI Data")
     displayKPIData();
+    console.log("Drawing Chart")
     drawAreaChart();
 }
+
+//--------------------------------------------------------------------------------------
+
+// Things to do after DOM load
+document.addEventListener("DOMContentLoaded", async function() {
+    console.log("Initializing Page");
+    await initializePage();
+    console.log("Rendering Content Panel");
+    renderContentPanel();
+});
+
+
 
 //-----------------------------------------------------------------------------------------------------------------
 // Prepare data items on page load
 window.onload = function() {
-    initializePage();
+    //initializePage();
 };
 
 //-----------------------------------------------------------------------------------------------------------------
