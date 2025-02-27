@@ -43,8 +43,9 @@ def index():
     is_admin = session.get('is_admin')
     app.logger.debug(f"Is admin: {is_admin}")
     
+    
     return render_template('index.html', username = username, is_admin = is_admin)
-
+    
 @app.route('/login', methods=['POST'])
 def login():
     '''Verify login and initialize session data'''

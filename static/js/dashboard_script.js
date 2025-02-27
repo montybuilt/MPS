@@ -83,11 +83,11 @@ async function setupDashboardSession() {
 //-----------------------------------------------------------------------------------------------------------------
 // Function to process XP data
 function processXP() {
-    const xpDict = JSON.parse(sessionStorage.getItem('xp'));
+    const xpDict = {'overallXP': 50};
     const contentScores = JSON.parse(sessionStorage.getItem('contentScores'));
     console.log("Content Scores:", contentScores);
 
-    totalXP = xpDict['overallXP'];
+    totalXP = xpDict['overallXP'] || 0;
     console.log("Total XP:", totalXP);
 
     if (totalXP > 100) {
@@ -182,6 +182,39 @@ function processPriorAnswers(xpData, questions) {
   sessionStorage.setItem("correctAnswers", JSON.stringify(correctAnswers));
   sessionStorage.setItem("incorrectAnswers", JSON.stringify(incorrectAnswers));
   
+}
+
+//-----------------------------------------------------------------------------------------------------------------
+
+function identifyCompletedCurriculums() {
+  const assignments = JSON.parse(sessionStorage.getItem("studentAssignments")) || {};
+  const xpData = JSON.parse(localStorage.getItem("xpData")) || [];
+  const completedCurriculums = [];
+
+  // Build a set of correct answers from xpData for quick lookup.
+  const correctAnswerSet = new Set();
+  xpData.forEach(record => {
+    if (record.dXP > 0 && record.question_id) {
+      correctAnswerSet.add(record.question_id);
+    }
+  });
+
+  // Iterate over each content area and curriculum.
+  for (let content in assignments) {
+    const curricula = assignments[content];
+    for (let curriculum in curricula) {
+      const questions = curricula[curriculum];
+      // Check if all questions are answered correctly.
+      const allCorrect = questions.every(q => correctAnswerSet.has(q));
+      if (allCorrect) {
+        completedCurriculums.push(curriculum);
+      }
+    }
+  }
+
+  // Store the completed curriculums in sessionStorage.
+  sessionStorage.setItem("completedCurriculums", JSON.stringify(completedCurriculums));
+  return completedCurriculums;
 }
 
 //-----------------------------------------------------------------------------------------------------------------
@@ -290,7 +323,6 @@ function updateKPI(id, value, condition) {
 
 
 //-----------------------------------------------------------------------------------------------------------------
-// Function reads userAssignments and draws the content/curriculum assignments
 function renderContentPanel() {
   const assignments = JSON.parse(sessionStorage.getItem("studentAssignments"));
   const completed = JSON.parse(sessionStorage.getItem("completedCurriculums")) || [];
@@ -308,19 +340,30 @@ function renderContentPanel() {
     row.appendChild(title);
 
     const curricula = assignments[content];
-    for (let curriculum in curricula) {
+    // Extract curriculum keys and sort them naturally
+    const curriculumKeys = Object.keys(curricula).sort((a, b) =>
+      a.localeCompare(b, undefined, { numeric: true, sensitivity: 'base' })
+    );
+
+    for (let curriculum of curriculumKeys) {
       const box = document.createElement("div");
       box.classList.add("curriculum-box");
       box.textContent = curriculum;
 
-      // Determine box color:
+      // Determine box color and text color:
       if (completed.includes(curriculum)) {
         box.style.backgroundColor = "green";
+        box.style.color = "white";
       } else {
         const questions = assignments[content][curriculum];
-        // Check if any question exists in xpData
         const answered = xpData.some(record => questions.includes(record.question_id));
-        box.style.backgroundColor = answered ? "yellow" : "grey";
+        if (answered) {
+          box.style.backgroundColor = "yellow";
+          box.style.color = "black";
+        } else {
+          box.style.backgroundColor = "grey";
+          box.style.color = "white";
+        }
       }
 
       box.addEventListener("click", () => {
@@ -340,12 +383,15 @@ function renderContentPanel() {
   }
 }
 
+
 //-----------------------------------------------------------------------------------------------------------------
 // Main initialization function
 async function initializePage() {
     await setupDashboardSession();
     console.log("Processing XP")
     processXP();
+    console.log("Calculating all curriculums status")
+    identifyCompletedCurriculums();
     console.log("Displaying KPI Data")
     displayKPIData();
     console.log("Drawing Chart")

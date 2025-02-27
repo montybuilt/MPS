@@ -29,7 +29,7 @@ async function fetchCourseData() {
         // Save the data in session storage
         sessionStorage.setItem('contentDict', JSON.stringify(data.content_dict));
         sessionStorage.setItem('allCurriculums', JSON.stringify(data.all_curriculums));
-        sessionStorage.setItem('filteredCurriculums', JSON.stringify(data.filtered_curriculums));
+        sessionStorage.setItem('filteredCurriculums', JSON.stringify(data.custom_curriculums));
         sessionStorage.setItem('allQuestions', JSON.stringify(data.all_questions));
         sessionStorage.setItem('curriculumDict', JSON.stringify(data.curriculum_dict))
     } catch (error) {

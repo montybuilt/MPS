@@ -161,59 +161,11 @@ function rickRoll() {
 
 //--------------------------------------------------------------------------------------
 
-// Initialize XP structure in local storage if it doesn't already exist
-// Currently deactivated
-
-(function initializeXP() {
-    if (!sessionStorage.getItem('xp')) {
-        const initialXP = {
-            overallXP: 0,
-            certifications: {
-                pcap: { xp_1: 0, xp_2: 0, xp_3: 0, xp_4: 0, xp_5: 0 },
-                pcep: { xp_1: 0, xp_2: 0, xp_3: 0, xp_4: 0 }
-            },
-            courses: {
-                python1: {xp_1: 0, xp_2: 0, xp_3: 0, xp_4: 0, xp_5: 0, xp_6: 0, xp_7: 0},
-                python2: {xp_1: 0, xp_2: 0, xp_3: 0, xp_4: 0, xp_5: 0, xp_6: 0, xp_7: 0}
-            }
-        };
-        sessionStorage.setItem('xp', JSON.stringify(initialXP));
-    }
-})();
-
-//--------------------------------------------------------------------------------------
-
-// Initialize the curriculumScores structure in local storage if it doesn't already exist
-(function initializeCurriculumScores() {
-    if (!sessionStorage.getItem('curriculumScores')) {
-        const initialScores = {};
-        sessionStorage.setItem('curriculumScores', JSON.stringify(initialScores));
-    }
-})();
-
-//--------------------------------------------------------------------------------------
-
-// Initialize the contentScores structure in local storage if it doesn't already exist
-(function initializeContentScores() {
-    if (!sessionStorage.getItem('contentScores')) {
-        const initialScores = {};
-        sessionStorage.setItem('contentScores', JSON.stringify(initialScores));
-    }
-})();
-
-//--------------------------------------------------------------------------------------
-
 // Function POSTs session data to the database
 function updateSessionData() {
     const sessionData = {
-        completedCurriculums: JSON.parse(sessionStorage.getItem('completedCurriculums')),
-        contentScores: JSON.parse(sessionStorage.getItem('contentScores')),
-        correctAnswers: JSON.parse(sessionStorage.getItem('correctAnswers')),
         currentCurriculum: sessionStorage.getItem('currentCurriculum'),
         currentQuestionId: sessionStorage.getItem('currentQuestionId'),
-        curriculumScores: JSON.parse(sessionStorage.getItem('curriculumScores')),
-        incorrectAnswers: JSON.parse(sessionStorage.getItem('incorrectAnswers')),
-        xp: JSON.parse(sessionStorage.getItem('xp')),
         updatedAt: new Date().toISOString()
     };
 
@@ -244,55 +196,14 @@ function checkQuestionStatus(questionId) {
     return correctAnswers.includes(questionId);
 }
 
-//--------------------------------------------------------------------------------------
-
-// Function to update the curriculumScores collection
-function updateCurriculumScores(curriculumID, XP_earned, XP_possible) {
-    // Get the current curriculumScores from sessionStorage
-    let curriculumScores = JSON.parse(sessionStorage.getItem('curriculumScores')) || {};
-
-    // If the curriculum does not exist in curriculumScores, initialize it
-    if (!curriculumScores[curriculumID]) {
-        curriculumScores[curriculumID] = { Earned: 0, Possible: 0 };
-    }
-
-    // Update the Earned and Possible values for the specific curriculum
-    curriculumScores[curriculumID].Earned = parseFloat((curriculumScores[curriculumID].Earned + XP_earned).toFixed(2));
-    curriculumScores[curriculumID].Possible = parseFloat((curriculumScores[curriculumID].Possible + XP_possible).toFixed(2));
-
-    // Save the updated curriculumScores back to sessionStorage
-    sessionStorage.setItem('curriculumScores', JSON.stringify(curriculumScores));
-}
 
 //--------------------------------------------------------------------------------------
 
-// Function to update the contentScores collection in sessionStorage
-function updateContentScores(contentId, XP_earned, XP_possible) {
-    // Retrieve the current contentScores from sessionStorage
-    let contentScores = JSON.parse(sessionStorage.getItem('contentScores')) || {};
-
-    // If the contentId doesn't exist in the contentScores collection, initialize it
-    if (!contentScores[contentId]) {
-        contentScores[contentId] = {
-            Earned: 0,
-            Possible: 0
-        };
-    }
-
-    // Update the Earned and Possible values for the specified contentId
-    contentScores[contentId].Earned = parseFloat((contentScores[contentId].Earned + XP_earned).toFixed(2));
-    contentScores[contentId].Possible = parseFloat((contentScores[contentId].Possible + XP_possible).toFixed(2));
-
-    // Save the updated contentScores back to sessionStorage
-    sessionStorage.setItem('contentScores', JSON.stringify(contentScores));
-}
-
-//------------------------------------------------------------------------------------------
 
 // Function to calculate the XP change and update the XP storage
 // Switching to ignore sessionStorage of xp and work only with database
 
-function updateXP(questionId, content, standard, difficulty, status) {
+function updateXP(questionId, difficulty, status) {
     console.log("Updating XP");
     // Get the list of correct and incorrect answers from sessionStorage
     let correctAnswers = JSON.parse(sessionStorage.getItem('correctAnswers')) || [];
@@ -317,38 +228,8 @@ function updateXP(questionId, content, standard, difficulty, status) {
     let dXP_accrued = Math.max(dXP, 0);
     dXP_possible = ((Number(difficulty) / 3) * multiplier);
 
-    // Get the current XP data from sessionStorage, or initialize it if it doesn't exist
-    let xpData = JSON.parse(sessionStorage.getItem('xp')) || {
-        overallXP: 0,  // Overall XP score
-        certifications: {} // Content certifications (e.g., PCAP, PCEP)
-    };
-
-    // Ensure that the content and category are properly initialized in the storage
-    if (!xpData.certifications[content]) {
-        xpData.certifications[content] = {}; // Initialize the content (e.g., PCAP or PCEP)
-    }
-    if (!xpData.certifications[content][`xp_${standard}`]) {
-        xpData.certifications[content][`xp_${standard}`] = 0; // Initialize XP for the specific category
-    }
-
-    // Update the XP for the specified content and category
-    xpData.certifications[content][`xp_${standard}`] += dXP;
-
-    // Update the overall XP (if applicable)
-    xpData.overallXP += dXP;
-
-    // Save the updated XP data back to sessionStorage
-    sessionStorage.setItem('xp', JSON.stringify(xpData));
-    
-    // Update content score
-    updateContentScores(content, dXP_accrued, dXP_possible);
-    
-    // Update curriculum score
-    let currentCurriculum = sessionStorage.getItem('currentCurriculum');
-    updateCurriculumScores(currentCurriculum, dXP_accrued, dXP_possible);
-    
     // Update the XP data bar
-    updateXPDisplay(content)
+    //updateXPDisplay(content)
     
 
     return dXP; // Return the XP change for display
@@ -591,7 +472,7 @@ function updatePage(data) {
     updateNavbarData(currentQuestionId);
     
     // Update the XP data bar
-    updateXPDisplay(content);
+    //updateXPDisplay(content);
     
     // Disable the Submit button again
     document.getElementById("submit-answer").disabled = false;
@@ -1074,9 +955,13 @@ function showResultDialog(isCorrect, dXP) {
 //------------------------------------------------------------------------------------------------------------------
 
 // Function to handle posting the XP data to the server for datbase storage
-function postXP(dXP, questionId, elapsedTime, difficulty, dXP_possible) {
+function postXP(dXP, questionId, curriculumId, contentId, standard, objective, elapsedTime, difficulty, dXP_possible) {
     const XPData = {'dXP': dXP,
                     'question_id': questionId,
+                    'curriculum_id': curriculumId,
+                    'content_id': contentId,
+                    'standard': standard,
+                    'objective': objective,
                     'elapsed_time': elapsedTime,
                     'difficulty': difficulty,
                     'possible_xp': dXP_possible};
@@ -1115,7 +1000,8 @@ document.getElementById("submit-answer").onclick = async function() {
     const timeData = checkTime(timeLimit);
     const answeredOnTime = timeData[0]; // Check if answered on time
     const elapsedTime = timeData[1];
-    
+    let dXP;
+        
     if (selectedAnswer) {
         stopTimer();
         // Check against the stored correct answer
@@ -1124,14 +1010,14 @@ document.getElementById("submit-answer").onclick = async function() {
             
             if (answeredOnTime) {
                 // Update XP and show alert for correct answer within time limit
-                dXP = updateXP(currentQuestionId, content, standard, difficulty, 'correct');
+                dXP = updateXP(currentQuestionId, difficulty, 'correct');
                 // Display the description and the video button
                 updateDescription();
                 updateAnswerStatus(currentQuestionId, "correct");
                 await showResultDialog(true, dXP);               
             } else {
                 // Handle case where correct answer is given but not within time limit
-                dXP = updateXP(currentQuestionId, content, standard, 0, 'correct');
+                dXP = updateXP(currentQuestionId, 0, 'correct');
                 // Display the description and the video button
                 updateDescription();
                 await showResultDialog("late", dXP);
@@ -1141,7 +1027,7 @@ document.getElementById("submit-answer").onclick = async function() {
             document.getElementById("submit-answer").disabled = true;
         } else {
             // Incorrect answer handling (timing doesn't matter)
-            dXP = updateXP(currentQuestionId, content, standard, difficulty, 'incorrect');
+            dXP = updateXP(currentQuestionId, difficulty, 'incorrect');
             // Display the description and the video button
             updateDescription();
             updateAnswerStatus(currentQuestionId, "incorrect");
@@ -1151,7 +1037,12 @@ document.getElementById("submit-answer").onclick = async function() {
         }
         
         // Post XP Data to the server
-        postXP(dXP, currentQuestionId, elapsedTime, difficulty, dXP_possible);
+        // add curriculum_id, content_id, tags, standard, objective
+        //dXP, questionId, curriculumId, contentId, standard, objective, elapsedTime, difficulty, dXP_possible
+        console.log("dXP", dXP, "QuestionId", currentQuestionId);
+        console.log("Content", content, "Curriculum", currentCurriculum, "Tags", tags);
+        console.log("Standard", standard, "Objective", objective);
+        postXP(dXP, currentQuestionId, currentCurriculum, content, standard, objective, elapsedTime, difficulty, dXP_possible);
         
         // Call this function to load the progress bar when the question is answered
         loadProgressBar();  //here last
@@ -1298,7 +1189,7 @@ async function initializePage() {
     // Get currentCurriculum from session
     currentCurriculumId = sessionStorage.getItem('currentCurriculum');
     await setupTestprepSession();
-    fetchCurriculum(currentCurriculumId);
+    fetchCurriculum(currentCurriculumId, false);
     
 }
 
@@ -1327,7 +1218,8 @@ document.addEventListener("DOMContentLoaded", function() {
 // Add the beforeunload event listener to call updateSessionData()
 
 window.addEventListener('beforeunload', function(event) { 
-    updateSessionData(); });
+    updateSessionData();
+});
 
 //---------------------------------------------------------------------------------------
 

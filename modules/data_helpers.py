@@ -346,12 +346,12 @@ def initialize_user_sessionStorage_data(logger=None):
                         #"assignedCurriculums": assigned_curriculums,
                         #"completedCurriculums": user.completed_curriculums,
                         #"contentScores": user.content_scores,
-                        "correctAnswers": user.correct_answers,
+                        #"correctAnswers": user.correct_answers,
                         "currentCurriculum": user.current_curriculum,
                         "currentQuestionId": user.current_question,
-                        "curriculumScores": user.curriculum_scores,
-                        "incorrectAnswers": user.incorrect_answers,
-                        "xp": user.xp,
+                        #"curriculumScores": user.curriculum_scores,
+                        #"incorrectAnswers": user.incorrect_answers,
+                        #"xp": user.xp,
                         "updatedAt": user.updated_at
                         }
         
