@@ -224,7 +224,7 @@ function updateXP(questionId, difficulty, status) {
 
     // Apply the multiplier to the XP change
     dXP = dXP * multiplier;
-    dXP = Math.round(dXP * 100) / 100;
+    dXP = (dXP * 100) / 100;
     let dXP_accrued = Math.max(dXP, 0);
     dXP_possible = ((Number(difficulty) / 3) * multiplier);
 

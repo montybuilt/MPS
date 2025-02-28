@@ -10,6 +10,68 @@ let myCurriculums;
 
 //-----------------------------------------------------------------------------------------------------------------
 
+function calculateKPIs(xpData) {
+  // Initialize summary object for each category
+  const summary = {
+    content: {},
+    curriculum: {},
+    standardObjective: {}, // This will be an object keyed by content_id, then by standard/objective pair
+    overall: { totalEarned: 0, totalPossible: 0, percent: 0 }
+  };
+
+  xpData.forEach(record => {
+    const { content_id, curriculum_id, standard, objective, dXP, possible_xp } = record;
+    
+    // Update overall totals
+    summary.overall.totalEarned += dXP;
+    summary.overall.totalPossible += possible_xp;
+    
+    // Group by content_id
+    if (!summary.content[content_id]) {
+      summary.content[content_id] = { totalEarned: 0, totalPossible: 0, percent: 0 };
+    }
+    summary.content[content_id].totalEarned += dXP;
+    summary.content[content_id].totalPossible += possible_xp;
+    
+    // Group by curriculum_id
+    if (!summary.curriculum[curriculum_id]) {
+      summary.curriculum[curriculum_id] = { totalEarned: 0, totalPossible: 0, percent: 0 };
+    }
+    summary.curriculum[curriculum_id].totalEarned += dXP;
+    summary.curriculum[curriculum_id].totalPossible += possible_xp;
+    
+    // Group by standard/objective pairing, nested by content_id
+    if (!summary.standardObjective[content_id]) {
+      summary.standardObjective[content_id] = {};
+    }
+    const soKey = `${standard}.${objective}`; // dot notation pairing
+    if (!summary.standardObjective[content_id][soKey]) {
+      summary.standardObjective[content_id][soKey] = { totalEarned: 0, totalPossible: 0, percent: 0 };
+    }
+    summary.standardObjective[content_id][soKey].totalEarned += dXP;
+    summary.standardObjective[content_id][soKey].totalPossible += possible_xp;
+  });
+
+  // Helper to compute percentage from totals
+  function computePercentage(group) {
+    group.percent = group.totalPossible > 0 ? (group.totalEarned / group.totalPossible) * 100 : 0;
+  }
+
+  // Compute percentages for overall, content, and curriculum
+  computePercentage(summary.overall);
+  Object.values(summary.content).forEach(computePercentage);
+  Object.values(summary.curriculum).forEach(computePercentage);
+
+  // Compute percentages for standardObjective pairings for each content
+  Object.values(summary.standardObjective).forEach(soGroup => {
+    Object.values(soGroup).forEach(computePercentage);
+  });
+
+  return summary;
+}
+
+//-----------------------------------------------------------------------------------------------------------------
+
 // Function to fetch user content/curriculum/question assignments and create global variables
 // Function will also save the xp history for the student in sessionStorage
 async function setupDashboardSession() {
@@ -81,14 +143,140 @@ async function setupDashboardSession() {
 }
 
 //-----------------------------------------------------------------------------------------------------------------
+
+// Helper: Convert a score (0-100) to a color from red (low) to green (high)
+function getColorForScore(score) {
+  const red = Math.round(255 * (100 - score) / 100);
+  const green = Math.round(255 * score / 100);
+  return `rgb(${red}, ${green}, 0)`;
+}
+
+function renderKPIPanel(currentContent) {
+  // Create or select the KPI panel container (inserted between content-panel and chart-container)
+  let kpiPanel = document.getElementById('kpi-panel');
+  if (!kpiPanel) {
+    kpiPanel = document.createElement('div');
+    kpiPanel.id = 'kpi-panel';
+    const chartContainer = document.getElementById('chart-container');
+    chartContainer.parentNode.insertBefore(kpiPanel, chartContainer);
+  }
+  kpiPanel.innerHTML = ''; // Clear previous content
+
+  // Use flexbox to align the grid and radar side by side.
+  kpiPanel.style.display = 'flex';
+  kpiPanel.style.justifyContent = 'space-between';
+  kpiPanel.style.alignItems = 'flex-start';
+
+  // Adjust sizes:
+  // Increase heatmap squares by ~10%: original 50px becomes 55px.
+  const squareSize = 55;
+  // Grid width for 6 columns.
+  const gridWidth = squareSize * 6; // 330px
+  // Shrink radar chart by x% relative to gridWidth.
+  const radarWidth = Math.round(gridWidth * 1); 
+
+  // Create grid container.
+  const gridDiv = document.createElement('div');
+  gridDiv.id = 'grid';
+  gridDiv.style.width = `${gridWidth}px`;
+  gridDiv.style.display = 'grid';
+  gridDiv.style.gridGap = '5px';
+  gridDiv.style.gridTemplateColumns = `repeat(6, ${squareSize}px)`;
+
+  // Create radar container.
+  const radarDiv = document.createElement('div');
+  radarDiv.id = 'radar';
+  radarDiv.style.width = `${radarWidth}px`;
+  radarDiv.style.backgroundColor = "#3d3d39";
+  radarDiv.style.border = '1px solid white';
+
+  kpiPanel.appendChild(gridDiv);
+  kpiPanel.appendChild(radarDiv);
+
+  // Retrieve KPI summary data (assumes xpData is in localStorage)
+  const xpData = JSON.parse(localStorage.getItem('xpData')) || [];
+  const summary = calculateKPIs(xpData);
+  const soData = summary.standardObjective[currentContent] || {};
+
+  // Build a fixed 5x6 grid.
+  for (let row = 1; row <= 5; row++) {
+    for (let col = 1; col <= 6; col++) {
+      const key = `${row}.${col}`;
+      const cell = document.createElement('div');
+      cell.style.width = `${squareSize}px`;
+      cell.style.height = `${squareSize}px`;
+      cell.style.display = 'flex';
+      cell.style.alignItems = 'center';
+      cell.style.justifyContent = 'center';
+      //cell.style.border = '1px solid #fff';
+      cell.style.fontSize = '12px';
+      cell.style.color = '#000000';
+      
+      if (soData.hasOwnProperty(key)) {
+        const score = soData[key].percent;
+        cell.style.backgroundColor = getColorForScore(score);
+        cell.title = `${key}: ${score.toFixed(1)}%`;
+        cell.textContent = score.toFixed(0) + '%';
+      } else {
+        cell.style.backgroundColor = '#3d3d39';
+        cell.title = `${key}: No data`;
+        cell.textContent = '';
+      }
+      gridDiv.appendChild(cell);
+    }
+  }
+
+  // --- Build Radar Chart for Curriculum Performance ---
+  const assignments = JSON.parse(sessionStorage.getItem("studentAssignments")) || {};
+  const curricula = assignments[currentContent] || {};
+  const curriculumIDs = Object.keys(curricula);
+  let radarValues = [];
+  let radarLabels = [];
+  curriculumIDs.forEach(currId => {
+    if (summary.curriculum[currId]) {
+      radarValues.push(summary.curriculum[currId].percent);
+      radarLabels.push(currId);
+    }
+  });
+  // Close the loop for radar chart
+  if (radarValues.length > 0) {
+    radarValues.push(radarValues[0]);
+    radarLabels.push(radarLabels[0]);
+  }
+
+  const radarData = [{
+    type: 'scatterpolar',
+    r: radarValues,
+    theta: radarLabels,
+    fill: 'toself'
+  }];
+
+  const radarLayout = {
+    paper_bgcolor: '#3d3d39',
+    plot_bgcolor: '#3d3d39',
+    polar: {
+      radialaxis: {
+        visible: true,
+        range: [0, 100]
+      }
+    },
+    showlegend: false,
+    title: 'Curriculum Performance',
+    width: radarWidth,
+    height: radarWidth
+  };
+
+  Plotly.newPlot('radar', radarData, radarLayout);
+}
+
+//-----------------------------------------------------------------------------------------------------------------
 // Function to process XP data
 function processXP() {
-    const xpDict = {'overallXP': 50};
-    const contentScores = JSON.parse(sessionStorage.getItem('contentScores'));
-    console.log("Content Scores:", contentScores);
-
-    totalXP = xpDict['overallXP'] || 0;
-    console.log("Total XP:", totalXP);
+    const xpData = JSON.parse(localStorage.getItem("xpData")) || [];
+    totalXP = xpData.reduce((sum, record) => sum + record.dXP, 0);
+    possibleXP = xpData.reduce((sum, record) => sum + record.possible_xp, 0);
+    xpScore = totalXP / possibleXP
+    
 
     if (totalXP > 100) {
         xpLevel = 'Advanced';
@@ -98,16 +286,6 @@ function processXP() {
         xpLevel = 'Developing';
     } else {
         xpLevel = 'Beginner';
-    }
-    console.log("xpLevel:", xpLevel);
-
-    let totalEarned = 0;
-    let totalPossible = 0;
-
-    for (let content in contentScores) {
-        totalEarned += contentScores[content]['Earned'];
-        totalPossible += contentScores[content]['Possible'];
-        xpScore = totalEarned / totalPossible;
     }
 }
 
@@ -337,6 +515,11 @@ function renderContentPanel() {
     const title = document.createElement("div");
     title.classList.add("content-title");
     title.textContent = content;
+    // Add click event to title element to drive KPI panel
+    title.addEventListener("click", () => {
+      sessionStorage.setItem("currentContent", content);
+      renderKPIPanel(content);
+    });
     row.appendChild(title);
 
     const curricula = assignments[content];
@@ -383,7 +566,6 @@ function renderContentPanel() {
   }
 }
 
-
 //-----------------------------------------------------------------------------------------------------------------
 // Main initialization function
 async function initializePage() {
@@ -406,6 +588,8 @@ document.addEventListener("DOMContentLoaded", async function() {
     await initializePage();
     console.log("Rendering Content Panel");
     renderContentPanel();
+    console.log("Calculating Key Performance Indicators");
+    console.log(calculateKPIs(JSON.parse(localStorage.getItem('xpData'))));
 });
 
 
@@ -417,3 +601,4 @@ window.onload = function() {
 };
 
 //-----------------------------------------------------------------------------------------------------------------
+

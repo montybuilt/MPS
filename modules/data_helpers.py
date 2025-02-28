@@ -882,8 +882,13 @@ def fetch_xp_data(username, last_fetched_date, logger=None):
             # Prepare the new XP data for return (with relevant fields)
             xp_data = [{
                 "dXP": entry.dXP,
+                "possible_xp": entry.possible_xp,
                 "question_id": entry.question_id,
                 "curriculum_id": entry.curriculum_id,
+                "content_id": entry.content_id,
+                "difficulty": entry.difficulty,
+                "standard": entry.standard,
+                "objective": entry.objective,
                 "elapsed_time": entry.elapsed_time,
                 "timestamp": entry.timestamp.replace(tzinfo=None)
             } for entry in new_xp_entries]
