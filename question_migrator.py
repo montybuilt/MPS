@@ -35,6 +35,10 @@ for key in content.keys():
         try:
             crud_helper.create(
                 task_key = task_key,
+                standard = 0,
+                objective = 0,
+                creator_id = 9,
+                content_id = 'pcep',
                 code = code,
                 question = question,
                 answer = answer,

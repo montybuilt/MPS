@@ -39,12 +39,12 @@ def index():
     # Get the username
     username = session.get('username')
     
-    # Check to see if user is an admin
-    is_admin = session.get('is_admin')
-    app.logger.debug(f"Is admin: {is_admin}")
+    # # Check to see if user is an admin
+    # is_admin = session.get('is_admin')
+    # app.logger.debug(f"Is admin: {is_admin}")
     
     
-    return render_template('index.html', username = username, is_admin = is_admin)
+    return render_template('index.html', username = username) #, is_admin = is_admin)
     
 @app.route('/login', methods=['POST'])
 def login():
@@ -59,11 +59,11 @@ def login():
             
             # Build the session data for this app
             build_session(username, app.logger)
-            app.logger.debug(f"The login was successful - building sessionStorage")
+            is_admin = session.get('is_admin')
             # Build sesstionStorage data for the client
             sessionStorage_data = initialize_user_sessionStorage_data(app.logger)
 
-            return jsonify({'message': 'Login successful', 'session_data': sessionStorage_data, 'username': username}), 200
+            return jsonify({'message': 'Login successful', 'session_data': sessionStorage_data, 'username': username, 'is_admin': is_admin}), 200
 
         # If result is not True, it will contain an error message to display
         return jsonify({'error': result}), 401

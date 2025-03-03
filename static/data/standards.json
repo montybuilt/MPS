@@ -1,0 +1,82 @@
+{
+  "pcep": {
+    "version": "02",
+    "1": {
+      "description": "Computer Programming and Python Fundamentals.",
+      "objectives": {
+        "1": "Understand fundamental terms and definitions. \n\n\t- interpreting and the interpreter\n\t- lexis, syntax, and semantics",
+        "2": "Understand Python's logic and structure. \n\n\t- keywords\n\t- instructions\n\t- indentation\n\t- comments",
+        "3": "Introduce literals and variables into code and use different numeral systems.\n\n\t- Boolean, integers, floating-point numbers\n\t- Scientific notation\n\t- strings\n\t- binary, octal, decimal and hexadecimal numeral systems\n\t- variables\n\t- naming conventions\n\t- implementing PEP-8 recommendations",
+        "4": "Choose operators and data types adequate to the problem.\n\n\t- numeric operators (**, *, /, %, //, +, -)\n\t- String operators (+, *)\n\t- Assignment and shortcut operators\n\t- unary and binary operators\n\t- priorities and binding\n\t- bitwise operators (~, &, ^, |, <<, >>)\n\t- Boolean operators (not, and, or)\n\t- Boolean expressions\n\t- relational operators (==, !=, >, >=, <, <=)\n\t- the accuracy of floating-point numbers\n\t- type casting",
+        "5": "Perform Input/Output console operations.\n\n\t- the print() and input() functions\n\t- The sep= and end= keyword parameters\n\t- The int() and float() functions"
+      }
+    },
+    "2": {
+      "description": "Control structures, covering conditional statements and loops.",
+      "objectives": {
+        "1": "Implement and use if, elif, and else statements.",
+        "2": "Apply for and while loops for iteration.",
+        "3": "Utilize control flow to manage program logic."
+      }
+    },
+    "3": {
+      "description": "Functions, modules, and code organization.",
+      "objectives": {
+        "1": "Define and invoke functions effectively.",
+        "2": "Understand function parameters, scope, and return values.",
+        "3": "Utilize modules and standard libraries for program organization."
+      }
+    },
+    "4": {
+      "description": "Basic exception handling, input/output operations, and file handling.",
+      "objectives": {
+        "1": "Handle exceptions using try, except, and finally blocks.",
+        "2": "Perform basic file I/O operations.",
+        "3": "Understand error types and apply basic debugging techniques."
+      }
+    }
+  },
+  "pcap": {
+    "version": "03",
+    "1": {
+      "description": "Advanced Python programming concepts and in-depth understanding of Python syntax and semantics.",
+      "objectives": {
+        "1": "Deepen knowledge of Python's advanced syntax and built-in functions.",
+        "2": "Utilize standard libraries to solve more complex problems.",
+        "3": "Analyze and understand Python code structure and execution flow."
+      }
+    },
+    "2": {
+      "description": "Data structures and algorithms using Python.",
+      "objectives": {
+        "1": "Examine lists, tuples, dictionaries, and sets in depth.",
+        "2": "Implement iterations, comprehensions, and basic algorithmic logic.",
+        "3": "Assess algorithm complexity and optimize Python code."
+      }
+    },
+    "3": {
+      "description": "Advanced file I/O, module usage, and exception handling.",
+      "objectives": {
+        "1": "Perform advanced file operations and data serialization.",
+        "2": "Employ sophisticated module management and package utilization.",
+        "3": "Implement robust error handling and debugging strategies."
+      }
+    },
+    "4": {
+      "description": "Object-oriented programming in Python.",
+      "objectives": {
+        "1": "Design and implement classes and objects.",
+        "2": "Apply inheritance, polymorphism, and encapsulation effectively.",
+        "3": "Utilize object-oriented design principles for modular code."
+      }
+    },
+    "5": {
+      "description": "Advanced topics including generators, iterators, decorators, and working with external libraries.",
+      "objectives": {
+        "1": "Understand and implement generators and iterators.",
+        "2": "Create and apply decorators to enhance code reusability.",
+        "3": "Manage virtual environments and integrate external libraries."
+      }
+    }
+  }
+}

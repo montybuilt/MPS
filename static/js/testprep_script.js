@@ -199,12 +199,8 @@ function checkQuestionStatus(questionId) {
 
 //--------------------------------------------------------------------------------------
 
-
 // Function to calculate the XP change and update the XP storage
-// Switching to ignore sessionStorage of xp and work only with database
-
 function updateXP(questionId, difficulty, status) {
-    console.log("Updating XP");
     // Get the list of correct and incorrect answers from sessionStorage
     let correctAnswers = JSON.parse(sessionStorage.getItem('correctAnswers')) || [];
     let incorrectAnswers = JSON.parse(sessionStorage.getItem('incorrectAnswers')) || [];
@@ -213,7 +209,7 @@ function updateXP(questionId, difficulty, status) {
     let multiplier = 1; // Default multiplier
     if (status === 'correct') {
         if (correctAnswers.includes(questionId)) {
-            multiplier = 0.05; // Previously answered correctly
+            multiplier = 0.01; // Previously answered correctly
         } else if (incorrectAnswers.includes(questionId)) {
             multiplier = 0.5;  // Previously answered incorrectly
         }
@@ -221,18 +217,38 @@ function updateXP(questionId, difficulty, status) {
 
     // Calculate ΔXP using the given formula
     let dXP = (Number(difficulty) / 3) - (status === 'correct' ? 0 : 1);
-
-    // Apply the multiplier to the XP change
-    dXP = dXP * multiplier;
-    dXP = (dXP * 100) / 100;
-    let dXP_accrued = Math.max(dXP, 0);
-    dXP_possible = ((Number(difficulty) / 3) * multiplier);
-
-    // Update the XP data bar
-    //updateXPDisplay(content)
     
+    // Apply the multiplier and round to two decimals.
+    //dXP = Math.round(dXP * multiplier * 100) / 100;
+    dXP = dXP * multiplier;
+    
+    // For scoring, only positive XP counts.
+    let dXP_accrued = Math.max(dXP, 0);
+        
+    // Calculate possible XP similarly, rounding to two decimals.
+    //let dXP_possible = Math.round(((Number(difficulty) / 3) * multiplier) * 100) / 100;
+    let dXP_possible = Number(difficulty) / 3 * multiplier;
 
-    return dXP; // Return the XP change for display
+    console.log("The Standard Is:", standard);  // Ensure this global is defined correctly.
+    
+    // Update global XP variables.
+    window.totalXP += dXP;
+    window.curriculumXPEarned += dXP_accrued;
+    
+    // Ensure the key exists in standardsXPEarned before adding.
+    let stdKey = Number(standard); // or String(standard), but be consistent with initializeXPData
+    if (typeof window.standardsXPEarned[stdKey] === 'undefined') {
+        window.standardsXPEarned[stdKey] = 0;
+    }
+    window.standardsXPEarned[stdKey] += dXP_accrued;
+    
+    // (If you need to update standardsXPPossible here too, do the same check.)
+    // updateXPDataBar();
+    
+    // Update the XP data bar.
+    updateXPDataBar();
+
+    return [dXP, dXP_possible]; // Return the XP change for display
 }
 
 //--------------------------------------------------------------------------------------
@@ -240,8 +256,6 @@ function updateXP(questionId, difficulty, status) {
 // Function to update the question metadata on the navbar
 
 function updateNavbarData(questionId) {
-
-    console.log("Updating Navbar Data:")
 
     // Get the completion status of the current question
     const isCompleted = checkQuestionStatus(questionId) ? "Completed" : "Not Completed";
@@ -265,39 +279,38 @@ function updateDescription() {
 //---------------------------------------------------------------------------------------
 
 // Function to update the XP data bar
-function updateXPDisplay(content) {
-    // Retrieve the XP data from local storage
-    const xpData = JSON.parse(sessionStorage.getItem('xp')) || {};
+function updateXPDataBar() {
+    // Update Overall XP
+    const overallXPSpan = document.getElementById("overallXP");
+    overallXPSpan.textContent = window.totalXP.toFixed(1);
     
-    // Check if the content exists in the XP data
-    if (xpData.certifications && xpData.certifications[content]) {
-        // Retrieve the overall XP and specific XP values for the content
-        const overallXP = xpData.overallXP || 0;
-        const contentXP = xpData.certifications[content];
-        
-        // Update the overall XP display
-        document.getElementById('overallXP').textContent = overallXP.toFixed(2);
-        
-        // Loop through each XP entry in the content-specific XP data
-        for (const [key, value] of Object.entries(contentXP)) {
-            const element = document.getElementById(key.toLowerCase());
-            if (element) {
-                element.textContent = value.toFixed(2);
-            }
+    // Update Curriculum Score
+    const curriculumScoreSpan = document.getElementById("curriculumScore");
+    let curriculumScore = window.curriculumXPPossible > 0 
+        ? (window.curriculumXPEarned / window.curriculumXPPossible) * 100 
+        : 0;
+    curriculumScoreSpan.textContent = Math.round(curriculumScore) + "%";
+    
+    // Standards: use a standards mapping based on content
+    const standardsMap = {'pcep': [1, 2, 3, 4], 'pcap': [1, 2, 3, 4, 5]};
+    const currentContent = content; //sessionStorage.getItem('currentContent');
+    const standardsList = standardsMap[currentContent] || [];
+    
+    // Loop over possible standard spans (xp_1 ... xp_5)
+    for (let i = 1; i <= 5; i++) {
+        const span = document.getElementById("xp_" + i);
+        // If the current content has this standard, update the span
+        if (standardsList.includes(i)) {
+            let earned = window.standardsXPEarned[i] || 0;
+            let possible = window.standardsXPPossible[i] || 0;
+            let score = possible > 0 ? (earned / possible) * 100 : 0;
+            span.textContent = Math.round(score) + "%";
+            span.style.display = "inline"; // Ensure it's visible
+        } else {
+            // Hide any standards that are not relevant for this content
+            span.textContent = "";
+            span.style.display = "none";
         }
-    }
-    
-    // Retrieve and display the curriculum score
-    const currentCurriculum = sessionStorage.getItem('currentCurriculum');
-    const curriculumScores = JSON.parse(sessionStorage.getItem('curriculumScores')) || {};
-    
-    if (currentCurriculum && curriculumScores[currentCurriculum]) {
-        const earned = curriculumScores[currentCurriculum].Earned || 0;
-        const possible = curriculumScores[currentCurriculum].Possible || 0;
-        const curriculumScore = possible > 0 ? ((earned / possible) * 100).toFixed(2) : '0.00';
-        
-        // Update the curriculum score display
-        document.getElementById('curriculumScore').textContent = curriculumScore + '%';
     }
 }
 
@@ -472,7 +485,7 @@ function updatePage(data) {
     updateNavbarData(currentQuestionId);
     
     // Update the XP data bar
-    //updateXPDisplay(content);
+    // updateXPDataBar();
     
     // Disable the Submit button again
     document.getElementById("submit-answer").disabled = false;
@@ -500,6 +513,8 @@ function checkCurriculumStatus() {
         completedCurriculums.push(curriculumKey);
         sessionStorage.setItem('completedCurriculums', JSON.stringify(completedCurriculums));
         alert("Congratulations! You've completed the curriculum!");
+        // Redirect to /dashboard
+        window.location.href = '/dashboard';
     }
     
 }
@@ -635,15 +650,12 @@ async function fetchCurriculum(curriculumId, isNew = true) {
         
     // Given the curriculum, find the content area and set global variable
     studentAssignments = JSON.parse(sessionStorage.getItem("studentAssignments")) || {}
-    console.log("studentAssignments", studentAssignments, "curriculum:", curriculumId);
     xpData = JSON.parse(localStorage.getItem("xpData")) || [];
     content_area = findOuterKeyByInnerKey(studentAssignments, curriculumId);
     content = content_area;
-    console.log("Content Area:", content);
 
     // Given the curriculum, find the questions list
     questionsList = studentAssignments[content_area][curriculumId] || [];
-    console.log("Questions", questionsList);
 
     // Save the questions list and curriculum name to local storage
     sessionStorage.setItem("questionsList", JSON.stringify(questionsList));
@@ -795,8 +807,6 @@ var editor = CodeMirror.fromTextArea(document.getElementById("code"), {
 document.getElementById("run").onclick = function() {
     var code = editor.getValue();
 
-    console.log("Code output is being requested");
-
     // Prepare inputs (you can ask for them before running the code)
     let inputs = [];  // Store inputs here
     let modifiedCode = code;  // Start with the raw code
@@ -832,7 +842,6 @@ document.getElementById("run").onclick = function() {
         .then(response => response.json())
         .then(data => {
             // Display the output in the console div
-            console.log("Code output has been received");
             displayOutput(data.output);
         })
         .catch((error) => {
@@ -965,9 +974,7 @@ function postXP(dXP, questionId, curriculumId, contentId, standard, objective, e
                     'elapsed_time': elapsedTime,
                     'difficulty': difficulty,
                     'possible_xp': dXP_possible};
-    // POST the jsonified data to the server
-    console.log("Sending XP data to datbase:", XPData);  // Log to console
-
+    
     fetch('/update_xp', {
         method: 'POST',
         headers: {
@@ -1010,14 +1017,14 @@ document.getElementById("submit-answer").onclick = async function() {
             
             if (answeredOnTime) {
                 // Update XP and show alert for correct answer within time limit
-                dXP = updateXP(currentQuestionId, difficulty, 'correct');
+                [dXP, dXP_possible] = updateXP(currentQuestionId, difficulty, 'correct');
                 // Display the description and the video button
                 updateDescription();
                 updateAnswerStatus(currentQuestionId, "correct");
                 await showResultDialog(true, dXP);               
             } else {
                 // Handle case where correct answer is given but not within time limit
-                dXP = updateXP(currentQuestionId, 0, 'correct');
+                [dXP, dXP_possible] = updateXP(currentQuestionId, 0, 'correct');
                 // Display the description and the video button
                 updateDescription();
                 await showResultDialog("late", dXP);
@@ -1027,7 +1034,7 @@ document.getElementById("submit-answer").onclick = async function() {
             document.getElementById("submit-answer").disabled = true;
         } else {
             // Incorrect answer handling (timing doesn't matter)
-            dXP = updateXP(currentQuestionId, difficulty, 'incorrect');
+            [dXP, dXP_possible] = updateXP(currentQuestionId, difficulty, 'incorrect');
             // Display the description and the video button
             updateDescription();
             updateAnswerStatus(currentQuestionId, "incorrect");
@@ -1037,11 +1044,6 @@ document.getElementById("submit-answer").onclick = async function() {
         }
         
         // Post XP Data to the server
-        // add curriculum_id, content_id, tags, standard, objective
-        //dXP, questionId, curriculumId, contentId, standard, objective, elapsedTime, difficulty, dXP_possible
-        console.log("dXP", dXP, "QuestionId", currentQuestionId);
-        console.log("Content", content, "Curriculum", currentCurriculum, "Tags", tags);
-        console.log("Standard", standard, "Objective", objective);
         postXP(dXP, currentQuestionId, currentCurriculum, content, standard, objective, elapsedTime, difficulty, dXP_possible);
         
         // Call this function to load the progress bar when the question is answered
@@ -1073,7 +1075,6 @@ async function setupTestprepSession() {
     
     // Reset the xpData if the current user is not the same as the stored xpData
     if (xpUsername !== username) {
-        console.log("NEW USER ALERT!");
         localStorage.setItem("xpLastFetchedDatetime", "1970-01-01");
         localStorage.setItem("xpUsername", username);
         localStorage.removeItem("xpData");
@@ -1099,11 +1100,63 @@ async function setupTestprepSession() {
     
         const data = await response.json();
         // Note: Adjusting to match your Flask response structure (data.data)
-        console.log('Student Assignments:', data.data.userAssignments);
         
-        // Save the student assignments dictionary into sessionStorage.
-        const studentAssignments = data.data.userAssignments || {};
+        // Get the raw assignments from the response
+        const rawAssignments = data.data.userAssignments || {};
+        
+        // Initialize our dictionaries.
+        const studentAssignments = {};      // { content: { curriculum: [question_ids] } }
+        const curriculumXP = {};            // { curriculum: potential_xp }
+        const standardObjectiveXP = {};     // { content: { "standard.objective": potential_xp } }
+        
+        // Iterate through the raw assignments.
+        for (const content in rawAssignments) {
+          if (rawAssignments.hasOwnProperty(content)) {
+            // Initialize the content key for both studentAssignments and standardObjectiveXP.
+            studentAssignments[content] = {};
+            standardObjectiveXP[content] = {};
+        
+            // Loop through each curriculum under this content.
+            for (const curriculum in rawAssignments[content]) {
+              if (rawAssignments[content].hasOwnProperty(curriculum)) {
+                const details = rawAssignments[content][curriculum]; // Array of objects: { task_key, difficulty, standard, objective }
+        
+                // Build the array of question_ids (task_keys) for studentAssignments.
+                studentAssignments[content][curriculum] = details.map(item => item.task_key);
+        
+                // Calculate total difficulty for the curriculum.
+                const totalDifficulty = details.reduce((sum, item) => sum + item.difficulty, 0);
+                // Compute potential XP for the curriculum (scaled by dividing by 3).
+                curriculumXP[curriculum] = totalDifficulty / 3;
+        
+                // For each question, accumulate difficulty for its standard/objective pairing.
+                details.forEach(item => {
+                  const soKey = `${item.standard}.${item.objective}`;
+                  if (!standardObjectiveXP[content].hasOwnProperty(soKey)) {
+                    standardObjectiveXP[content][soKey] = 0;
+                  }
+                  standardObjectiveXP[content][soKey] += item.difficulty;
+                });
+              }
+            }
+          }
+        }
+        
+        // Now, convert each standard/objective total into potential XP by dividing by 3.
+        for (const content in standardObjectiveXP) {
+          if (standardObjectiveXP.hasOwnProperty(content)) {
+            for (const soKey in standardObjectiveXP[content]) {
+              if (standardObjectiveXP[content].hasOwnProperty(soKey)) {
+                standardObjectiveXP[content][soKey] /= 3;
+              }
+            }
+          }
+        }
+        
+        // Save the split dictionaries into storage.
         sessionStorage.setItem('studentAssignments', JSON.stringify(studentAssignments));
+        localStorage.setItem('curriculumXP', JSON.stringify(curriculumXP));
+        localStorage.setItem('standardObjectiveXP', JSON.stringify(standardObjectiveXP));
         
         // Extract all content areas (keys) from the student assignments.
         const assignedContent = Object.keys(studentAssignments) || [];
@@ -1119,7 +1172,6 @@ async function setupTestprepSession() {
             // Store the merged XP data and the new last fetched datetime in localStorage.
             localStorage.setItem("xpData", JSON.stringify(mergedXPData));
             localStorage.setItem("xpLastFetchedDatetime", data.data.xpLastFetchedDatetime);
-            console.log("XP Data updated and stored.");
         } else {
             console.log("No XP Data update needed.");
         }
@@ -1130,6 +1182,65 @@ async function setupTestprepSession() {
     } catch (error) {
         console.error('Fetch error:', error);
     }
+}
+
+//--------------------------------------------------------------------------------------
+
+function initializeXPData() {
+    // Get data from storage
+    const xpData = JSON.parse(localStorage.getItem('xpData')) || [];
+    const curriculumXP = JSON.parse(localStorage.getItem('curriculumXP')) || {};
+    const standardObjectiveXP = JSON.parse(localStorage.getItem('standardObjectiveXP')) || {};
+    //const content = sessionStorage.getItem('currentContent');
+    const curriculum = sessionStorage.getItem('currentCurriculum');
+    const standards = {'pcep': [1,2,3,4], 'pcap': [1,2,3,4,5]};
+    
+    // Calculate total XP: sum all dXP values from xpData.
+    let totalXP = xpData.reduce((sum, record) => sum + record.dXP, 0);
+    
+    // Calculate XP earned for the current curriculum using only positive dXP.
+    let curriculumXPEarned = xpData
+        .filter(record => record.curriculum_id === curriculum)
+        .reduce((sum, record) => sum + Math.max(record.dXP, 0), 0);
+    
+    // Get the possible XP for the current curriculum from the curriculumXP object.
+    let curriculumXPPossible = curriculumXP[curriculum] || 0;
+    
+    // Initialize dictionaries for standards data.
+    let standardsXPEarned = {};
+    let standardsXPPossible = {};
+    
+    // Get the list of standards for the current content.
+    const standardsList = standards[content] || [];
+    
+    // For each standard in the current content, calculate earned and possible XP.
+    standardsList.forEach(std => {
+        // Earned XP for this standard across the entire content:
+        const earned = xpData
+            .filter(record => record.content_id === content && Number(record.standard) === std)
+            .reduce((sum, record) => sum + Math.max(record.dXP, 0), 0);
+        standardsXPEarned[std] = earned;
+        
+        // Possible XP for this standard:
+        let possible = 0;
+        if (standardObjectiveXP[content]) {
+            for (const key in standardObjectiveXP[content]) {
+                // Assume key format "standard.objective", e.g., "1.2"
+                const parts = key.split('.');
+                if (parts.length === 2 && Number(parts[0]) === std) {
+                    possible += standardObjectiveXP[content][key];
+                }
+            }
+        }
+        standardsXPPossible[std] = possible;
+    });
+    
+    // Store the results in global variables
+    window.totalXP = totalXP;
+    window.curriculumXPEarned = curriculumXPEarned;
+    window.curriculumXPPossible = curriculumXPPossible;
+    window.standardsXPEarned = standardsXPEarned;
+    window.standardsXPPossible = standardsXPPossible;
 }
 
 //--------------------------------------------------------------------------------------
@@ -1190,6 +1301,8 @@ async function initializePage() {
     currentCurriculumId = sessionStorage.getItem('currentCurriculum');
     await setupTestprepSession();
     fetchCurriculum(currentCurriculumId, false);
+    initializeXPData();
+    updateXPDataBar();
     
 }
 

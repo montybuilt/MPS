@@ -5,69 +5,144 @@ let xpCompletion = 0;
 let myAssignments;
 let myContent;
 let myCurriculums;
+window.standardsData = {}
 
+//-----------------------------------------------------------------------------------------------------------------
 
+// Async function to fetch standards data
+async function loadStandardsData() {
+  try {
+    const response = await fetch('/static/data/standards.json');
+    const data = await response.json();
+    window.standardsData = data;
+    console.log("Standards data loaded:", window.standardsData);
+  } catch (error) {
+    console.error("Error loading standards data:", error);
+  }
+}
 
 //-----------------------------------------------------------------------------------------------------------------
 
 function calculateKPIs(xpData) {
-  // Initialize summary object for each category
-  const summary = {
-    content: {},
-    curriculum: {},
-    standardObjective: {}, // This will be an object keyed by content_id, then by standard/objective pair
-    overall: { totalEarned: 0, totalPossible: 0, percent: 0 }
-  };
+    // Retrieve potential XP data from localStorage.
+    const curriculumXPFromStorage = JSON.parse(localStorage.getItem('curriculumXP')) || {};
+    const standardObjectiveXPFromStorage = JSON.parse(localStorage.getItem('standardObjectiveXP')) || {};
 
-  xpData.forEach(record => {
-    const { content_id, curriculum_id, standard, objective, dXP, possible_xp } = record;
+    const summary = {
+        overall: { totalEarned: 0, scoreEarned: 0, totalPossible: 0, percent: 0 },
+        content: {},
+        curriculum: {},
+        standardObjective: {}
+    };
+
+    // Iterate over xpData to accumulate earned XP.
+    xpData.forEach(record => {
+        const { content_id, curriculum_id, standard, objective, dXP } = record;
+        
+        // Overall: accumulate raw earned XP and positive earned XP.
+        summary.overall.totalEarned += dXP;
+        summary.overall.scoreEarned += (dXP > 0 ? dXP : 0);
     
-    // Update overall totals
-    summary.overall.totalEarned += dXP;
-    summary.overall.totalPossible += possible_xp;
-    
-    // Group by content_id
+    // Content grouping: accumulate earned XP.
     if (!summary.content[content_id]) {
-      summary.content[content_id] = { totalEarned: 0, totalPossible: 0, percent: 0 };
+        summary.content[content_id] = { totalEarned: 0, scoreEarned: 0, totalPossible: 0, percent: 0 };
     }
     summary.content[content_id].totalEarned += dXP;
-    summary.content[content_id].totalPossible += possible_xp;
+    summary.content[content_id].scoreEarned += (dXP > 0 ? dXP : 0);
     
-    // Group by curriculum_id
+    // Curriculum grouping: accumulate earned XP.
     if (!summary.curriculum[curriculum_id]) {
-      summary.curriculum[curriculum_id] = { totalEarned: 0, totalPossible: 0, percent: 0 };
+        summary.curriculum[curriculum_id] = { totalEarned: 0, scoreEarned: 0, totalPossible: 0, percent: 0 };
     }
     summary.curriculum[curriculum_id].totalEarned += dXP;
-    summary.curriculum[curriculum_id].totalPossible += possible_xp;
+    summary.curriculum[curriculum_id].scoreEarned += (dXP > 0 ? dXP : 0);
     
-    // Group by standard/objective pairing, nested by content_id
+    // Standard/Objective grouping (nested by content)
     if (!summary.standardObjective[content_id]) {
-      summary.standardObjective[content_id] = {};
+        summary.standardObjective[content_id] = {};
     }
-    const soKey = `${standard}.${objective}`; // dot notation pairing
+    const soKey = `${standard}.${objective}`;
     if (!summary.standardObjective[content_id][soKey]) {
-      summary.standardObjective[content_id][soKey] = { totalEarned: 0, totalPossible: 0, percent: 0 };
+        summary.standardObjective[content_id][soKey] = { totalEarned: 0, scoreEarned: 0, totalPossible: 0, percent: 0 };
     }
     summary.standardObjective[content_id][soKey].totalEarned += dXP;
-    summary.standardObjective[content_id][soKey].totalPossible += possible_xp;
-  });
+    summary.standardObjective[content_id][soKey].scoreEarned += (dXP > 0 ? dXP : 0);
+    });
 
-  // Helper to compute percentage from totals
-  function computePercentage(group) {
-    group.percent = group.totalPossible > 0 ? (group.totalEarned / group.totalPossible) * 100 : 0;
-  }
+    // Build a mapping of content -> set of unique curriculum_ids encountered in xpData.
+    const contentCurricula = {};
+    xpData.forEach(record => {
+        const { content_id, curriculum_id } = record;
+        if (!contentCurricula[content_id]) {
+          contentCurricula[content_id] = new Set();
+        }
+        contentCurricula[content_id].add(curriculum_id);
+    });
 
-  // Compute percentages for overall, content, and curriculum
-  computePercentage(summary.overall);
-  Object.values(summary.content).forEach(computePercentage);
-  Object.values(summary.curriculum).forEach(computePercentage);
+    // For each curriculum group, override totalPossible from curriculumXP.
+    for (const curriculum_id in summary.curriculum) {
+        if (summary.curriculum.hasOwnProperty(curriculum_id)) {
+            summary.curriculum[curriculum_id].totalPossible = curriculumXPFromStorage[curriculum_id] || 0;
+        }
+    }
 
-  // Compute percentages for standardObjective pairings for each content
-  Object.values(summary.standardObjective).forEach(soGroup => {
-    Object.values(soGroup).forEach(computePercentage);
-  });
+    // For content grouping, sum up the curriculumXP values for each curriculum in that content
+    const assignments = JSON.parse(sessionStorage.getItem('studentAssignments')) || {};
+    for (const content_id in summary.content) {
+        if (summary.content.hasOwnProperty(content_id)) {
+            let totalPossible = 0;
+            if (assignments[content_id]) {
+                Object.keys(assignments[content_id]).forEach(curriculum_id => {
+                    totalPossible += (curriculumXPFromStorage[curriculum_id] || 0);
+                });
+            }
+            summary.content[content_id].totalPossible = totalPossible;
+        }
+    }
 
-  return summary;
+    // For overall, sum up all unique curriculumXP values (across all curricula encountered).
+    let overallPossible = 0;
+    for (const curriculum_id in curriculumXPFromStorage) {
+        if (curriculumXPFromStorage.hasOwnProperty(curriculum_id)) {
+            overallPossible += curriculumXPFromStorage[curriculum_id];
+        }
+    }
+    summary.overall.totalPossible = overallPossible;
+    console.log("Overall Possible", overallPossible);
+
+    // For standard/objective grouping: override totalPossible using standardObjectiveXP.
+    for (const content_id in summary.standardObjective) {
+        if (summary.standardObjective.hasOwnProperty(content_id)) {
+            for (const soKey in summary.standardObjective[content_id]) {
+                if (summary.standardObjective[content_id].hasOwnProperty(soKey)) {
+                    summary.standardObjective[content_id][soKey].totalPossible =
+                      (standardObjectiveXPFromStorage[content_id] &&
+                        standardObjectiveXPFromStorage[content_id][soKey]) || 0;
+                }
+            }
+        }
+    }
+
+    // Compute overall percent using scoreEarned (only positive dXP) over totalPossible.
+    summary.overall.percent = summary.overall.totalPossible > 0 ?
+        (summary.overall.scoreEarned / summary.overall.totalPossible) * 100 : 0;
+    
+    // Set the global XP values.
+    totalXP = summary.overall.totalEarned;  // raw total earned XP (including negatives)
+    xpScore = summary.overall.percent;        // XP Score is percentage of positive earned XP
+    
+    // Helper: Compute percentage for group using scoreEarned.
+    function computePercentage(group) {
+        group.percent = group.totalPossible > 0 ? (group.scoreEarned / group.totalPossible) * 100 : 0;
+    }
+
+    Object.values(summary.content).forEach(computePercentage);
+    Object.values(summary.curriculum).forEach(computePercentage);
+    Object.values(summary.standardObjective).forEach(soGroup => {
+        Object.values(soGroup).forEach(computePercentage);
+    });
+    
+    return summary;
 }
 
 //-----------------------------------------------------------------------------------------------------------------
@@ -112,10 +187,66 @@ async function setupDashboardSession() {
         // Note: Adjusting to match your Flask response structure (data.data)
         console.log('Student Assignments:', data.data.userAssignments);
         
-        // Save the student assignments dictionary into sessionStorage.
-        const studentAssignments = data.data.userAssignments || {};
-        sessionStorage.setItem('studentAssignments', JSON.stringify(studentAssignments));
+        // Get the raw assignments from the response
+        const rawAssignments = data.data.userAssignments || {};
         
+        // Initialize our dictionaries.
+        const studentAssignments = {};      // { content: { curriculum: [question_ids] } }
+        const curriculumXP = {};            // { curriculum: potential_xp }
+        const standardObjectiveXP = {};     // { content: { "standard.objective": potential_xp } }
+        
+        // Iterate through the raw assignments.
+        for (const content in rawAssignments) {
+          if (rawAssignments.hasOwnProperty(content)) {
+            // Initialize the content key for both studentAssignments and standardObjectiveXP.
+            studentAssignments[content] = {};
+            standardObjectiveXP[content] = {};
+        
+            // Loop through each curriculum under this content.
+            for (const curriculum in rawAssignments[content]) {
+              if (rawAssignments[content].hasOwnProperty(curriculum)) {
+                const details = rawAssignments[content][curriculum]; // Array of objects: { task_key, difficulty, standard, objective }
+        
+                // Build the array of question_ids (task_keys) for studentAssignments.
+                studentAssignments[content][curriculum] = details.map(item => item.task_key);
+        
+                // Calculate total difficulty for the curriculum.
+                const totalDifficulty = details.reduce((sum, item) => sum + item.difficulty, 0);
+                // Compute potential XP for the curriculum (scaled by dividing by 3).
+                curriculumXP[curriculum] = totalDifficulty / 3;
+        
+                // For each question, accumulate difficulty for its standard/objective pairing.
+                details.forEach(item => {
+                  const soKey = `${item.standard}.${item.objective}`;
+                  if (!standardObjectiveXP[content].hasOwnProperty(soKey)) {
+                    standardObjectiveXP[content][soKey] = 0;
+                  }
+                  standardObjectiveXP[content][soKey] += item.difficulty;
+                });
+              }
+            }
+          }
+        }
+        
+        // Now, convert each standard/objective total into potential XP by dividing by 3.
+        for (const content in standardObjectiveXP) {
+          if (standardObjectiveXP.hasOwnProperty(content)) {
+            for (const soKey in standardObjectiveXP[content]) {
+              if (standardObjectiveXP[content].hasOwnProperty(soKey)) {
+                standardObjectiveXP[content][soKey] /= 3;
+              }
+            }
+          }
+        }
+        
+        // Save the split dictionaries into storage.
+        sessionStorage.setItem('studentAssignments', JSON.stringify(studentAssignments));
+        localStorage.setItem('curriculumXP', JSON.stringify(curriculumXP));
+        localStorage.setItem('standardObjectiveXP', JSON.stringify(standardObjectiveXP));
+        
+        console.log("Curriculum XPs", curriculumXP);
+        console.log("Standard/Objective XPs", standardObjectiveXP);
+
         // Extract all content areas (keys) from the student assignments.
         const assignedContent = Object.keys(studentAssignments) || [];
         
@@ -137,6 +268,7 @@ async function setupDashboardSession() {
         
         // Update the xpUsername in localStorage.
         localStorage.setItem("xpUsername", data.data.xpUsername);
+        
     } catch (error) {
         console.error('Fetch error:', error);
     }
@@ -146,9 +278,13 @@ async function setupDashboardSession() {
 
 // Helper: Convert a score (0-100) to a color from red (low) to green (high)
 function getColorForScore(score) {
-  const red = Math.round(255 * (100 - score) / 100);
-  const green = Math.round(255 * score / 100);
-  return `rgb(${red}, ${green}, 0)`;
+  if (score > 70) {
+    return "green";
+  } else if (score >= 50) {
+    return "yellow";
+  } else {
+    return "red";
+  }
 }
 
 function renderKPIPanel(currentContent) {
@@ -158,68 +294,149 @@ function renderKPIPanel(currentContent) {
     kpiPanel = document.createElement('div');
     kpiPanel.id = 'kpi-panel';
     const chartContainer = document.getElementById('chart-container');
-    chartContainer.parentNode.insertBefore(kpiPanel, chartContainer);
+    if (chartContainer) {
+      chartContainer.parentNode.insertBefore(kpiPanel, chartContainer);
+    } else {
+      document.body.appendChild(kpiPanel);
+    }
   }
   kpiPanel.innerHTML = ''; // Clear previous content
 
-  // Use flexbox to align the grid and radar side by side.
+  // Set a fixed overall width for the KPI panel and center it.
+  kpiPanel.style.width = '1200px';
+  kpiPanel.style.margin = '0 auto';
+  // Use column layout so we have a title row above the panels.
   kpiPanel.style.display = 'flex';
-  kpiPanel.style.justifyContent = 'space-between';
-  kpiPanel.style.alignItems = 'flex-start';
+  kpiPanel.style.flexDirection = 'column';
 
-  // Adjust sizes:
-  // Increase heatmap squares by ~10%: original 50px becomes 55px.
-  const squareSize = 55;
-  // Grid width for 6 columns.
-  const gridWidth = squareSize * 6; // 330px
-  // Shrink radar chart by x% relative to gridWidth.
-  const radarWidth = Math.round(gridWidth * 1); 
+  // --- Create a title container for the three sub-panels ---
+  const detailTitles = document.createElement('div');
+  detailTitles.id = 'kpi-detail-titles';
+  detailTitles.style.display = 'flex';
+  detailTitles.style.justifyContent = 'space-between';
+  detailTitles.style.alignItems = 'center';
+  detailTitles.style.marginBottom = '10px';
+  
+  // Create three title boxes; adjust marginLeft as needed to shift horizontally.
+  const heatmapTitle = document.createElement('div');
+  heatmapTitle.id = 'heatmapTitle';
+  heatmapTitle.className = 'title-box';
+  heatmapTitle.style.flex = '1';
+  heatmapTitle.style.textAlign = 'left';
+  heatmapTitle.style.marginLeft = '68px';
+  heatmapTitle.innerHTML = `<h5 style="margin: 0; color: white; font-size: .9em;">${currentContent} - Objectives Heatmap</h5>`;
+  
+  const radarTitle = document.createElement('div');
+  radarTitle.id = 'radarTitle';
+  radarTitle.className = 'title-box';
+  radarTitle.style.flex = '1';
+  radarTitle.style.textAlign = 'left';
+  radarTitle.style.marginLeft = '50px';
+  radarTitle.innerHTML = `<h5 style="margin: 0; color: white; font-size: .9em;">${currentContent} - Curriculum Performance</h5>`;
+  
+  const xpTitle = document.createElement('div');
+  xpTitle.id = 'xpTitle';
+  xpTitle.className = 'title-box';
+  xpTitle.style.flex = '1';
+  xpTitle.style.textAlign = 'right';
+  xpTitle.style.marginRight = '155px';
+  xpTitle.innerHTML = `<h5 style="margin: 0; color: white; font-size: .9em;">Historical XP Performance</h5>`;
+  
+  detailTitles.appendChild(heatmapTitle);
+  detailTitles.appendChild(radarTitle);
+  detailTitles.appendChild(xpTitle);
+  
+  // Append the title container to the KPI panel.
+  kpiPanel.appendChild(detailTitles);
 
-  // Create grid container.
+  // --- Create a container for the three sub-panels ---
+  const panelsContainer = document.createElement('div');
+  panelsContainer.id = 'kpi-panels';
+  panelsContainer.style.display = 'flex';
+  panelsContainer.style.justifyContent = 'space-around';
+  panelsContainer.style.alignItems = 'flex-start';
+  
+  // Define sizes for the three sub-panels:
+  const gridWidth = 300;    // for the heatmap grid
+  const radarWidth = 400;   // for the radar chart
+  const xpChartWidth = 450; // for the historical XP chart
+
+  // Create grid container (heatmap).
   const gridDiv = document.createElement('div');
   gridDiv.id = 'grid';
   gridDiv.style.width = `${gridWidth}px`;
   gridDiv.style.display = 'grid';
-  gridDiv.style.gridGap = '5px';
-  gridDiv.style.gridTemplateColumns = `repeat(6, ${squareSize}px)`;
+  gridDiv.style.gridGap = '2px';
+  // Use 6 columns; 48px cells.
+  gridDiv.style.gridTemplateColumns = `repeat(6, 48px)`;
 
   // Create radar container.
   const radarDiv = document.createElement('div');
   radarDiv.id = 'radar';
   radarDiv.style.width = `${radarWidth}px`;
+  // For a 3:2 aspect ratio, height = radarWidth * 2/3 (e.g., 400 x ~267)
+  radarDiv.style.height = `${Math.round(radarWidth * 2/2.98)}px`;
   radarDiv.style.backgroundColor = "#3d3d39";
   radarDiv.style.border = '1px solid white';
 
-  kpiPanel.appendChild(gridDiv);
-  kpiPanel.appendChild(radarDiv);
+  // Create historical XP chart container.
+  const xpChartDiv = document.createElement('div');
+  xpChartDiv.id = 'xpChart';
+  xpChartDiv.style.width = `${xpChartWidth}px`;
+  xpChartDiv.style.height = `${xpChartWidth * 2/3.35}px`;
+  xpChartDiv.style.backgroundColor = "#3d3d39";
+  xpChartDiv.style.border = '1px solid white';
+
+  // Append the three sub-panels to the panels container.
+  panelsContainer.appendChild(gridDiv);
+  panelsContainer.appendChild(radarDiv);
+  panelsContainer.appendChild(xpChartDiv);
+  
+  // Append the panels container to the KPI panel.
+  kpiPanel.appendChild(panelsContainer);
 
   // Retrieve KPI summary data (assumes xpData is in localStorage)
   const xpData = JSON.parse(localStorage.getItem('xpData')) || [];
   const summary = calculateKPIs(xpData);
   const soData = summary.standardObjective[currentContent] || {};
 
-  // Build a fixed 5x6 grid.
+  // Build a fixed 5x6 grid for standards/objectives.
+  // For tooltip purposes, currentContent, row and col will determine what text to display.
   for (let row = 1; row <= 5; row++) {
     for (let col = 1; col <= 6; col++) {
       const key = `${row}.${col}`;
       const cell = document.createElement('div');
-      cell.style.width = `${squareSize}px`;
-      cell.style.height = `${squareSize}px`;
+      cell.style.width = '50px';
+      cell.style.height = '50px';
       cell.style.display = 'flex';
       cell.style.alignItems = 'center';
       cell.style.justifyContent = 'center';
-      //cell.style.border = '1px solid #fff';
+      cell.style.border = '1px solid #ffffff';
       cell.style.fontSize = '12px';
       cell.style.color = '#000000';
       
       if (soData.hasOwnProperty(key)) {
         const score = soData[key].percent;
         cell.style.backgroundColor = getColorForScore(score);
-        cell.title = `${key}: ${score.toFixed(1)}%`;
+        
+        console.log("Standards Available?", window.standardsData)
+        
+        // Build a detailed tooltip using the standardsData.
+        let tooltipText = `${currentContent} ${key}: ${score.toFixed(1)}%\n`;
+        if (window.standardsData &&
+            window.standardsData[currentContent] &&
+            window.standardsData[currentContent][row]) {
+          const stdInfo = window.standardsData[currentContent][row];
+          tooltipText += stdInfo.description + "\n";
+          if (stdInfo.objectives && stdInfo.objectives[col]) {
+            tooltipText += stdInfo.objectives[col];
+          }
+        }
+        cell.title = tooltipText;
         cell.textContent = score.toFixed(0) + '%';
       } else {
         cell.style.backgroundColor = '#3d3d39';
-        cell.title = `${key}: No data`;
+        cell.title = `${currentContent} ${key}: No data`;
         cell.textContent = '';
       }
       gridDiv.appendChild(cell);
@@ -230,6 +447,7 @@ function renderKPIPanel(currentContent) {
   const assignments = JSON.parse(sessionStorage.getItem("studentAssignments")) || {};
   const curricula = assignments[currentContent] || {};
   const curriculumIDs = Object.keys(curricula);
+  
   let radarValues = [];
   let radarLabels = [];
   curriculumIDs.forEach(currId => {
@@ -238,46 +456,111 @@ function renderKPIPanel(currentContent) {
       radarLabels.push(currId);
     }
   });
-  // Close the loop for radar chart
+  // Close the loop for the polygon trace.
+  let polygonValues = [...radarValues];
+  let polygonLabels = [...radarLabels];
   if (radarValues.length > 0) {
-    radarValues.push(radarValues[0]);
-    radarLabels.push(radarLabels[0]);
+    polygonValues.push(radarValues[0]);
+    polygonLabels.push(radarLabels[0]);
   }
-
-  const radarData = [{
+  
+  const polygonTrace = {
     type: 'scatterpolar',
-    r: radarValues,
-    theta: radarLabels,
-    fill: 'toself'
-  }];
-
+    mode: 'lines',
+    r: polygonValues,
+    theta: polygonLabels,
+    fill: 'toself',
+    line: { color: '#888' },
+    name: 'Overall Performance',
+    showlegend: false
+  };
+  
+  const markerColors = ['red', 'blue', 'green', 'orange', 'purple', 'cyan', 'magenta', 'yellow'];
+  
+  const markerTraces = curriculumIDs.map((currId, i) => {
+    if (summary.curriculum[currId]) {
+      return {
+        type: 'scatterpolar',
+        mode: 'markers',
+        r: [summary.curriculum[currId].percent],
+        theta: [currId],
+        marker: { color: markerColors[i % markerColors.length], size: 10 },
+        name: currId,
+        showlegend: true,
+        text: '' // Hide data point labels.
+      };
+    }
+  }).filter(trace => trace !== undefined);
+  
+  const radarData = [polygonTrace, ...markerTraces];
+  
   const radarLayout = {
     paper_bgcolor: '#3d3d39',
     plot_bgcolor: '#3d3d39',
     polar: {
+      bgcolor: '#3d3d39',
+      domain: { x: [0, 0.85], y: [0, 1] },
       radialaxis: {
         visible: true,
-        range: [0, 100]
+        range: [0, 100.5],
+        gridcolor: 'white',
+        gridwidth: 2,
+        tickfont: { color: 'white' },
+        linecolor: 'white'
+      },
+      angularaxis: {
+        showticklabels: false,
+        gridcolor: 'white',
+        gridwidth: 2,
+        linecolor: 'white',
+        gridshape: 'circular'
       }
     },
-    showlegend: false,
-    title: 'Curriculum Performance',
+    margin: { t: 0, r: 145, b: 0, l: 15 },
+    showlegend: true,
+    legend: {
+      orientation: 'v',
+      x: 0.9,
+      y: 0.9,
+      font: { color: 'white' }
+    },
+    title: `${currentContent} - Curriculum Performance`,
     width: radarWidth,
-    height: radarWidth
+    height: Math.round(radarWidth * 2 / 3)
   };
-
+  
   Plotly.newPlot('radar', radarData, radarLayout);
+
+  // --- Draw Historical XP Chart ---
+  // Assuming your drawAreaChart() function renders into the xpChart container.
+  drawAreaChart();
 }
+
+//-----------------------------------------------------------------------------------------------------------------
+// Function to load the kpi panel with content related to session curriculumId
+function loadKpiPanelFromCurrentCurriculum() {
+  const currentCurriculum = sessionStorage.getItem('currentCurriculum');
+  if (currentCurriculum) {
+    const assignments = JSON.parse(sessionStorage.getItem("studentAssignments"));
+    let foundContent = null;
+    // Iterate through each content area to see if it contains the currentCurriculum.
+    for (let content in assignments) {
+      if (assignments[content].hasOwnProperty(currentCurriculum)) {
+        foundContent = content;
+        break;
+      }
+    }
+    if (foundContent) {
+      renderKPIPanel(foundContent);
+    }
+  }
+}
+
 
 //-----------------------------------------------------------------------------------------------------------------
 // Function to process XP data
 function processXP() {
-    const xpData = JSON.parse(localStorage.getItem("xpData")) || [];
-    totalXP = xpData.reduce((sum, record) => sum + record.dXP, 0);
-    possibleXP = xpData.reduce((sum, record) => sum + record.possible_xp, 0);
-    xpScore = totalXP / possibleXP
     
-
     if (totalXP > 100) {
         xpLevel = 'Advanced';
     } else if (totalXP > 70) {
@@ -448,11 +731,11 @@ function drawAreaChart() {
     });
 
     const layout = {
-        title: { text: 'XP Accumulation Over Time', font: { color: 'white' } },
+        title: "", //{ text: 'XP Accumulation Over Time', font: { color: 'white' } },
         xaxis: {
             title: '',
             showticklabels: false, // Hide x-axis labels
-            color: 'white',
+            color: '#3d3d39',
             gridcolor: 'rgba(255, 255, 255, 0.2)'
         },
         yaxis: {
@@ -462,13 +745,13 @@ function drawAreaChart() {
             gridcolor: 'rgba(255, 255, 255, 0.2)',
             side: 'right' // Move y-axis labels to the right side
         },
-        paper_bgcolor: 'black',
-        plot_bgcolor: 'black',
+        paper_bgcolor: '#3d3d39',
+        plot_bgcolor: '#3d3d39',
         showlegend: false, // Hide legend
         margin: {
             l: 20,
             r: 30,
-            t: 40,
+            t: 20,
             b: 20,
         }
     };
@@ -481,7 +764,7 @@ function drawAreaChart() {
 function displayKPIData() {
     updateKPI('total-xp', totalXP.toFixed(1), xpLevel);
     updateKPI('xp-level', xpLevel, xpLevel);
-    updateKPI('xp-score', (xpScore * 100).toFixed(0) + '%', xpLevel);
+    updateKPI('xp-score', (xpScore).toFixed(0) + '%', xpLevel);
 }
 
 function updateKPI(id, value, condition) {
@@ -503,8 +786,8 @@ function updateKPI(id, value, condition) {
 //-----------------------------------------------------------------------------------------------------------------
 function renderContentPanel() {
   const assignments = JSON.parse(sessionStorage.getItem("studentAssignments"));
-  const completed = JSON.parse(sessionStorage.getItem("completedCurriculums")) || [];
   const xpData = JSON.parse(localStorage.getItem("xpData")) || [];
+  const summary = calculateKPIs(xpData); // Calculate KPI summary here
   const panel = document.getElementById("content-panel");
   panel.innerHTML = '';
 
@@ -512,10 +795,45 @@ function renderContentPanel() {
     const row = document.createElement("div");
     row.classList.add("content-row");
 
+    // Create content title element styled as a button.
     const title = document.createElement("div");
     title.classList.add("content-title");
-    title.textContent = content;
-    // Add click event to title element to drive KPI panel
+    
+    // Button-like minimal styling:
+    title.style.backgroundColor = "#ddd";      // light gray background
+    title.style.color = "#000";                  // black text
+    title.style.border = "1px solid #999";        // dark gray border
+    title.style.borderRadius = "4px";
+    title.style.padding = "8px 8px";             // smaller padding
+    title.style.cursor = "pointer";
+    title.style.boxShadow = "0px 1px 2px rgba(0, 0, 0, 0.2)";
+    title.style.display = "inline-block";
+    title.style.marginBottom = "0px";
+    title.style.whiteSpace = "nowrap";           // prevents wrapping
+    
+    // Add a hover effect that doesn't increase the overall size too much.
+    title.addEventListener("mouseover", () => {
+      title.style.backgroundColor = "#ccc";
+      title.style.boxShadow = "0px 2px 4px rgba(0, 0, 0, 0.3)";
+    });
+    title.addEventListener("mouseout", () => {
+      title.style.backgroundColor = "#ddd";
+      title.style.boxShadow = "0px 1px 2px rgba(0, 0, 0, 0.2)";
+    });
+
+    title.addEventListener("mouseout", () => {
+      title.style.backgroundColor = "#ddd";
+      title.style.boxShadow = "0px 2px 4px rgba(0, 0, 0, 0.3)";
+    });
+
+    // Get content score percentage (if available) from summary.content.
+    let contentScore = '';
+    if (summary.content[content]) {
+      contentScore = ` (${summary.content[content].percent.toFixed(0)}%)`;
+    }
+    title.textContent = content + contentScore;
+    
+    // When clicking on the content title, load the KPI panel for that content.
     title.addEventListener("click", () => {
       sessionStorage.setItem("currentContent", content);
       renderKPIPanel(content);
@@ -523,32 +841,43 @@ function renderContentPanel() {
     row.appendChild(title);
 
     const curricula = assignments[content];
-    // Extract curriculum keys and sort them naturally
+    // Extract curriculum keys and sort them naturally.
     const curriculumKeys = Object.keys(curricula).sort((a, b) =>
       a.localeCompare(b, undefined, { numeric: true, sensitivity: 'base' })
     );
 
+    const completed = JSON.parse(sessionStorage.getItem("completedCurriculums")) || [];
     for (let curriculum of curriculumKeys) {
       const box = document.createElement("div");
       box.classList.add("curriculum-box");
-      box.textContent = curriculum;
-
-      // Determine box color and text color:
-      if (completed.includes(curriculum)) {
-        box.style.backgroundColor = "green";
-        box.style.color = "white";
+    
+      // Determine the curriculum's score percentage.
+      let percent = summary.curriculum[curriculum] ? summary.curriculum[curriculum].percent : 0;
+      const isCompleted = completed.includes(curriculum);
+      // If the curriculum is completed, force percent to 100.
+      if (isCompleted) {
+        percent = 100;
+        // Append a checkmark (Unicode U+2713) to indicate completion.
+        box.innerHTML = `${curriculum} <span style="font-size:16px; font-weight:bold; color:white;">&#10003;</span>`;
       } else {
-        const questions = assignments[content][curriculum];
-        const answered = xpData.some(record => questions.includes(record.question_id));
-        if (answered) {
-          box.style.backgroundColor = "yellow";
-          box.style.color = "black";
-        } else {
-          box.style.backgroundColor = "grey";
-          box.style.color = "white";
-        }
+        box.textContent = curriculum;
       }
-
+      
+      // Set background color based on score thresholds.
+      if (percent > 70) {
+        box.style.backgroundColor = "green";
+      } else if (percent >= 50) {
+        box.style.backgroundColor = "yellow";
+      } else {
+        box.style.backgroundColor = "red";
+      }
+      // Always set text color to black.
+      box.style.color = "black";
+      box.style.cursor = "pointer";
+      box.style.padding = "8px 1px";
+      box.style.borderRadius = "4px";
+      // (The margin styling "px 0" doesn't have any effect; you may want to adjust that if needed.)
+      
       box.addEventListener("click", () => {
         sessionStorage.setItem("currentCurriculum", curriculum);
         const questions = assignments[content][curriculum];
@@ -559,9 +888,10 @@ function renderContentPanel() {
         sessionStorage.setItem("currentQuestionId", nextQuestion);
         window.location.href = "testprep";
       });
-
+      
       row.appendChild(box);
     }
+
     panel.appendChild(row);
   }
 }
@@ -570,14 +900,15 @@ function renderContentPanel() {
 // Main initialization function
 async function initializePage() {
     await setupDashboardSession();
+    await loadStandardsData();
     console.log("Processing XP")
     processXP();
     console.log("Calculating all curriculums status")
     identifyCompletedCurriculums();
-    console.log("Displaying KPI Data")
+    console.log("Drawing KPI Charts")
+    loadKpiPanelFromCurrentCurriculum();
+    console.log("Displaying KPI Summary")
     displayKPIData();
-    console.log("Drawing Chart")
-    drawAreaChart();
 }
 
 //--------------------------------------------------------------------------------------

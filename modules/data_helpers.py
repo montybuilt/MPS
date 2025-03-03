@@ -502,14 +502,20 @@ def fetch_user_assignments(user_id, logger=None):
         )
         for curriculum in content_curricula:
             # For each curriculum, get the Questions.task_key values via CurriculumQuestion.
-            question_keys = (
-                db.session.query(Questions.task_key)
+            question_data = (
+                db.session.query(Questions.task_key, Questions.difficulty, Questions.standard, Questions.objective)
                 .join(CurriculumQuestion, CurriculumQuestion.question_id == Questions.id)
                 .filter(CurriculumQuestion.curriculum_id == curriculum.id)
                 .all()
             )
             # Extract the task_key strings from the tuples.
-            result[content_id][curriculum.curriculum_id] = [qk for (qk,) in question_keys]
+            result[content_id][curriculum.curriculum_id]= [
+                {"task_key": qk,
+                 "difficulty": difficulty,
+                 "standard": standard,
+                 "objective": objective}
+                for (qk, difficulty, standard, objective) in question_data
+            ]
 
     # Handle custom curricula: these are assigned to the user via UserCurriculum.
     custom_curricula = (

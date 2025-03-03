@@ -16,9 +16,8 @@ document.addEventListener("DOMContentLoaded", function() {
                 if (data.error) {
                     alert(data.error);  // Display error message
                 } else {
-                    
                     // Store the username in sessionStorage
-                    sessionStorage.setItem('username', data.username)
+                    sessionStorage.setItem('username', data.username);
                     
                     // Set sessionStorage with session data
                     const sessionData = data.session_data;
@@ -34,8 +33,13 @@ document.addEventListener("DOMContentLoaded", function() {
                             }
                         }
                     }
-                    // Redirect to index page
-                    window.location.href = '/';
+                    
+                    // Redirect based on the is_admin flag
+                    if (data.is_admin) {
+                        window.location.href = '/admin';
+                    } else {
+                        window.location.href = '/dashboard';
+                    }
                 }
             })
             .catch(error => console.error('Error:', error));
