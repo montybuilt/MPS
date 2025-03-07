@@ -19,6 +19,20 @@ let studentAssignments;
 
 //--------------------------------------------------------------------------------------
 
+// Async function to fetch standards data
+async function loadStandardsData() {
+  try {
+    const response = await fetch('/static/data/standards.json');
+    const data = await response.json();
+    window.standardsData = data;
+    console.log("Standards data loaded:", window.standardsData);
+  } catch (error) {
+    console.error("Error loading standards data:", error);
+  }
+}
+
+//--------------------------------------------------------------------------------------
+
 function pause(milliseconds) {
     return new Promise(resolve => setTimeout(resolve, milliseconds));
 }
@@ -292,22 +306,34 @@ function updateXPDataBar() {
     curriculumScoreSpan.textContent = Math.round(curriculumScore) + "%";
     
     // Standards: use a standards mapping based on content
-    const standardsMap = {'pcep': [1, 2, 3, 4], 'pcap': [1, 2, 3, 4, 5]};
-    const currentContent = content; //sessionStorage.getItem('currentContent');
+    const standardsMap = { 'pcep': [1, 2, 3, 4], 'pcap': [1, 2, 3, 4, 5] };
+    // Use a fallback if currentContent is not set.
+    const currentContent = sessionStorage.getItem('currentContent') || 'pcep';
     const standardsList = standardsMap[currentContent] || [];
+    console.log("STANDARDS", standardsList);
     
     // Loop over possible standard spans (xp_1 ... xp_5)
     for (let i = 1; i <= 5; i++) {
         const span = document.getElementById("xp_" + i);
-        // If the current content has this standard, update the span
         if (standardsList.includes(i)) {
             let earned = window.standardsXPEarned[i] || 0;
             let possible = window.standardsXPPossible[i] || 0;
             let score = possible > 0 ? (earned / possible) * 100 : 0;
+            
+            // Set the text to display the score percentage
             span.textContent = Math.round(score) + "%";
-            span.style.display = "inline"; // Ensure it's visible
+            span.style.display = "inline";
+            span.style.cursor = "help"; // sets the help cursor (question mark)
+            
+            // Set the tooltip using standardsData
+            let stdKey = String(i);
+            if (window.standardsData && window.standardsData[currentContent] && window.standardsData[currentContent][stdKey]) {
+                span.title = window.standardsData[currentContent][stdKey].description;
+            } else {
+                span.title = "";
+            }
         } else {
-            // Hide any standards that are not relevant for this content
+            // Hide any standards that are not relevant
             span.textContent = "";
             span.style.display = "none";
         }
@@ -1300,6 +1326,7 @@ async function initializePage() {
     // Get currentCurriculum from session
     currentCurriculumId = sessionStorage.getItem('currentCurriculum');
     await setupTestprepSession();
+    await loadStandardsData();
     fetchCurriculum(currentCurriculumId, false);
     initializeXPData();
     updateXPDataBar();

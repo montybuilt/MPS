@@ -10,6 +10,23 @@
     <link rel="stylesheet" href="../static/css/styles.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
     <link rel="icon" type="image/png" sizes="32x32" href="../static/images/watermark.png">
+<style>
+    .admin-btn {
+        display: inline-block;
+        padding: 5px 10px;
+        margin-right: 10px;  /* adjust spacing as needed */
+        background-color: #007bff; /* example blue background */
+        color: white;
+        text-decoration: none;
+        border: none;
+        border-radius: 4px;
+        font-size: 0.9em;
+        cursor: pointer;
+    }
+    .admin-btn:hover {
+        background-color: #0056b3;
+    }
+</style>
 </head>
 
 <body>
@@ -36,6 +53,9 @@
         <button id="notepadBtn" title="Open Notepad">
             <i class="fas fa-pencil-alt"></i> <!-- Font Awesome pencil icon -->
         </button>
+        {% if is_admin %}
+          <a href="/admin" class="admin-btn">Admin</a>
+        {% endif %}
         <!-- Next question button -->
         <div style="float: left; margin-left: auto;">
             <button id="next-question-btn" type="button" style="display: inline;">Next Question</button>

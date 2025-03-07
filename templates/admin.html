@@ -31,18 +31,28 @@
             <button type="submit">Logout</button> <!-- Logout button -->
         </form>
     </div>
-
-    <h2>Welcome to the Admin Dashboard, {{ username }}!</h2>
-
+    &nbsp;
+    <h2>Manage Users</h2>
     <nav>
-        <ul>
+        <ul>           
             <li><a href="/new_user">Add New User</a></li>
             <li><a href="/user_data">View and Edit User Data</a></li>
             <li><a href="/remove_user">Remove User</a></li>
+        </ul>
+    <nav>
+    <h2>Manage Classrooms and Course Content</h2>
+    <nav>
+        <ul>
             <li><a href="/manage_classrooms">Manage Classrooms</a></li>
             <li><a href="/question_content">Create or Edit Questions</a></li>
             <li><a href="/course_content">View and Edit Content & Curriculum Setup</a></li>
-            
+        </ul>
+    </nav>
+    <h2>Learning Content</h2>
+    <nav>
+        <ul>
+            <li><a href="dashboard">Dashboard</a></li>
+            <li><a href="/testprep">Test Prep</a></li>
         </ul>
     </nav>
     

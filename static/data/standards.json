@@ -1,8 +1,7 @@
 {
   "pcep": {
-    "version": "02",
     "1": {
-      "description": "Computer Programming and Python Fundamentals.",
+      "description": "Computer Programming and Python Fundamentals. (18% - 7 items)",
       "objectives": {
         "1": "Understand fundamental terms and definitions. \n\n\t- interpreting and the interpreter\n\t- lexis, syntax, and semantics",
         "2": "Understand Python's logic and structure. \n\n\t- keywords\n\t- instructions\n\t- indentation\n\t- comments",
@@ -12,32 +11,32 @@
       }
     },
     "2": {
-      "description": "Control structures, covering conditional statements and loops.",
+      "description": "Control Flow - Conditional Blocks and Loops.",
       "objectives": {
-        "1": "Implement and use if, elif, and else statements.",
-        "2": "Apply for and while loops for iteration.",
-        "3": "Utilize control flow to manage program logic."
+        "1": "Make decisions and branch the flow with if keyword.\n\n\t- Conditional statements, if, if-else, if-elif, if-elif-else.\n\t- Multiple conditional statements.\n\t- Nesting conditional statements.",
+        "2": "Perform different types of iteration.\n\n\t- The pass instruction\n\t- Building loops with while, for, range(), and in.\n\t- Iterating through sequences.\n\t- Expanding loops with while-else and for-else.\n\t- Nesting loops and conditional statements.\n\t- Controlling loop execution with break and continue."
       }
     },
     "3": {
-      "description": "Functions, modules, and code organization.",
+      "description": "Data Collections - Tuples, Dictionaries, Lists and Strings.",
       "objectives": {
-        "1": "Define and invoke functions effectively.",
-        "2": "Understand function parameters, scope, and return values.",
-        "3": "Utilize modules and standard libraries for program organization."
+        "1": "Collect and process data using lists.\n\n\t- Constructing vectors.\n\t- Indexing and slicing.\n\t- The len() function.\n\t- List methods: append(), insert(), index(), etc.\n\t- Functions: len(), sorted().\n\t- The del instruction.\n\t- iterating trough lists with the for loop.\n\t- Initializing loops.\n\t- The in and not in operators.\n\t- List comprehensions.\n\t- Copying and cloning.\n\t- Lists in lists, matrices and cubes.",
+        "2": "Collect and process data using tuples.\n\n\t- Tuples: indexing, slicing, building, immutability.\n\t- Tuples vs. lists: similarities and differences.\n\t- Lists inside tuples and tuples inside lists.",
+        "3": "Collect and process data using dictionaries.\n\n\t- Dictionaries: building, indexing, adding and removing keys.\n\t- Iterating through dictionaries and their keys and values.\n\t- Checking the existence of keys.\n\t- Methods: keys(), items() and values().",
+        "4": "Operate with strings.\n\n\t- Constructing strings.\n\t- Indexing, slicing, immutability.\n\t Escaping using the escape character.\n\t- Quotes and apostrophes inside strings.\n\t- Multi-line strings.\n\t- Basic string functions and methods."
       }
     },
     "4": {
-      "description": "Basic exception handling, input/output operations, and file handling.",
+      "description": "Functions and Exceptions. (28% - 8 exam items)",
       "objectives": {
-        "1": "Handle exceptions using try, except, and finally blocks.",
-        "2": "Perform basic file I/O operations.",
-        "3": "Understand error types and apply basic debugging techniques."
+        "1": "Decompose the code using functions.\n\n\t- Defining and invoking user-defined functions and generators.\n\t- The return keyword, returning results.\n\t- The None keyword.\n\t- Recursion.",
+        "2": "Organize interaction between the function and its environment.\n\n\t- Parameters vs. argumentst- Positional, keyword and mixed argument passing.\n\t- Default parameter values.\n\t- Name scopes, name hiding (shadowing) and the global keyword.",
+        "3": "Python built-in exception hierarchy.\n\n\t- BaseException.\n\t- Exception.\n\t- SystemExit.\n\t- KeyboardInterrupt.\n\t- Abstract exceptions.\n\t- ArithmeticError.\n\t- LookupError.\n\t- IndexError.\n\t- KeyError.\n\t- TypeError.\n\t- ValueError.",
+        "4": "Basics of exception handling.\n\n\t- Try-except - the try-except Exception.\n\t- Ordering the except branches.\n\t- Propagating exceptions through function boundaries.\n\t- Delegating responsibility for handling exceptions."
       }
     }
   },
   "pcap": {
-    "version": "03",
     "1": {
       "description": "Advanced Python programming concepts and in-depth understanding of Python syntax and semantics.",
       "objectives": {

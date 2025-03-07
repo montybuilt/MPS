@@ -43,6 +43,23 @@
         margin-right: 0;
     }
     
+    .admin-btn {
+        display: inline-block;
+        padding: 5px 10px;
+        margin-right: 10px;  /* adjust spacing as needed */
+        background-color: #007bff; /* example blue background */
+        color: white;
+        text-decoration: none;
+        border: none;
+        border-radius: 4px;
+        font-size: 0.9em;
+        cursor: pointer;
+    }
+    .admin-btn:hover {
+        background-color: #0056b3;
+    }
+
+    
     </style>
 </head>
 <body>
@@ -58,10 +75,15 @@
     <div id="navbar">
         <p>Logged in as: <strong>{{ username }}</strong></p>
         <nav-loc>Student Dashboard</nav-loc>
+        {% if is_admin %}
+          <a href="/admin" class="admin-btn">Admin</a>
+        {% endif %}
         <form action="/logout" method="POST" id="logout-form">
             <button type="submit">Logout</button> <!-- Logout button -->
         </form>
     </div>
+
+
 
     <!-- Top container for KPIs -->
     <div id="top-kpi-container">

@@ -80,7 +80,8 @@ def logout():
 @login_required
 def dashboard():
     username = session['username']
-    return render_template('dashboard.html', username=username)
+    is_admin = session.get('is_admin')
+    return render_template('dashboard.html', username=username, is_admin=is_admin)
 
 @app.route('/test_xp', methods=['GET'])
 def text_xp():
@@ -291,7 +292,8 @@ def update_user():
 def testprep():
     
     username = session.get('username')
-    return render_template("testprep.html", username=username)
+    is_admin = session.get('is_admin')
+    return render_template("testprep.html", username=username, is_admin=is_admin)
     
 @app.route('/task_request', methods=['POST'])
 def task_request():
@@ -675,4 +677,4 @@ def student_assignments():
 #------------------------------------------------------------------------------------------#
 
 if __name__ == '__main__':
-    app.run(debug=True)
+    app.run(debug=False)

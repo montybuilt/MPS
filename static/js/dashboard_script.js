@@ -432,6 +432,7 @@ function renderKPIPanel(currentContent) {
             tooltipText += stdInfo.objectives[col];
           }
         }
+        cell.style.cursor = "help";
         cell.title = tooltipText;
         cell.textContent = score.toFixed(0) + '%';
       } else {
