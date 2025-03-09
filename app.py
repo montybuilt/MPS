@@ -6,23 +6,25 @@ from sqlalchemy.exc import SQLAlchemyError, IntegrityError
 from werkzeug.exceptions import HTTPException
 from modules import *
 from modules import db
+from config import config_map
+from dotenv import load_dotenv
 
+# Load environment variables from .env
+load_dotenv()
 
 # Create the flask object
 app = Flask(__name__)
 
-# Set the debug mode
-app.config['DEBUG'] = False  # Disable debug mode
+# Set the environment (default to development)
+env = os.getenv('FLASK_ENV', 'development')
+app.config.from_object(config_map[env])
 
 # Set the secret key
 app.secret_key = secrets.token_hex(16)
 
-# Set up logging
-logging.basicConfig(level=logging.DEBUG, format='%(asctime)s %(levelname)s: %(message)s')
-
 # Set the database configurations
-app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///db.sqlite'
-app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
+# app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///db.sqlite'
+# app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
 # Initialize the app with db object
 db.init_app(app)
@@ -30,8 +32,8 @@ db.init_app(app)
 # Initialize flask-migrate
 migrate = Migrate(app, db)
 
-# Path to content.json located in the data directory
-content_file_path = os.path.join('data', 'content.json')
+# Set up logging
+logging.basicConfig(level=logging.DEBUG, format='%(asctime)s %(levelname)s: %(message)s')
 
 @app.route('/')
 def index():
