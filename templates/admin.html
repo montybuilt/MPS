@@ -8,9 +8,28 @@
     <link rel="icon" type="image/png" sizes="32x32" href="../static/images/watermark.png">
     
     <style>
+        #content {
+            margin-left: 75px;
+            margin-top: 50px;
+        }
+        
+        h2 {
+            margin-top: 10px;
+            margin-bottom: 10px;
+        }
+        
+        nav {
+            margin-top: 10px;
+            margin-bottom: 10px;
+        }
+        
+        nav a {
+            font-size: 18px;
+        }
+    
         ul {
             list-style-type: disc;
-            padding: 40px;
+            padding: 10px;
         }
         ul li {
             margin-bottom: 10px; /* Add space between list items */
@@ -31,31 +50,31 @@
             <button type="submit">Logout</button> <!-- Logout button -->
         </form>
     </div>
-    &nbsp;
-    <h2>Manage Users</h2>
-    <nav>
-        <ul>           
-            <li><a href="/new_user">Add New User</a></li>
-            <li><a href="/user_data">View and Edit User Data</a></li>
-            <li><a href="/remove_user">Remove User</a></li>
-        </ul>
-    <nav>
-    <h2>Manage Classrooms and Course Content</h2>
-    <nav>
-        <ul>
-            <li><a href="/manage_classrooms">Manage Classrooms</a></li>
-            <li><a href="/question_content">Create or Edit Questions</a></li>
-            <li><a href="/course_content">View and Edit Content & Curriculum Setup</a></li>
-        </ul>
-    </nav>
-    <h2>Learning Content</h2>
-    <nav>
-        <ul>
-            <li><a href="dashboard">Dashboard</a></li>
-            <li><a href="/testprep">Test Prep</a></li>
-        </ul>
-    </nav>
-    
+    <div id="content">
+        <h2>Manage Users</h2>
+        <nav>
+            <ul>           
+                <li><a href="/new_user">Add New User</a></li>
+                <li><a href="/user_data">View and Edit User Data</a></li>
+                <li><a href="/remove_user">Remove User</a></li>
+            </ul>
+        <nav>
+        <h2>Manage Classrooms and Course Content</h2>
+        <nav>
+            <ul>
+                <li><a href="/manage_classrooms">Manage Classrooms</a></li>
+                <li><a href="/question_content">Create or Edit Questions</a></li>
+                <li><a href="/course_content">View and Edit Content & Curriculum Setup</a></li>
+            </ul>
+        </nav>
+        <h2>Learning Content</h2>
+        <nav>
+            <ul>
+                <li><a href="dashboard">Dashboard</a></li>
+                <li><a href="/testprep">Test Prep</a></li>
+            </ul>
+        </nav>
+    </div>
     <!-- Include the script file -->
     <script src="{{ url_for('static', filename='js/index_script.js') }}"></script>
 </body>
