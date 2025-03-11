@@ -23,8 +23,8 @@ app.config.from_object(config_map[env])
 app.secret_key = secrets.token_hex(16)
 
 # Set the database configurations
-# app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///db.sqlite'
-# app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
+app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///db.sqlite'
+app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
 # Initialize the app with db object
 db.init_app(app)
@@ -164,30 +164,30 @@ def update_session():
     
     return jsonify({"message": "Session data submitted successfully"}), 200
 
-@app.route('/new_user', methods=['GET', 'POST'])
+@app.route('/new_user', methods=['GET'])
 @login_required
 def new_user():
-    '''This route handles creation of new users'''
     username = session.get('username')
-    
-    if request.method == 'POST':
-        # Extract request data
-        new_username = request.form['username']
-        password = hashit(request.form['password'])
-        email = request.form['email']
-                
-        # Invoke the create_new_user function from data_helpers
-        try:
-            new_user = create_new_user(new_username, password, email)
-            if session.get('is_admin'):
-                return redirect(url_for('admin', username=username))
-            else:
-                return redirect(url_for('index'))
-        except Exception as e:
-            app.logger.debug(f"Error creating user {username}: {e}")
-            return redirect(url_for('new_user_error', username=new_user))
-            
-    return render_template('new_user.html', username=username)
+    # Check to make sure user is admin
+    if session.get('is_admin'):
+        return render_template('new_user.html', username=username)
+
+@app.route('/add_new_user', methods=['POST'])
+@login_required
+def add_new_user():
+    data = request.get_json()
+
+    new_username = data.get('new_username')
+    new_password = hashit(data.get('new_password'))
+    new_email = data.get('new_email')
+
+    try:
+        # Create the new user using the extracted data
+        new_user = create_new_user(new_username, new_password, new_email)
+        return jsonify({"message": "User added successfully", "success": True})
+    except Exception as e:
+        app.logger.error(f"Error creating user: {e}")
+        return jsonify({"message": str(e), "success": False})
 
 @app.route('/new_user_error/<username>')
 def user_created(username):

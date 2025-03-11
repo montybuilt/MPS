@@ -427,9 +427,6 @@ def create_new_user(username, password, email):
             email=email,
             current_curriculum = defaults["current_curriculum"],
             current_question = defaults["current_question"],
-            content_scores = defaults["content_scores"],
-            curriculum_scores = defaults["curriculum_scores"],
-            xp = defaults["xp"],
             updated_at = now
             )
         

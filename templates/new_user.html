@@ -1,9 +1,13 @@
 <!DOCTYPE html>
 <html>
 <head>
+    <title>New User</title>
     <link rel="stylesheet" href="../static/css/styles.css">
     <link rel="stylesheet" href="../static/css/form_styles.css">
     <link rel="icon" type="image/png" sizes="32x32" href="../static/images/watermark.png">
+    <style>
+        
+    </style>
 </head>
 <body>
     <!-- Banner image at the top -->
@@ -11,7 +15,6 @@
         <a href="../admin">
             <img src="{{ url_for('static', filename='images/Web Banner.png') }}" alt="Web Banner" class="banner">
         </a>
-    </div>
     <!-- Navbar with admin buttons -->
     <div id="navbar">
         <p>Logged in as: <strong>{{ username }}</strong></p>
@@ -19,18 +22,48 @@
             <button type="submit">Logout</button> <!-- Logout button -->
         </form>
     </div>
-    <h2>Create New User</h2>
-    <form id="new-user-form" method="post" action="/new_user">
-        <label for="username">Username:</label>
-        <input type="text" id="username" name="username" required><br>
+    <h2>Add New User</h2>
+    <!--<form id="user-data-form" method="post" action="/update_user">-->
+    <form id="add-user-form" onsubmit="submitForm(); return false;">
+        <label for="new_username">Add Username:</label>
+        <input type="text" id="new_username" name="new_username"><br>
+        
+        <label for="new_password">Add Password:</label>
+        <input type="text" id="new_password" name="new_password"><br>
 
-        <label for="password">Password:</label>
-        <input type="password" id="password" name="password" required><br>
-
-        <label for="email">Email:</label>
-        <input type="email" id="email" name="email" required><br>
-
-        <input type="submit" value="Create User">
+        <label for="new_email">Email:</label>
+        <input type="text" id="new_email" name="new_email"><br>
+        
+        <input type="submit" value="Add User">
     </form>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {});
+
+        function submitForm() {
+            var newUsername = document.getElementById('new_username').value;
+            var newPassword = document.getElementById('new_password').value;
+            var newEmail = document.getElementById('new_email').value;
+            data = {"new_username": newUsername, "new_password": newPassword, "new_email": newEmail}
+            console.log(data)     
+            fetch('/add_new_user', {
+                method: 'POST',
+                body: JSON.stringify(data),
+                headers: {
+                    'Content-Type': 'application/json'
+                }
+            })
+            .then(response => response.json())
+            .then(data => {
+                alert(data.message);
+                if (data.message === "User added successfully") {
+                    location.reload(); // Refresh the page
+                }
+            })
+            .catch(error => console.error('Error adding user:', error));
+        }
+
+    </script>
+
 </body>
 </html>
