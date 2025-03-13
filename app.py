@@ -23,7 +23,11 @@ app.config.from_object(config_map[env])
 app.secret_key = secrets.token_hex(16)
 
 # Set the database configurations
-app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///db.sqlite'
+if env == 'production':
+    app.config['SQLALCHEMY_DATABASE_URI'] = os.getenv('DATABASE_URL')
+else:
+    app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///db.sqlite'
+    
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
 # Initialize the app with db object
