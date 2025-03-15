@@ -329,16 +329,16 @@ def initialize_user_sessionStorage_data(logger=None):
         # Query the User table for the other session data
         user = User.query.filter_by(id=user_id).first()
         
-        logger.debug(f"assignedContent: {assigned_content}")
-        logger.debug(f"assignedCurriculums: {assigned_curriculums}")
-        logger.debug(f"completedCurriculums: {user.completed_curriculums}")
-        logger.debug(f"contentScores: {user.content_scores}")
-        logger.debug(f"correctAnswers: {user.correct_answers}")
-        logger.debug(f"currentQuestion: {user.current_question}")
-        logger.debug(f"curriculumScores: {user.curriculum_scores}")
-        logger.debug(f"incorrectAnswers: {user.incorrect_answers}")
-        logger.debug(f"xp: {user.xp}")
-        logger.debug(f"updatedAt: {user.updated_at}")
+        # logger.debug(f"assignedContent: {assigned_content}")
+        # logger.debug(f"assignedCurriculums: {assigned_curriculums}")
+        # logger.debug(f"completedCurriculums: {user.completed_curriculums}")
+        # logger.debug(f"contentScores: {user.content_scores}")
+        # logger.debug(f"correctAnswers: {user.correct_answers}")
+        # logger.debug(f"currentQuestion: {user.current_question}")
+        # logger.debug(f"curriculumScores: {user.curriculum_scores}")
+        # logger.debug(f"incorrectAnswers: {user.incorrect_answers}")
+        # logger.debug(f"xp: {user.xp}")
+        # logger.debug(f"updatedAt: {user.updated_at}")
         
         # Update session data with the basic fields
         session_data = {

@@ -13,4 +13,5 @@ dependencies:
   - flask-sqlalchemy=3.1.1
   - bcrypt=4.2.1
   - python-dotenv
+  - psycopg2-binary=2.9.10
 

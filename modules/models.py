@@ -126,7 +126,7 @@ class CurriculumProject(db.Model):
 class Questions(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     task_key = db.Column(db.String(120), unique=True, nullable=False, index=True)
-    content_id = db.Column(db.Integer, nullable=True, default=0)
+    content_id = db.Column(db.String(120), nullable=True, default=0)
     standard = db.Column(db.Integer, nullable=True, default=0)
     objective = db.Column(db.Integer, nullable=True, default=0)
     code = db.Column(db.Text())
