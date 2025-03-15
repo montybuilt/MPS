@@ -5,6 +5,7 @@
 /testing/
 /admin/
 /instance/
+/backups/
 
 # Ignore Python bytecode files and folders
 *.pyc
