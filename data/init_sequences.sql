@@ -21,7 +21,7 @@ BEGIN
 
         -- Check if table and column exist
         IF tbl_name IS NOT NULL THEN
-            EXECUTE format('SELECT MAX(%I) FROM "%I"', col_name, tbl_name) INTO max_id;
+            EXECUTE format('SELECT MAX(%I) FROM %s', col_name, quote_ident(tbl_name)) INTO max_id;
 
             -- Reset sequence only if MAX(id) exists
             IF max_id IS NOT NULL THEN
