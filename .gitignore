@@ -32,3 +32,6 @@ mps/
 
 # Ignore any other unintended local artifacts
 *.log
+
+# Ignore my database backup file on droplet
+backup.sh
