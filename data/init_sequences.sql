@@ -17,7 +17,7 @@ BEGIN
         INTO tbl_name, col_name
         FROM pg_attribute a
         JOIN pg_class c ON a.attrelid = c.oid
-        WHERE a.attnum = 1 AND c.relname = replace(seq_name, '_id_seq', '');
+        WHERE a.attnum = 1 AND c.relname = replace(seq_name, '_id_seq', '')::text;
 
         -- Check if table and column exist
         IF tbl_name IS NOT NULL THEN
