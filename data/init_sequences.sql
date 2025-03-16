@@ -1,32 +1,14 @@
-DO $$
-DECLARE
-    seq_name TEXT;
-    tbl_name TEXT;
-    col_name TEXT;
-    max_id INTEGER;
-BEGIN
-    -- Iterate over sequences
-    FOR seq_name IN
-        SELECT c.relname
-        FROM pg_class c
-        JOIN pg_namespace n ON n.oid = c.relnamespace
-        WHERE c.relkind = 'S' AND n.nspname = 'public'
-    LOOP
-        -- Identify the associated table and column
-        SELECT a.attrelid::regclass::text, a.attname
-        INTO tbl_name, col_name
-        FROM pg_attribute a
-        JOIN pg_class c ON a.attrelid = c.oid
-        WHERE a.attnum = 1 AND c.relname = replace(seq_name, '_id_seq', '')::text;
+-- Reset sequence for the user table
+SELECT setval('user_id_seq', (SELECT MAX(id) FROM "user") + 1);
 
-        -- Check if table and column exist
-        IF tbl_name IS NOT NULL THEN
-            EXECUTE format('SELECT MAX(%I) FROM %s', col_name, quote_ident(tbl_name)) INTO max_id;
+-- Reset sequence for the questions table
+SELECT setval('questions_id_seq', (SELECT MAX(id) FROM questions) + 1);
 
-            -- Reset sequence only if MAX(id) exists
-            IF max_id IS NOT NULL THEN
-                EXECUTE format('ALTER SEQUENCE %I RESTART WITH %s', seq_name, max_id + 1);
-            END IF;
-        END IF;
-    END LOOP;
-END $$;
+-- Reset sequence for the curriculum_question table
+SELECT setval('curriculum_question_id_seq', (SELECT MAX(id) FROM curriculum_question) + 1);
+
+-- Reset sequence for the content_curriculum table
+SELECT setval('content_curriculum_id_seq', (SELECT MAX(id) FROM content_curriculum) + 1);
+
+-- Add other tables as needed (only those with data).
+
