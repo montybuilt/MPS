@@ -189,6 +189,7 @@ async function setupDashboardSession() {
         
         // Get the raw assignments from the response
         const rawAssignments = data.data.userAssignments || {};
+        console.log("RAW DOG ASSIGNMENTS", rawAssignments);
         
         // Initialize our dictionaries.
         const studentAssignments = {};      // { content: { curriculum: [question_ids] } }

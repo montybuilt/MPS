@@ -39,8 +39,6 @@ migrate = Migrate(app, db)
 # Set up logging
 logging.basicConfig(level=logging.DEBUG, format='%(asctime)s %(levelname)s: %(message)s')
 
-app.logger.debug(f"***Debug Mode is set to*** {app.config['DEBUG']}")
-
 @app.route('/')
 def index():
     
@@ -123,6 +121,7 @@ def get_student_profile():
     user_assignments = fetch_user_assignments(user_id, app.logger)
     
     response = {'userAssignments': user_assignments, 'xpUsername': username}
+    app.logger.debug(f"The UserAssignments {user_assignments}")
     
     if xp_data:
     
@@ -130,12 +129,12 @@ def get_student_profile():
         response.update({'xpData': xp_data['xpData'],
                          'xpLastFetchedDatetime': xp_data['mostRecentDatetime']
         })
-        
+
         # Return the XP data to the client (or None if no data)
         return jsonify({"data": response, "message": "XP data found", "username": username})
     
     else:
-        
+
         return jsonify({"data": response, "message": "No new XP Data", "username": username})
     
 @app.route('/admin', methods=['GET'])

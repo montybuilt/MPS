@@ -483,13 +483,14 @@ def fetch_user_assignments(user_id, logger=None):
     # Outer keys: Content.content_id (strings), plus a "custom" key for curricula not tied to any Content.
     result = {content_id: {} for content_id in user_content_ids}
 
-    # 3. For each Content, get the associated curriculums via ContentCurriculum.
+    #For each classroom-related Content, get the associated curriculums via ContentCurriculum.
     for content_id in user_content_ids:
         # Retrieve the Content row (we assume content_id is unique in Content).
         content_obj = db.session.query(Content).filter_by(content_id=content_id).first()
         if not content_obj:
             continue
 
+        
         # Get curriculums assigned to this content.
         content_curricula = (
             db.session.query(Curriculum)
@@ -505,7 +506,7 @@ def fetch_user_assignments(user_id, logger=None):
                 .filter(CurriculumQuestion.curriculum_id == curriculum.id)
                 .all()
             )
-            # Extract the task_key strings from the tuples.
+            # Extract the task_key data from the tuples
             result[content_id][curriculum.curriculum_id]= [
                 {"task_key": qk,
                  "difficulty": difficulty,
@@ -521,15 +522,24 @@ def fetch_user_assignments(user_id, logger=None):
         .filter(UserCurriculum.user_id == user_id)
         .all()
     )
+    
     custom_dict = {}
     for curriculum in custom_curricula:
-        question_keys = (
-            db.session.query(Questions.task_key)
+        # For each custom curriculum, get the question data
+        question_data = (
+            db.session.query(Questions.task_key, Questions.difficulty, Questions.standard, Questions.objective)
             .join(CurriculumQuestion, CurriculumQuestion.question_id == Questions.id)
             .filter(CurriculumQuestion.curriculum_id == curriculum.id)
             .all()
         )
-        custom_dict[curriculum.curriculum_id] = [qk for (qk,) in question_keys]
+        # Extract the task key data from the tuples
+        custom_dict[curriculum.curriculum_id] = [
+            {"task_key": qk,
+             "difficulty": difficulty,
+             "standard": standard,
+             "objective": objective}
+            for (qk, difficulty, standard, objective) in question_data
+        ]    
 
     # Place custom curricula under the "custom" key in the outer dictionary.
     if custom_dict:
