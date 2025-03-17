@@ -1,0 +1,1 @@
+select last_value from xp_id_seq;
