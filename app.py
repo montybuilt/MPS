@@ -39,6 +39,8 @@ migrate = Migrate(app, db)
 # Set up logging
 logging.basicConfig(level=logging.DEBUG, format='%(asctime)s %(levelname)s: %(message)s')
 
+app.logger.debug(f"***Debug Mode is set to*** {app.config['DEBUG']}")
+
 @app.route('/')
 def index():
     
@@ -683,4 +685,4 @@ def student_assignments():
 #------------------------------------------------------------------------------------------#
 
 if __name__ == '__main__':
-    app.run()
+    app.run(debug=app.config['DEBUG'])

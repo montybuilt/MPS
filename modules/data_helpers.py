@@ -386,14 +386,14 @@ def update_user_session_data(session_data, logger=None):
         
         # Prepare the data for update
         update_map = {
-            "completedCurriculums": "completed_curriculums",
-            "contentScores": "content_scores",
-            "correctAnswers": "correct_answers",
+            #"completedCurriculums": "completed_curriculums",
+            #"contentScores": "content_scores",
+            #"correctAnswers": "correct_answers",
             "currentCurriculum": "current_curriculum",
             "currentQuestionId": "current_question",
-            "curriculumScores": "curriculum_scores",
-            "incorrectAnswers": "incorrect_answers",
-            "xp": "xp",
+            #"curriculumScores": "curriculum_scores",
+            #"incorrectAnswers": "incorrect_answers",
+            #"xp": "xp",
             "updatedAt": "updated_at"
         }
         
@@ -545,7 +545,6 @@ def fetch_user_data(username, logger=None):
         - This function is used in the /get_user_data route
         - It is used to populate information in the user_data.html page
     '''
-    
     # Fetch the user_id belonging to the student username passed
     user_id = db.session.query(User.id).filter_by(username = username).scalar()
     
@@ -565,7 +564,7 @@ def fetch_user_data(username, logger=None):
     all_curriculums = [curriculum for inner in user_assignments.values() for curriculum in inner.keys()]
     
     custom_curriculums = list(user_assignments['custom'].keys()) if 'custom' in user_assignments.keys() else []
-    
+        
     # Query the User table for this user
     user = User.query.filter_by(username=username).first()
 
@@ -573,14 +572,14 @@ def fetch_user_data(username, logger=None):
         user_data = {
             'email': user.email,
             'custom_curriculums': custom_curriculums,
-            'completed_curriculums': user.completed_curriculums,
-            'content_scores': user.content_scores,
-            'correct_answers': user.correct_answers,
+            #'completed_curriculums': user.completed_curriculums,
+            #'content_scores': user.content_scores,
+            #'correct_answers': user.correct_answers,
             'current_curriculum': user.current_curriculum,
             'current_question': user.current_question,
-            'curriculum_scores': user.curriculum_scores,
-            'incorrect_answers': user.incorrect_answers,
-            'xp': user.xp
+            #'curriculum_scores': user.curriculum_scores,
+            #'incorrect_answers': user.incorrect_answers,
+            #'xp': user.xp
         }
         return user_data
     else:
@@ -867,7 +866,6 @@ def fetch_xp_data(username, last_fetched_date, logger=None):
     
     try:
         
-        logger.debug(f"Last update: {last_fetched_date} type: {type(last_fetched_date)}")
         last_fetched_date = datetime.fromisoformat(last_fetched_date)
                 
         new_xp_entries = (
@@ -948,7 +946,7 @@ def fetch_admin_content(username, logger=None):
         
         # Convert query result to dictionary
         all_content_dict = {content_id: content_key for content_id, content_key in content_data}
-        logger.debug(f"All Content Dict: {all_content_dict}")
+
         # Query all Curriculum.id and Curriculum.curriculum_id
         curriculum_data = db.session.query(Curriculum.id, Curriculum.curriculum_id)
 
@@ -1025,10 +1023,10 @@ def fetch_admin_content(username, logger=None):
         
         curriculum_dict = all_assignment_dict
         
-        logger.debug(f"content_dict: {content_dict}")
-        logger.debug(f"all_curriculums: {all_curriculums}")
-        logger.debug(f"custom_curriculums: {custom_curriculums}")
-        logger.debug(f"curriculum_dict: {curriculum_dict}")
+        # logger.debug(f"content_dict: {content_dict}")
+        # logger.debug(f"all_curriculums: {all_curriculums}")
+        # logger.debug(f"custom_curriculums: {custom_curriculums}")
+        # logger.debug(f"curriculum_dict: {curriculum_dict}")
 
 
         return {
@@ -1131,10 +1129,7 @@ def fetch_classroom_data(class_code, logger=None):
             )
         
         available_content = [c[0] for c in available_content]
-        logger.debug(f"Available Content: {available_content} - System IDs: {system_ids}")
         
-        logger.debug(f"Content: {content_ids}")
-
         return{'students': student_emails, 'availableContent': available_content, 'assignedContent': assigned_content}
         
     except Exception as e:
@@ -1436,7 +1431,6 @@ def update_curriculum_assignments(data, logger=None):
     # Extract the curriculum assignment data
     curriculum_name = data.get('curriculum_id')
     task_list = data.get('task_list', [])
-    logger.debug(f"Curriculum: {curriculum_name} Tasks: {task_list}")
 
     if not curriculum_name or not isinstance(task_list, list):
         raise ValueError("Invalid input: 'curriculum_id' must be a string and 'task_list' must be a list.")
