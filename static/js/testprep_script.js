@@ -540,7 +540,7 @@ function checkCurriculumStatus() {
         sessionStorage.setItem('completedCurriculums', JSON.stringify(completedCurriculums));
         alert("Congratulations! You've completed the curriculum!");
         // Redirect to /dashboard
-        window.location.href = '/dashboard';
+        //window.location.href = '/dashboard';
     }
     
 }
