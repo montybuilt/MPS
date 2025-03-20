@@ -6,6 +6,11 @@
 /admin/
 /instance/
 
+# Ignore microsoft office documents
+*.xlsx
+*.pptx
+*.docx
+
 # Ignore Python bytecode files and folders
 *.pyc
 *.pyo
