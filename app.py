@@ -25,7 +25,7 @@ app.secret_key = secrets.token_hex(16)
 # Set the database configurations
 if env == 'production':
     app.config['SQLALCHEMY_DATABASE_URI'] = os.getenv('DATABASE_URL')
-    app.config['SERVER_NAME'] = 'montyspythonshow.com'
+    app.config['SERVER_NAME'] = 'montyspythonshow.com' # not sure about this
 else:
     app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///db.sqlite'
     
