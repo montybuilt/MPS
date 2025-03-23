@@ -168,6 +168,9 @@ def build_session(username, logger=None):
     session['system_ids'] = system_ids
     session['role'] = role
     
+    # Force the session to update
+    session.modified = True
+    
 def fetch_usernames():
     '''
     Function to fetch all usernames for a teacher or system admin

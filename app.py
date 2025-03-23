@@ -1,7 +1,8 @@
 # Import packages
-import subprocess, logging, secrets, os
+import subprocess, logging, secrets, os, redis
 from flask_migrate import Migrate
-from flask import Flask, render_template, request, jsonify, session, redirect, url_for
+from flask import Flask, session, render_template, request, jsonify, redirect, url_for
+from flask_session import Session
 from sqlalchemy.exc import SQLAlchemyError, IntegrityError
 from werkzeug.exceptions import HTTPException
 from modules import *
@@ -22,10 +23,15 @@ app.config.from_object(config_map[env])
 # Set the secret key
 app.secret_key = secrets.token_hex(16)
 
-# Set the database configurations
+# Set the database and session management configurations
 if env == 'production':
     app.config['SQLALCHEMY_DATABASE_URI'] = os.getenv('DATABASE_URL')
     app.config['SERVER_NAME'] = 'montyspythonshow.com'
+    app.config['SESSION_TYPE'] = 'redis'
+    app.config['SESSION_PERMANENT'] = False
+    app.config['SESSION_USE_SIGNER'] = True
+    app.config['SESSION_REDIS'] = redis.StrictRedis(host='localhost', port=6379, db=0)
+    Session(app)
 else:
     app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///db.sqlite'
     app.config['SERVER_NAME'] = 'localhost'
