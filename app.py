@@ -65,14 +65,9 @@ def test_session():
 def index():
     
     # Get the username
-    username = session.get('username')
+    username = session.get('username')    
     
-    # # Check to see if user is an admin
-    # is_admin = session.get('is_admin')
-    # app.logger.debug(f"Is admin: {is_admin}")
-    
-    
-    return render_template('index.html', username = username) #, is_admin = is_admin)
+    return render_template('index.html', username = username)
     
 @app.route('/login', methods=['POST'])
 def login():
@@ -143,7 +138,6 @@ def get_student_profile():
     user_assignments = fetch_user_assignments(user_id, app.logger)
     
     response = {'userAssignments': user_assignments, 'xpUsername': username}
-    app.logger.debug(f"The UserAssignments {user_assignments}")
     
     if xp_data:
     
@@ -303,7 +297,6 @@ def update_user():
     if session.get('is_admin'):
         
         changes = request.json
-        app.logger.debug(f"Changes: {changes}")
         username = changes.pop('username', None)  # Extract username from changes
         
         if not username:
@@ -350,13 +343,11 @@ def get_curriculum():
     data = request.get_json()
     if data.get('key-input'):
         curriculum_id = data.get('key-input')  # formerly made .lower()
-        app.logger.debug(f"Curriculum ID: {curriculum_id}")
     else:
         return jsonify({"error": "No curriculum ID given"}), 400
     
     try:
         curriculum_data = fetch_curriculum_task_list(curriculum_id)
-        app.logger.debug(f"Task List: {curriculum_data}")
         return jsonify(curriculum_data)
         
     except IntegrityError as ie:
@@ -523,7 +514,6 @@ def submit_question():
 
         # Determine if it's a new question or an update
         is_new = question_key not in fetch_task_keys(user_id, app.logger)
-        app.logger.debug(f"New question? {is_new}")
 
         if is_new:
             # Handle new question insertion
@@ -565,7 +555,6 @@ def new_classroom():
     class_description = data['data'][1]
     
     try:
-        app.logger.debug(f"Pre-call: class_code: {class_code}")
         add_new_classroom(class_code, class_description, app.logger)
         return jsonify({"message": "New classroom added"}), 201
     
@@ -636,7 +625,6 @@ def remove_from_classroom():
     students = data['students']  # student emails as list
     content = data['content'] # Content_ids as a list
     removals = {'students': students, 'content': content}
-    app.logger.debug(f"Removals: {removals}")
     try:
         status = remove_classroom_assignments(class_code, removals, app.logger) #update_classroom_student_assignments(class_code=class_code, students=students, logger=app.logger)
 
@@ -661,9 +649,6 @@ def update_xp():
     
         # Extract the xp data from the request
         xp_data = request.get_json()
-        
-        # Update the xp_data to include username
-        app.logger.debug(f"In Route: {xp_data}")
         
         # Call call the data helper function to update the database
         update_xp_data(xp_data, app.logger)
