@@ -13,15 +13,7 @@ from collections import defaultdict
 #### Default Variables #############################################################
 ####################################################################################
 
-defaults = {    
-                "assigned_content" : ["intro"],
-                "assigned_curriculums" : ["intro"],
-                "current_curriculum" : "intro",
-                "current_question" : "tutorial.1.1",
-                "content_scores" : {"tutorial":{"Earned":0, "Possible":0}},
-                "curriculum_scores" : {"intro":{"Earned":0, "Possible":0}},
-                "xp" : {"overallXP": 0.0, "certifications": {"tutorial": {"xp_1": 0}}}
-            }
+
 
 ####################################################################################
 #### Classes #######################################################################
@@ -428,8 +420,8 @@ def create_new_user(username, password, email):
             username=username,
             password_hash=password,
             email=email,
-            current_curriculum = defaults["current_curriculum"],
-            current_question = defaults["current_question"],
+            current_curriculum = "",
+            current_question = "",
             updated_at = now
             )
         
@@ -610,6 +602,16 @@ def update_user_data(username, changes, logger=None):
         - GETs information from user_data.html and POSTs it to the database
     
     '''
+    
+    defaults = {    
+                    #"assigned_content" : ["intro"],
+                    #"assigned_curriculums" : ["intro"],
+                    "current_curriculum" : "",
+                    "current_question" : "",
+                    #"content_scores" : {"tutorial":{"Earned":0, "Possible":0}},
+                    #"curriculum_scores" : {"intro":{"Earned":0, "Possible":0}},
+                    #"xp" : {"overallXP": 0.0, "certifications": {"tutorial": {"xp_1": 0}}}
+                }
 
     # Fetch the user_id belonging to the student username passed
     user_id = db.session.query(User.id).filter_by(username = username).scalar()
