@@ -13,6 +13,7 @@ function handleLoginSubmit(event) {
     })
     .then(response => {
         console.log("Raw response:", response);
+        console.log("Headers:", [...response.headers.entries()]);
         return response.json();
     })
     .then(data => {
