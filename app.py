@@ -160,6 +160,8 @@ def admin():
 
     # Get username
     username = session.get('username')
+    
+    app.logger.debug(f"Routing admin user {username} to the Admin page")
 
     if session.get('is_admin'):
         return render_template('admin.html', username=username, is_admin=True)
