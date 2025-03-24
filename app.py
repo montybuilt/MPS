@@ -32,6 +32,11 @@ if env == 'production':
     app.config['SESSION_USE_SIGNER'] = True
     app.config['SESSION_REDIS'] = redis.StrictRedis(host='localhost', port=6379, db=0)
     Session(app)
+    try:
+        app.config['SESSION_REDIS'].ping()
+        app.logger.debug("Redis connection successful")
+    except redis.ConnectionError as e:
+        app.logger.error(f"Redis connection failed: {e}")
 else:
     app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///db.sqlite'
     app.config['SERVER_NAME'] = 'localhost'
@@ -46,6 +51,15 @@ migrate = Migrate(app, db)
 
 # Set up logging
 logging.basicConfig(level=logging.DEBUG, format='%(asctime)s %(levelname)s: %(message)s')
+
+@app.route('/test_session', methods=['GET'])
+def test_session():
+    session['counter'] = session.get('counter', 0) + 1
+    return jsonify({
+        'counter': session['counter'],
+        'username': session.get('username'),
+        'is_admin': session.get('is_admin')
+    })
 
 @app.route('/')
 def index():
