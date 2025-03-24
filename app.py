@@ -111,7 +111,6 @@ def text_xp():
     xp_test(username, app.logger)
 
 @app.route('/get_student_profile', methods=['GET', 'POST'])
-@login_required
 def get_student_profile():
     '''
     Handles request for entire student profile for dashboard and testprep pages
@@ -153,7 +152,6 @@ def get_student_profile():
         return jsonify({"data": response, "message": "No new XP Data", "username": username})
     
 @app.route('/admin', methods=['GET'])
-@login_required
 def admin():
     '''Admin dashboard route'''
 
@@ -185,7 +183,6 @@ def update_session():
     return jsonify({"message": "Session data submitted successfully"}), 200
 
 @app.route('/new_user', methods=['GET'])
-@login_required
 def new_user():
     username = session.get('username')
     # Check to make sure user is admin
@@ -193,7 +190,6 @@ def new_user():
         return render_template('new_user.html', username=username)
 
 @app.route('/add_new_user', methods=['POST'])
-@login_required
 def add_new_user():
     data = request.get_json()
 
@@ -214,7 +210,6 @@ def user_created(username):
     return f"Something went wrong ... User {username} not created successfully"
 
 @app.route('/remove_user', methods=['GET'])
-@login_required
 def remove_user():
     username = session.get('username')
     # Check to make sure user is admin
@@ -222,7 +217,6 @@ def remove_user():
         return render_template('remove_user.html', username=username)
 
 @app.route('/remove_user_data', methods=['GET', 'POST'])
-@login_required
 def remove_user_data():
     '''This route handles deletion of an existing user'''
     
@@ -245,7 +239,6 @@ def remove_user_data():
             return jsonify({"message": f"Unexpected Error: {e}"})
 
 @app.route('/user_data', methods=['GET'])
-@login_required
 def user_data():
     # Get the username
     username = session.get('username')
@@ -254,7 +247,6 @@ def user_data():
         return render_template('user_data.html', username=username)
 
 @app.route('/get_users', methods=['GET'])
-@login_required
 def get_users():
     '''Responds with a list of usernames for user_data.html'''
     
@@ -269,7 +261,6 @@ def get_users():
         return jsonify({'error': 'Internal Server Error'}), 500
 
 @app.route('/get_user_data', methods=['GET'])
-@login_required
 def get_user_data():
     '''Route to fetch user data'''
     
@@ -288,7 +279,6 @@ def get_user_data():
             return jsonify({'message': 'Error fetching user data'}), 500
 
 @app.route('/update_user', methods=['POST'])
-@login_required
 def update_user():
     '''Route to update user data'''
     
@@ -309,7 +299,6 @@ def update_user():
             return jsonify({'message': 'Error updating user data'}), 500
 
 @app.route('/testprep')
-@login_required
 def testprep():
     
     username = session.get('username')
@@ -492,7 +481,6 @@ def assign_tasks_to_curriculum():
     return jsonify({'content': 'Request received'}), 200
 
 @app.route('/submit_question', methods=['POST'])
-@login_required
 def submit_question():
     """Saves a new question or updates an existing question in the database."""
     try:
