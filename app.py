@@ -30,6 +30,8 @@ app.secret_key = secrets.token_hex(16)
 if env == 'production':
     app.config['SQLALCHEMY_DATABASE_URI'] = os.getenv('DATABASE_URL')
     app.config['SERVER_NAME'] = 'montyspythonshow.com'
+    app.config['SESSION_COOKIE_DOMAIN'] = 'montyspythonshow.com'
+    app.config['SESSION_COOKIE_PATH'] = '/'
     app.config['SESSION_TYPE'] = 'redis'
     app.config['SESSION_PERMANENT'] = False
     app.config['SESSION_USE_SIGNER'] = True
@@ -82,8 +84,8 @@ def login():
         is_admin = session.get('is_admin')
         sessionStorage_data = initialize_user_sessionStorage_data(app.logger)
         response = jsonify({'message': 'Login successful', 'session_data': sessionStorage_data, 'username': username, 'is_admin': is_admin})
-        app.logger.debug(f"Login response sent, session: {dict(session)}, cookies: {request.cookies}")
-        app.logger.debug(f"Response headers: {response.headers}")
+        app.logger.debug(f"Login response sent, session: {dict(session)}, request cookies: {request.cookies}")
+        app.logger.debug(f"Response headers: {dict(response.headers)}")  # Better header logging
         return response
     return jsonify({'error': result}), 401
 
