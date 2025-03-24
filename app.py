@@ -100,7 +100,6 @@ def logout():
     return redirect(url_for('index'))  # Redirect back to the home page
 
 @app.route('/dashboard', methods=['GET'])
-@login_required
 def dashboard():
     username = session['username']
     is_admin = session.get('is_admin')
