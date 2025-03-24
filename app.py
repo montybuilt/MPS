@@ -1,7 +1,7 @@
 # Import packages
 import subprocess, logging, secrets, os, redis
 from flask_migrate import Migrate
-from flask import Flask, session, render_template, request, jsonify, redirect, url_for
+from flask import Flask, render_template, request, jsonify, redirect, url_for
 from flask_session import Session
 from sqlalchemy.exc import SQLAlchemyError, IntegrityError
 from werkzeug.exceptions import HTTPException
@@ -71,44 +71,30 @@ def index():
     
 @app.route('/login', methods=['POST'])
 def login():
-    '''Verify login and initialize session data'''
-    try:
-        username = request.form['username']
-        password = request.form['password']
-
-        result = verify(username, password)
-
-        if result is True:  # If the verification was successful
-            
-            # Build the session data for this app
-            build_session(username, app.logger)
-            app.logger.debug(f"Session after build: {dict(session)}")
-            is_admin = session.get('is_admin')
-            
-            # Build sesstionStorage data for the client
-            sessionStorage_data = initialize_user_sessionStorage_data(app.logger)
-            
-            # Build the response
-            response = jsonify({'message': 'Login successful', 'session_data': sessionStorage_data, 'username': username, 'is_admin': is_admin}), 200
-
-            app.logger.debug(f"Login response sent: {dict(session)}")
-
-            return response
-
-        # If result is not True, it will contain an error message to display
-        return jsonify({'error': result}), 401
-    
-    except Exception as e:
-        return jsonify({'error': f'An unexpected error occurred {e}'}), 500
+    username = request.form['username']
+    password = request.form['password']
+    result = verify(username, password)
+    if result is True:
+        build_session(username, app.logger)
+        app.logger.debug(f"Session after build_session: {dict(session)}")
+        session.modified = True
+        app.logger.debug(f"Session before response: {dict(session)}")
+        is_admin = session.get('is_admin')
+        sessionStorage_data = initialize_user_sessionStorage_data(app.logger)
+        response = jsonify({'message': 'Login successful', 'session_data': sessionStorage_data, 'username': username, 'is_admin': is_admin})
+        app.logger.debug(f"Login response sent, session: {dict(session)}, cookies: {request.cookies}")
+        app.logger.debug(f"Response headers: {response.headers}")
+        return response
+    return jsonify({'error': result}), 401
 
 @app.route('/logout', methods=['POST'])
 def logout():
     session.clear()
     return redirect(url_for('index'))  # Redirect back to the home page
 
-@app.route('/dashboard', methods=['GET'])
+@app.route('/dashboard')
 def dashboard():
-    app.logger.debug(f"Dashboard session: {dict(session)}")
+    app.logger.debug(f"Dashboard session: {dict(session)}, cookies: {request.cookies}")
     username = session.get('username')
     is_admin = session.get('is_admin')
     if username is None:
