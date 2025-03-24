@@ -1,6 +1,8 @@
+console.log("SCRIPT VERSION: RIGHT FUCKING NOW!");
+
 function handleLoginSubmit(event) {
     event.preventDefault(); // Stop default submission
-    event.stopPropagation(); // Stop any bubbling shenanigans
+    event.stopPropagation(); // Stop bubbling
     console.log("Form submitted");
 
     const formData = new FormData(event.target);
@@ -13,7 +15,6 @@ function handleLoginSubmit(event) {
     })
     .then(response => {
         console.log("Raw response:", response);
-        console.log("Headers:", [...response.headers.entries()]);
         return response.json();
     })
     .then(data => {
@@ -45,9 +46,11 @@ function handleLoginSubmit(event) {
             if (data.is_admin) {
                 console.log("Going to /admin");
                 window.location.href = '/admin';
+                console.log("Redirect to /admin triggered");
             } else {
                 console.log("Going to /dashboard");
-                window.location.assign('/dashboard'); // Try assign instead
+                window.location.assign('/dashboard');
+                console.log("Redirect to /dashboard triggered");
             }
         }
     })
