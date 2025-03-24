@@ -9,6 +9,7 @@ from modules import *
 from modules import db
 from config import config_map
 from dotenv import load_dotenv
+from datetime import datetime
 
 # Load environment variables from .env
 load_dotenv()
@@ -80,12 +81,14 @@ def login():
         build_session(username, app.logger)
         app.logger.debug(f"Session after build_session: {dict(session)}")
         session.modified = True
+        # Force a detectable change
+        session['login_time'] = str(datetime.utcnow())
         app.logger.debug(f"Session before response: {dict(session)}")
         is_admin = session.get('is_admin')
         sessionStorage_data = initialize_user_sessionStorage_data(app.logger)
         response = jsonify({'message': 'Login successful', 'session_data': sessionStorage_data, 'username': username, 'is_admin': is_admin})
         app.logger.debug(f"Login response sent, session: {dict(session)}, request cookies: {request.cookies}")
-        app.logger.debug(f"Response headers: {dict(response.headers)}")  # Better header logging
+        app.logger.debug(f"Response headers: {dict(response.headers)}")
         return response
     return jsonify({'error': result}), 401
 
