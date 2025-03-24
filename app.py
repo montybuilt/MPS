@@ -16,6 +16,9 @@ load_dotenv()
 # Create the flask object
 app = Flask(__name__)
 
+# Set up logging
+logging.basicConfig(level=logging.DEBUG, format='%(asctime)s %(levelname)s: %(message)s')
+
 # Set the environment (default to development)
 env = os.getenv('FLASK_ENV', 'development')
 app.config.from_object(config_map[env])
@@ -48,9 +51,6 @@ db.init_app(app)
 
 # Initialize flask-migrate
 migrate = Migrate(app, db)
-
-# Set up logging
-logging.basicConfig(level=logging.DEBUG, format='%(asctime)s %(levelname)s: %(message)s')
 
 @app.route('/test_session', methods=['GET'])
 def test_session():
