@@ -21,6 +21,7 @@ document.addEventListener("DOMContentLoaded", function() {
                     
                     // Set sessionStorage with session data
                     const sessionData = data.session_data;
+                    sessionStorage.setItem("is_admin", data.is_admin);
                     for (const key in sessionData) {
                         if (sessionData.hasOwnProperty(key)) {
                             const value = sessionData[key];
@@ -35,7 +36,6 @@ document.addEventListener("DOMContentLoaded", function() {
                     }
                     
                     // Redirect based on the is_admin flag
-                    console.log("Is Admin:", data.is_admin)
                     if (data.is_admin) {
                         window.location.href = '/admin';
                     } else {
