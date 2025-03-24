@@ -1,8 +1,6 @@
-console.log("SCRIPT VERSION: RIGHT FUCKING NOW!");
-
-// Define the login handler function separately
 function handleLoginSubmit(event) {
-    event.preventDefault(); // Prevent default form submission
+    event.preventDefault(); // Stop default submission
+    event.stopPropagation(); // Stop any bubbling shenanigans
     console.log("Form submitted");
 
     const formData = new FormData(event.target);
@@ -26,7 +24,6 @@ function handleLoginSubmit(event) {
             console.log("Login successful, processing data");
             sessionStorage.setItem('username', data.username);
             console.log("Username set:", sessionStorage.getItem('username'));
-
             sessionStorage.setItem("is_admin", data.is_admin);
             console.log("is_admin set:", sessionStorage.getItem("is_admin"));
 
@@ -49,18 +46,18 @@ function handleLoginSubmit(event) {
                 window.location.href = '/admin';
             } else {
                 console.log("Going to /dashboard");
-                window.location.href = '/dashboard';
+                window.location.assign('/dashboard'); // Try assign instead
             }
         }
     })
     .catch(error => console.error('Fetch error:', error));
 }
 
-// Attach the listener after defining the form
 const loginForm = document.getElementById("login-form");
 if (loginForm) {
     console.log("Login form found, attaching listener");
     loginForm.addEventListener("submit", handleLoginSubmit);
+    loginForm.onsubmit = () => false; // Extra insurance
 } else {
     console.log("Login form not found");
 }
