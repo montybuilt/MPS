@@ -77,13 +77,11 @@ def login():
         password = request.form['password']
 
         result = verify(username, password)
-        app.logger.debug(f"User {username} has successfully logged in {result}")
 
         if result is True:  # If the verification was successful
             
             # Build the session data for this app
             build_session(username, app.logger)
-            app.logger.debut(f"User has successfully built session data and is_admin {session.get(is_admin)}")
             is_admin = session.get('is_admin')
             # Build sesstionStorage data for the client
             sessionStorage_data = initialize_user_sessionStorage_data(app.logger)
