@@ -1,49 +1,66 @@
-document.addEventListener("DOMContentLoaded", function() {
-    const loginForm = document.getElementById("login-form");
-    if (loginForm) {
-        loginForm.addEventListener("submit", function(event) {
-            event.preventDefault();  // Prevent default form submission
+console.log("SCRIPT VERSION: RIGHT FUCKING NOW!");
 
-            const formData = new FormData(loginForm);
-            const data = new URLSearchParams(formData);
+// Define the login handler function separately
+function handleLoginSubmit(event) {
+    event.preventDefault(); // Prevent default form submission
+    console.log("Form submitted");
 
-            fetch('/login', {
-                method: 'POST',
-                body: data
-            })
-            .then(response => response.json())
-            .then(data => {
-                if (data.error) {
-                    alert(data.error);  // Display error message
-                } else {
-                    // Store the username in sessionStorage
-                    sessionStorage.setItem('username', data.username);
-                    
-                    // Set sessionStorage with session data
-                    const sessionData = data.session_data;
-                    sessionStorage.setItem("is_admin", data.is_admin);
-                    for (const key in sessionData) {
-                        if (sessionData.hasOwnProperty(key)) {
-                            const value = sessionData[key];
-                            if (Array.isArray(value)) {
-                                sessionStorage.setItem(key, JSON.stringify(value));
-                            } else if (typeof value === 'object' && value !== null) {
-                                sessionStorage.setItem(key, JSON.stringify(value));
-                            } else {
-                                sessionStorage.setItem(key, value);
-                            }
-                        }
-                    }
-                    
-                    // Redirect based on the is_admin flag
-                    if (data.is_admin) {
-                        window.location.href = '/admin';
-                    } else {
-                        window.location.href = '/dashboard';
-                    }
+    const formData = new FormData(event.target);
+    const data = new URLSearchParams(formData);
+    console.log("Sending login request");
+
+    fetch('/login', {
+        method: 'POST',
+        body: data
+    })
+    .then(response => {
+        console.log("Raw response:", response);
+        return response.json();
+    })
+    .then(data => {
+        console.log("Parsed response:", data);
+        if (data.error) {
+            console.log("Error received:", data.error);
+            alert(data.error);
+        } else {
+            console.log("Login successful, processing data");
+            sessionStorage.setItem('username', data.username);
+            console.log("Username set:", sessionStorage.getItem('username'));
+
+            sessionStorage.setItem("is_admin", data.is_admin);
+            console.log("is_admin set:", sessionStorage.getItem("is_admin"));
+
+            const sessionData = data.session_data;
+            console.log("session_data:", sessionData);
+            for (const key in sessionData) {
+                if (sessionData.hasOwnProperty(key)) {
+                    const value = sessionData[key];
+                    const storedValue = Array.isArray(value) || (typeof value === 'object' && value !== null)
+                        ? JSON.stringify(value)
+                        : value;
+                    sessionStorage.setItem(key, storedValue);
+                    console.log(`Set ${key}:`, sessionStorage.getItem(key));
                 }
-            })
-            .catch(error => console.error('Error:', error));
-        });
-    }
-});
+            }
+
+            console.log("Redirecting, is_admin:", data.is_admin);
+            if (data.is_admin) {
+                console.log("Going to /admin");
+                window.location.href = '/admin';
+            } else {
+                console.log("Going to /dashboard");
+                window.location.href = '/dashboard';
+            }
+        }
+    })
+    .catch(error => console.error('Fetch error:', error));
+}
+
+// Attach the listener after defining the form
+const loginForm = document.getElementById("login-form");
+if (loginForm) {
+    console.log("Login form found, attaching listener");
+    loginForm.addEventListener("submit", handleLoginSubmit);
+} else {
+    console.log("Login form not found");
+}
