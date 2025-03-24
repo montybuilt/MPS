@@ -82,11 +82,18 @@ def login():
             
             # Build the session data for this app
             build_session(username, app.logger)
+            app.logger.debug(f"Session after build: {dict(session)}")
             is_admin = session.get('is_admin')
+            
             # Build sesstionStorage data for the client
             sessionStorage_data = initialize_user_sessionStorage_data(app.logger)
+            
+            # Build the response
+            response = jsonify({'message': 'Login successful', 'session_data': sessionStorage_data, 'username': username, 'is_admin': is_admin}), 200
 
-            return jsonify({'message': 'Login successful', 'session_data': sessionStorage_data, 'username': username, 'is_admin': is_admin}), 200
+            app.logger.debug(f"Login response sent: {dict(session)}")
+
+            return response
 
         # If result is not True, it will contain an error message to display
         return jsonify({'error': result}), 401
@@ -101,8 +108,12 @@ def logout():
 
 @app.route('/dashboard', methods=['GET'])
 def dashboard():
-    username = session['username']
+    app.logger.debug(f"Dashboard session: {dict(session)}")
+    username = session.get('username')
     is_admin = session.get('is_admin')
+    if username is None:
+        app.logger.debug("No username in session")
+        return "Please log in again", 403
     return render_template('dashboard.html', username=username, is_admin=is_admin)
 
 @app.route('/test_xp', methods=['GET'])
