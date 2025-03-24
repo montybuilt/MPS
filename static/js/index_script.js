@@ -35,6 +35,7 @@ document.addEventListener("DOMContentLoaded", function() {
                     }
                     
                     // Redirect based on the is_admin flag
+                    console.log("Is Admin:", data.is_admin)
                     if (data.is_admin) {
                         window.location.href = '/admin';
                     } else {
