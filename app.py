@@ -114,6 +114,7 @@ def dashboard():
     app.logger.debug(f"Session ID from cookie: {session_id}")
     app.logger.debug(f"Dashboard session: {dict(session)}, cookies: {request.cookies}")
     username = session.get('username')
+    is_admin = session.get('is_admin')
     if username is None:
         app.logger.debug("No username in session")
         return "Please log in again", 403
