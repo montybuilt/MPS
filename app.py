@@ -101,12 +101,14 @@ def logout():
 
 @app.route('/dashboard')
 def dashboard():
-    # Test Redis connection
     try:
         app.config['SESSION_REDIS'].ping()
         app.logger.debug("Redis ping successful on dashboard")
     except Exception as e:
         app.logger.debug(f"Redis ping failed on dashboard: {str(e)}")
+    # Log the session ID Flask-Session is trying to load
+    session_id = request.cookies.get('session', 'No cookie')
+    app.logger.debug(f"Session ID from cookie: {session_id}")
     app.logger.debug(f"Dashboard session: {dict(session)}, cookies: {request.cookies}")
     username = session.get('username')
     if username is None:
