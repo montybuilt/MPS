@@ -59,7 +59,7 @@ migrate = Migrate(app, db)
 def test_session():
     session['counter'] = session.get('counter', 0) + 1
     return jsonify({
-        'counter': session['counter'],
+        'counter': session.get('counter'),
         'username': session.get('username'),
         'is_admin': session.get('is_admin')
     })
@@ -99,9 +99,14 @@ def logout():
 
 @app.route('/dashboard')
 def dashboard():
+    # Test Redis connection
+    try:
+        app.config['SESSION_REDIS'].ping()
+        app.logger.debug("Redis ping successful on dashboard")
+    except Exception as e:
+        app.logger.debug(f"Redis ping failed on dashboard: {str(e)}")
     app.logger.debug(f"Dashboard session: {dict(session)}, cookies: {request.cookies}")
     username = session.get('username')
-    is_admin = session.get('is_admin')
     if username is None:
         app.logger.debug("No username in session")
         return "Please log in again", 403
