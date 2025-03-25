@@ -1,7 +1,7 @@
 # Import packages
 import subprocess, logging, secrets, os, redis
 from flask_migrate import Migrate
-from flask import Flask, render_template, request, jsonify, redirect, url_for
+from flask import Flask, render_template, request, jsonify, redirect, url_for, session as flask_session
 from flask_session import Session
 from sqlalchemy.exc import SQLAlchemyError, IntegrityError
 from werkzeug.exceptions import HTTPException
@@ -72,24 +72,27 @@ def index():
     
     return render_template('index.html', username = username)
     
+from flask import session as flask_session  # Rename to avoid confusion
+
 @app.route('/login', methods=['POST'])
 def login():
     username = request.form['username']
     password = request.form['password']
     result = verify(username, password)
     if result is True:
-        # Regenerate session ID to force a new cookie
-        session.clear()  # Clear old session
-        session['session_id'] = secrets.token_hex(16)  # Unique ID for tracking
+        flask_session.clear()  # Clear old session
+        flask_session['session_id'] = secrets.token_hex(16)
         build_session(username, app.logger)
-        app.logger.debug(f"Session after build_session: {dict(session)}")
-        session.modified = True
-        session['login_time'] = str(datetime.utcnow())
-        app.logger.debug(f"Session before response: {dict(session)}")
-        is_admin = session.get('is_admin')
+        app.logger.debug(f"Session after build_session: {dict(flask_session)}")
+        flask_session.modified = True
+        flask_session['login_time'] = str(datetime.utcnow())
+        app.logger.debug(f"Session before response: {dict(flask_session)}")
+        is_admin = flask_session.get('is_admin')
         sessionStorage_data = initialize_user_sessionStorage_data(app.logger)
         response = jsonify({'message': 'Login successful', 'session_data': sessionStorage_data, 'username': username, 'is_admin': is_admin})
-        app.logger.debug(f"Login response sent, session: {dict(session)}, request cookies: {request.cookies}")
+        # Force cookie update
+        flask_session.permanent = False  # Match your config
+        app.logger.debug(f"Login response sent, session: {dict(flask_session)}, request cookies: {request.cookies}")
         app.logger.debug(f"Response headers: {dict(response.headers)}")
         return response
     return jsonify({'error': result}), 401
