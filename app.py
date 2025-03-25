@@ -78,10 +78,12 @@ def login():
     password = request.form['password']
     result = verify(username, password)
     if result is True:
+        # Regenerate session ID to force a new cookie
+        session.clear()  # Clear old session
+        session['session_id'] = secrets.token_hex(16)  # Unique ID for tracking
         build_session(username, app.logger)
         app.logger.debug(f"Session after build_session: {dict(session)}")
         session.modified = True
-        # Force a detectable change
         session['login_time'] = str(datetime.utcnow())
         app.logger.debug(f"Session before response: {dict(session)}")
         is_admin = session.get('is_admin')
