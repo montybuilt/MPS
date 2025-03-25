@@ -80,20 +80,20 @@ def login():
     password = request.form['password']
     result = verify(username, password)
     if result is True:
-        flask_session.clear()  # Clear old session
-        flask_session['session_id'] = secrets.token_hex(16)
+        #flask_session.clear()  # Clear old session
+        #flask_session['session_id'] = secrets.token_hex(16)
         build_session(username, app.logger)
-        app.logger.debug(f"Session after build_session: {dict(flask_session)}")
-        flask_session.modified = True
-        flask_session['login_time'] = str(datetime.utcnow())
-        app.logger.debug(f"Session before response: {dict(flask_session)}")
+        #app.logger.debug(f"Session after build_session: {dict(flask_session)}")
+        #flask_session.modified = True
+        #flask_session['login_time'] = str(datetime.utcnow())
+        #app.logger.debug(f"Session before response: {dict(flask_session)}")
         is_admin = flask_session.get('is_admin')
         sessionStorage_data = initialize_user_sessionStorage_data(app.logger)
         response = jsonify({'message': 'Login successful', 'session_data': sessionStorage_data, 'username': username, 'is_admin': is_admin})
         # Force cookie update
-        flask_session.permanent = False  # Match your config
-        app.logger.debug(f"Login response sent, session: {dict(flask_session)}, request cookies: {request.cookies}")
-        app.logger.debug(f"Response headers: {dict(response.headers)}")
+        #flask_session.permanent = False  # Match your config
+        #app.logger.debug(f"Login response sent, session: {dict(flask_session)}, request cookies: {request.cookies}")
+        #app.logger.debug(f"Response headers: {dict(response.headers)}")
         return response
     return jsonify({'error': result}), 401
 
@@ -104,19 +104,19 @@ def logout():
 
 @app.route('/dashboard')
 def dashboard():
-    try:
-        app.config['SESSION_REDIS'].ping()
-        app.logger.debug("Redis ping successful on dashboard")
-    except Exception as e:
-        app.logger.debug(f"Redis ping failed on dashboard: {str(e)}")
+    # try:
+    #     app.config['SESSION_REDIS'].ping()
+    #     app.logger.debug("Redis ping successful on dashboard")
+    # except Exception as e:
+    #     app.logger.debug(f"Redis ping failed on dashboard: {str(e)}")
     # Log the session ID Flask-Session is trying to load
-    session_id = request.cookies.get('session', 'No cookie')
-    app.logger.debug(f"Session ID from cookie: {session_id}")
-    app.logger.debug(f"Dashboard session: {dict(session)}, cookies: {request.cookies}")
+    # session_id = request.cookies.get('session', 'No cookie')
+    # app.logger.debug(f"Session ID from cookie: {session_id}")
+    # app.logger.debug(f"Dashboard session: {dict(session)}, cookies: {request.cookies}")
     username = session.get('username')
     is_admin = session.get('is_admin')
     if username is None:
-        app.logger.debug("No username in session")
+        #app.logger.debug("No username in session")
         return "Please log in again", 403
     return render_template('dashboard.html', username=username, is_admin=is_admin)
 
