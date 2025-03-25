@@ -25,7 +25,7 @@ env = os.getenv('FLASK_ENV', 'development')
 app.config.from_object(config_map[env])
 
 # Set the secret key
-app.secret_key = secrets.token_hex(16)
+app.secret_key = app.config['SECRET_KEY']
 
 # Set the database and session management configurations
 if env == 'production':
