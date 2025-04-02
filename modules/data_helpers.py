@@ -1335,7 +1335,7 @@ def add_new_content(item_id, table, username, logger=None):
             # Create helper for Content table
             c_CRUD = CRUDHelper(Content)
             # Add the new content_id
-            c_CRUD.create(content_id = item_id, base_curriculums = [], creator_id=user.id)
+            c_CRUD.create(content_id = item_id, creator_id=user.id)
             # Return a success message
             return f"content_id {item_id} added to the database"
         
