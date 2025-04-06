@@ -1,5 +1,3 @@
-console.log("SCRIPT VERSION: RIGHT FUCKING NOW!");
-
 function handleLoginSubmit(event) {
     event.preventDefault(); // Stop default submission
     event.stopPropagation(); // Stop bubbling
@@ -64,4 +62,13 @@ if (loginForm) {
     loginForm.onsubmit = () => false; // Extra insurance
 } else {
     console.log("Login form not found");
+}
+
+const logoutForm = document.getElementById("logout-form");
+if (logoutForm) {
+    logoutForm.addEventListener("submit", () => {
+        console.log("Clearing storage on logout");
+        localStorage.clear();
+        sessionStorage.clear();
+    });
 }

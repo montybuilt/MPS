@@ -104,6 +104,15 @@
         <div id="xpChart"></div>
     </div>
     
+    <script>
+        document.getElementById('logout-form').addEventListener('submit', function(event) {
+            // Clear localStorage and sessionStorage before the form submits
+            localStorage.clear();
+            sessionStorage.clear();
+            // Form submission proceeds to /logout route
+        });
+    </script>
+    
     
 </body>
 </html>
