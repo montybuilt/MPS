@@ -80,7 +80,8 @@
         "2": "Embed lambda functions into the code\n\t- lambdas: defining and using lambdas\n\t- self-defined functions taking lambdas as arguments\n\t- functions: map(), filter()",
         "3": "Define and use closures\n\t- closures: meaning and rationale\n\t- defining and using closures",
         "4": "Understand basic Input/Output terminology\n\t- I/O modes\n\t- predefined streams\n\t- handles vs. streams\n\t- text vs. binary modes",
-        "5": "Perform Input/Output operations\n\t- the open() function\n\t- the errno variable and its values\n\t- functions: close(), .read(), .write(), .readline(), readlines()\n\t- using bytearray as input/output buffer"
+        "5": "Perform Input/Output operations\n\t- the open() function\n\t- the errno variable and its values\n\t- functions: close(), .read(), .write(), .readline(), readlines()\n\t- using bytearray as input/output buffer",
+        "6": "Write and interpret iterator classes, generator functions and generator expressions"
       }
     }
   }
