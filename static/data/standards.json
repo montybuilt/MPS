@@ -38,43 +38,49 @@
   },
   "pcap": {
     "1": {
-      "description": "Advanced Python programming concepts and in-depth understanding of Python syntax and semantics.",
+      "description": "Modules and Packages (12% - 6 exam items)",
       "objectives": {
-        "1": "Deepen knowledge of Python's advanced syntax and built-in functions.",
-        "2": "Utilize standard libraries to solve more complex problems.",
-        "3": "Analyze and understand Python code structure and execution flow."
+        "1": "Import variants: import, from import, import as, import *\n\t- advanced qualifying for nested modules\n\t- the dir() function\n\t- the sys.path variable",
+        "2": "Perform evaluations using the math module\n\t- functions: ceil(), floor(), trunc(), factorial(), hypot(), sqrt()",
+        "3": "Generate random values using the random module\n\t- functions: random(), seed(), choice(), sample()",
+        "4": "Discover host platform properties using the platform module\n\t- functions: platform(), machine(), processor()\n\tsystem(), version(), python_implementation(), python_version_tuple()",
+        "5": "Create and use user-defined modules and packages\n\t- idea and rationale\n\t- the __pycache__ directory\n\t- the __name__ variable\n\t- public and private variables\n\t- the __init__.py file\n\t- searching for/through modules/packages\n\t- nested packages vs. directory trees"
       }
     },
     "2": {
-      "description": "Data structures and algorithms using Python.",
+      "description": "Exceptions (14% 5 exam items)",
       "objectives": {
-        "1": "Examine lists, tuples, dictionaries, and sets in depth.",
-        "2": "Implement iterations, comprehensions, and basic algorithmic logic.",
-        "3": "Assess algorithm complexity and optimize Python code."
+        "1": "Handle errors using Python-defined exceptions\n\t- except, except:-except, except:-else:, except (e1, e2)\n\t- the hierarchy of exceptions\n\t- raise, raise ex\n\t- assert\n\t- event classes\n\t- except E as e\n\t- the arg property",
+        "2": "Extend the Python exceptions hierarchy with self-defined exceptions\n\t- self-defined exceptions\n\t- defining and using self-defined exceptions"
       }
     },
     "3": {
-      "description": "Advanced file I/O, module usage, and exception handling.",
+      "description": "Strings (18% - 8 exam items)",
       "objectives": {
-        "1": "Perform advanced file operations and data serialization.",
-        "2": "Employ sophisticated module management and package utilization.",
-        "3": "Implement robust error handling and debugging strategies."
+        "1": "Understand machine representation of characters\n\t- encoding standards: ASCII, UNICODE, UTF-8, code points, escape sequences",
+        "2": "Operate on strings\n\t- functions: ord(), chr()\n\t- indexing, slicing, immutability\n\t- iterating through strings, concatenating, multiplying, comparing (against strings and numbers)\n\t- operators: in, not in",
+        "3": "Employ built-in string methods\n\t- methods: .isxxx(), .join(), .split(), .sort(), sorted(), .index(), .find(), .rfind()"
       }
     },
     "4": {
-      "description": "Object-oriented programming in Python.",
+      "description": "Object-oriented programming in Python (34% - 12 exam items)",
       "objectives": {
-        "1": "Design and implement classes and objects.",
-        "2": "Apply inheritance, polymorphism, and encapsulation effectively.",
-        "3": "Utilize object-oriented design principles for modular code."
+        "1": "Understand the Object-Oriented approach\n\t- ideas and notions: class, object, property, method, encapsulation, inheritance, superclass, subclass, identifying class components",
+        "2": "Employ class and object properties\n\t- instance vs. class variables: declarations and initializations\n\t- the __dict__ property (objects vs. classes)\n\t- private components (instances vs. classes)\n\t- name mangling",
+        "3": "Equip a class with methods\n\t- declaring and using methods\n\t- the self parameter",
+        "4": "Discover the class structure\n\t- introspection and the hasattr() function (objects vs classes)\n\t- properties: __name__, __module__ , __bases__",
+        "5": "Build a class hierarchy using inheritance\n\t- single and multiple inheritance\n\t- the isinstance() function\n\t- overriding\n\t- operators: not is, is\n\t- polymorphism\n\t- overriding the __str__() method\n\t- diamonds",
+        "6": "Construct and initialize objects\n\t- declaring and invoking constructors"
       }
     },
     "5": {
-      "description": "Advanced topics including generators, iterators, decorators, and working with external libraries.",
+      "description": "Miscellaneous (22% - 9 exam items)",
       "objectives": {
-        "1": "Understand and implement generators and iterators.",
-        "2": "Create and apply decorators to enhance code reusability.",
-        "3": "Manage virtual environments and integrate external libraries."
+        "1": "Build complex lists using list comprehension\n\t- list comprehensions: the if operator, nested comprehensions",
+        "2": "Embed lambda functions into the code\n\t- lambdas: defining and using lambdas\n\t- self-defined functions taking lambdas as arguments\n\t- functions: map(), filter()",
+        "3": "Define and use closures\n\t- closures: meaning and rationale\n\t- defining and using closures",
+        "4": "Understand basic Input/Output terminology\n\t- I/O modes\n\t- predefined streams\n\t- handles vs. streams\n\t- text vs. binary modes",
+        "5": "Perform Input/Output operations\n\t- the open() function\n\t- the errno variable and its values\n\t- functions: close(), .read(), .write(), .readline(), readlines()\n\t- using bytearray as input/output buffer"
       }
     }
   }
