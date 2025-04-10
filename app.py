@@ -72,8 +72,6 @@ def index():
     
     return render_template('index.html', username = username)
     
-from flask import session as flask_session  # Rename to avoid confusion
-
 @app.route('/login', methods=['POST'])
 def login():
     
@@ -103,6 +101,7 @@ def logout():
 
 @app.route('/dashboard')
 def dashboard():
+    ''' Renders the dashboard page - see /get_student_profile for data API'''
     
     username = session.get('username')
     is_admin = session.get('is_admin')
@@ -111,6 +110,18 @@ def dashboard():
         return "Please log in again", 403
     
     return render_template('dashboard.html', username=username, is_admin=is_admin)
+
+@app.route('/student_detail', methods=['GET'])
+def student_detail():
+    ''' Renders the student_detail page for teachers/admin '''
+    
+    username = session.get('username')
+    is_admin = session.get('is_admin')
+    
+    if username is None:
+        return "Please log in again", 403
+    
+    return render_template('student_detail.html', username=username, is_admin=is_admin)
 
 @app.route('/test_xp', methods=['GET'])
 def text_xp():
