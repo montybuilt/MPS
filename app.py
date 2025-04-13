@@ -148,7 +148,7 @@ def get_student_profile():
     xp_username = request.args.get('xpUsername')
     
     # Get the xp history update for the user
-    xp_data = fetch_xp_data(username, last_fetched_datetime, app.logger)
+    xp_data = fetch_xp_data(xp_username, last_fetched_datetime, app.logger)
     
     # Get the content and curriculum assignments for the user
     user_assignments = fetch_user_assignments(user_id, app.logger)

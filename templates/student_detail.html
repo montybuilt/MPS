@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard</title>
+    <link rel="stylesheet" href="../static/css/styles.css">
+    <link rel="stylesheet" href="../static/css/dashboard_styles.css">
+    <!-- Include the script file -->
+    <script src="../static/js/student_detail_script.js"></script>
+    <script src="https://cdn.plot.ly/plotly-3.0.1.min.js"></script>
+    <link rel="icon" type="image/png" sizes="32x32" href="../static/images/watermark.png">
+<style>
+    label {
+        margin-bottom: 5px;
+        margin-top: 5px;
+        color: white;
+    }
+    
+    #content-panel {
+        margin: 20px;
+    }
+    
+    .form-group {
+        display: flex;
+        flex-direction: row;
+        margin-top: 20px;
+        margin-left: 20px;
+        flex: 1 1 300px;
+        width: 300px;
+        box-sizing: border-box;
+    }
+    
+    select {
+        padding: 8px;
+        font-size: 14px;
+        width: 90%;
+    }
+
+    .content-row {
+        display: flex;
+        flex-wrap: wrap;
+        align-items: center;
+        margin-bottom: 15px;
+    }
+    
+    .content-row .content-title {
+        flex: 0 0 150px;
+        font-weight: bold;
+        margin-right: 10px;
+        color: white;
+    }
+    
+    .content-row .curriculum-box {
+        flex: 1;
+        background-color: #444;
+        color: white;
+        padding: 10px;
+        margin-right: 5px;
+        text-align: center;
+        border-radius: 4px;
+    }
+    
+    .content-row .curriculum-box:last-child {
+        margin-right: 0;
+    }
+    
+    .admin-btn {
+        display: inline-block;
+        padding: 5px 10px;
+        margin-right: 10px;  /* adjust spacing as needed */
+        background-color: #007bff; /* example blue background */
+        color: white;
+        text-decoration: none;
+        border: none;
+        border-radius: 4px;
+        font-size: 0.9em;
+        cursor: pointer;
+    }
+    .admin-btn:hover {
+        background-color: #0056b3;
+    }
+
+    
+    </style>
+</head>
+<body>
+
+    <!-- Banner image at the top -->
+    <div id="banner-container">
+        <a href="../testprep">
+            <img src="{{ url_for('static', filename='images/Web Banner.png') }}" alt="Web Banner" class="banner">
+        </a>
+    </div>
+    
+    <!-- Navbar with admin buttons -->
+    <div id="navbar">
+        <p>Logged in as: <strong>{{ username }}</strong></p>
+        <nav-loc>Student Dashboard</nav-loc>
+        {% if is_admin %}
+          <a href="/admin" class="admin-btn">Admin</a>
+        {% endif %}
+        <form action="/logout" method="POST" id="logout-form">
+            <button type="submit">Logout</button> <!-- Logout button -->
+        </form>
+    </div>
+
+    <!-- Select student control -->
+    <div class="row-container">
+        <div class="form-group">
+            <label for="studentName">Select Student:</label>
+            <select id="studentName" name="studentName" onchange="loadStudentName()">
+                <option value="">Select a user</option>
+                {% for student in students %}
+                    <option value="{{ student.students }}">{{ student.students }}</option>
+                {% endfor %}
+            </select>
+        </div>
+    </div>
+
+    <!-- Top container for KPIs -->
+    <div id="top-kpi-container">
+        <div class="kpi-item">Total XP: <span id="total-xp"></span></div>
+        <div class="kpi-item">Skill Level: <span id="xp-level"></span></div>
+        <div class="kpi-item">Total Score: <span id="xp-score"></span></div>
+    </div>
+    
+    <!-- Content Panel -->
+    <div id="content-panel">Content Area Summary</div>
+    
+    <!-- KPI detail panel -->
+    <div id="kpi-panel">
+    </div>
+        
+    <!-- XP Chart Container -->
+    <div id="chart-container">
+        <div id="xpChart"></div>
+    </div>
+    
+    <script>
+        document.getElementById('logout-form').addEventListener('submit', function(event) {
+            // Clear localStorage and sessionStorage before the form submits
+            localStorage.clear();
+            sessionStorage.clear();
+            // Form submission proceeds to /logout route
+        });
+    </script>
+    
+    
+</body>
+</html>
