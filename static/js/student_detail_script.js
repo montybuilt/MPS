@@ -8,7 +8,7 @@ let studentName;
 let lastUpdate = ""
 let curriculumXP = {};
 let standardObjectiveXP = {};
-let xpData = {};
+let xpData = [];
 let studentAssignments = {};
 let completedCurriculums = [];
 let currentCurriculum;
@@ -278,7 +278,7 @@ async function setupDashboardSession(studentName) {
         const assignedContent = Object.keys(studentAssignments) || [];
         
         // Get Students XP Data
-        xpData = data.data.xpData;
+        xpData = data.data.xpData || [];
         console.log("XP DATA DUDE", xpData)
         
     } catch (error) {
@@ -837,9 +837,12 @@ function renderContentPanel() {
 
     // Get content score percentage (if available) from summary.content.
     let contentScore = '';
-    if (summary.content[content]) {
+    if (summary.content[content] && !isNaN(summary.content[content].percent)) {
       contentScore = ` (${summary.content[content].percent.toFixed(0)}%)`;
+    } else {
+      contentScore = ` (0%)`;
     }
+
     title.textContent = content + contentScore;
     
     // When clicking on the content title, load the KPI panel for that content.
@@ -897,10 +900,16 @@ function renderContentPanel() {
 function clearKPIPanel() {
 
     let kpiPanel = document.getElementById('kpi-panel');
+    let totalXP = document.getElementById('total-xp');
+    let xpLevel = document.getElementById('xp-level');
+    let xpScore = document.getElementById('xp-score');
     kpiPanel.innerHTML = "";
+    totalXP.innerHTML = "";
+    xpLevel.innerHTML = "";
+    xpScore.innerHTML = "";
     curriculumXP = {};
     standardObjectiveXP = {};
-    xpData = {};
+    xpData = [];
     studentAssignments = {};
     completedCurriculums = [];
     
