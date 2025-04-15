@@ -266,6 +266,15 @@ def fetch_user_ids():
     except Exception as e:
         raise e
 
+def fetch_student_id(username, logger=None):
+    '''Fetch user.id given user.username'''
+    
+    # Get the user.id
+    user = User.query.filter_by(username=username).first()
+    user_id = user.id
+    
+    return user_id
+
 def initialize_user_sessionStorage_data(logger=None):
     '''
     Send user data from Server to Client for sessionStorage
@@ -446,7 +455,7 @@ def fetch_user_assignments(user_id, logger=None):
         
 
     '''
-    
+    logger.debug(f"Student Profile Request for {user_id}")
     # A set to hold unique Content.content_id values for the user.
     user_content_ids = set()
 
@@ -475,7 +484,7 @@ def fetch_user_assignments(user_id, logger=None):
     # Prepare the result dictionary.
     # Outer keys: Content.content_id (strings), plus a "custom" key for curricula not tied to any Content.
     result = {content_id: {} for content_id in user_content_ids}
-
+    logger.debug(f"Content Fetched: {result}")
     #For each classroom-related Content, get the associated curriculums via ContentCurriculum.
     for content_id in user_content_ids:
         # Retrieve the Content row (we assume content_id is unique in Content).

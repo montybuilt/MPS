@@ -1116,7 +1116,7 @@ async function setupTestprepSession() {
   
     try {
         // Use GET with query parameters.
-        const response = await fetch(`/get_student_profile?${params.toString()}`, {
+        const response = await fetch(`/get_user_profile?${params.toString()}`, {
             method: 'GET'
         });
     

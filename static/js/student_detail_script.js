@@ -190,17 +190,15 @@ function calculateKPIs(xpData) {
 // Function will also save the xp history for the student in sessionStorage
 async function setupDashboardSession(studentName) {
     // Retrieve parameters from localStorage or define defaults.
-    const xpUsername = studentName
-    const username = studentName
     lastUpdate = "1970-01-01";
     
     // Build query parameters.
     const params = new URLSearchParams({
         lastUpdate: lastUpdate,
-        xpUsername: xpUsername
+        xpUsername: studentName
     });
     
-    console.log("Search Params:", lastUpdate, xpUsername);
+    console.log("Search Params:", lastUpdate, studentName);
   
     try {
         // Use GET with query parameters.
@@ -667,6 +665,7 @@ function identifyCompletedCurriculums() {
 
   // Build a set of correct answers from xpData for quick lookup.
   const correctAnswerSet = new Set();
+  
   xpData.forEach(record => {
     if (record.dXP > 0 && record.question_id) {
       correctAnswerSet.add(record.question_id);
@@ -894,9 +893,28 @@ function renderContentPanel() {
 
 //-----------------------------------------------------------------------------------------------------------------
 
+
+function clearKPIPanel() {
+
+    let kpiPanel = document.getElementById('kpi-panel');
+    kpiPanel.innerHTML = "";
+    curriculumXP = {};
+    standardObjectiveXP = {};
+    xpData = {};
+    studentAssignments = {};
+    completedCurriculums = [];
+    
+
+}
+
+//-----------------------------------------------------------------------------------------------------------------
+
 // Main initialization function
 
 async function loadStudentName() {
+    // first clear out the existing global variables and KPI Panel
+    clearKPIPanel();
+    // Fetch the student name from dropdown
     const studentName = document.getElementById("studentName").value;
     if (!studentName) return;  // ignore empty selection
     console.log("Student Name Selected:", studentName);

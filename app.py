@@ -128,10 +128,10 @@ def text_xp():
     username = session.get('username')
     xp_test(username, app.logger)
 
-@app.route('/get_student_profile', methods=['GET', 'POST'])
-def get_student_profile():
+@app.route('/get_user_profile', methods=['GET', 'POST'])
+def get_user_profile():
     '''
-    Handles request for entire student profile for dashboard and testprep pages
+    Handles request for entire user profile for dashboard and testprep pages
     
     Notes:
         - Returns entire student assignment dictionary
@@ -168,6 +168,50 @@ def get_student_profile():
     else:
 
         return jsonify({"data": response, "message": "No new XP Data", "username": username})
+    
+@app.route('/get_student_profile', methods=['GET', 'POST'])
+def get_student_profile():
+    '''
+    Handles request for entire student profile for student detail page
+    
+    Notes:
+        - Returns entire student assignment dictionary
+        - Returns entire xp history
+    
+    '''
+    
+    # get the username and user_id
+    username = session.get('username')
+    user_id = session.get('user_id')
+    
+    # get the last fetched datetime and xpUsername from request
+    last_fetched_datetime = request.args.get('lastUpdate')
+    xp_username = request.args.get('xpUsername')
+    
+    # Fetch the user_id for xp_username
+    student_id = fetch_student_id(xp_username)
+    
+    # Get the xp history update for the user
+    xp_data = fetch_xp_data(xp_username, last_fetched_datetime, app.logger)
+    
+    # Get the content and curriculum assignments for the user
+    user_assignments = fetch_user_assignments(student_id, app.logger)
+    
+    response = {'userAssignments': user_assignments, 'xpUsername': xp_username}
+    
+    if xp_data:
+    
+        # organize the response dictionary
+        response.update({'xpData': xp_data['xpData'],
+                         'xpLastFetchedDatetime': xp_data['mostRecentDatetime']
+        })
+
+        # Return the XP data to the client (or None if no data)
+        return jsonify({"data": response, "message": "XP data found", "student": xp_username})
+    
+    else:
+
+        return jsonify({"data": response, "message": "No new XP Data", "student": xp_username})
     
 @app.route('/admin', methods=['GET'])
 def admin():
