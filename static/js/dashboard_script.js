@@ -147,15 +147,12 @@ function calculateKPIs(xpData) {
 
 //-----------------------------------------------------------------------------------------------------------------
 
-// Function to fetch user content/curriculum/question assignments and create global variables
-// Function will also save the xp history for the student in sessionStorage
-async function setupDashboardSession() {
-    // Retrieve parameters from localStorage or define defaults.
+// This function gets all data needed for dashboard from server
+async function fetchDashboardData() {
     let lastUpdate = localStorage.getItem("xpLastFetchedDatetime") || "1970-01-01";
     let xpUsername = localStorage.getItem("xpUsername") || "default_xpusername";
     const username = sessionStorage.getItem("username") || "default_username";
-    
-    // Reset the xpData if the current user is not the same as the stored xpData
+
     if (xpUsername !== username) {
         console.log("NEW USER ALERT!");
         localStorage.setItem("xpLastFetchedDatetime", "1970-01-01");
@@ -164,115 +161,105 @@ async function setupDashboardSession() {
         xpUsername = username;
         lastUpdate = "1970-01-01";
     }
-    
-    // Build query parameters.
-    const params = new URLSearchParams({
-        lastUpdate: lastUpdate,
-        xpUsername: xpUsername
-    });
-    
-    console.log("Search Params:", lastUpdate, xpUsername);
-  
-    try {
-        // Use GET with query parameters.
-        const response = await fetch(`/get_user_profile?${params.toString()}`, {
-            method: 'GET'
-        });
-    
-        if (!response.ok) {
-            throw new Error('Network response was not ok: ' + response.status);
-        }
-    
-        const data = await response.json();
-        // Note: Adjusting to match your Flask response structure (data.data)
-        console.log('Student Assignments:', data.data.userAssignments);
-        
-        // Get the raw assignments from the response
-        const rawAssignments = data.data.userAssignments || {};
-        console.log("RAW DOG ASSIGNMENTS", rawAssignments);
-        
-        // Initialize our dictionaries.
-        const studentAssignments = {};      // { content: { curriculum: [question_ids] } }
-        const curriculumXP = {};            // { curriculum: potential_xp }
-        const standardObjectiveXP = {};     // { content: { "standard.objective": potential_xp } }
-        
-        // Iterate through the raw assignments.
-        for (const content in rawAssignments) {
-          if (rawAssignments.hasOwnProperty(content)) {
-            // Initialize the content key for both studentAssignments and standardObjectiveXP.
-            studentAssignments[content] = {};
-            standardObjectiveXP[content] = {};
-        
-            // Loop through each curriculum under this content.
-            for (const curriculum in rawAssignments[content]) {
-              if (rawAssignments[content].hasOwnProperty(curriculum)) {
-                const details = rawAssignments[content][curriculum]; // Array of objects: { task_key, difficulty, standard, objective }
-        
-                // Build the array of question_ids (task_keys) for studentAssignments.
-                studentAssignments[content][curriculum] = details.map(item => item.task_key);
-        
-                // Calculate total difficulty for the curriculum.
-                const totalDifficulty = details.reduce((sum, item) => sum + item.difficulty, 0);
-                // Compute potential XP for the curriculum (scaled by dividing by 3).
-                curriculumXP[curriculum] = totalDifficulty / 3;
-        
-                // For each question, accumulate difficulty for its standard/objective pairing.
-                details.forEach(item => {
-                  const soKey = `${item.standard}.${item.objective}`;
-                  if (!standardObjectiveXP[content].hasOwnProperty(soKey)) {
-                    standardObjectiveXP[content][soKey] = 0;
-                  }
-                  standardObjectiveXP[content][soKey] += item.difficulty;
-                });
-              }
-            }
-          }
-        }
-        
-        // Now, convert each standard/objective total into potential XP by dividing by 3.
-        for (const content in standardObjectiveXP) {
-          if (standardObjectiveXP.hasOwnProperty(content)) {
-            for (const soKey in standardObjectiveXP[content]) {
-              if (standardObjectiveXP[content].hasOwnProperty(soKey)) {
-                standardObjectiveXP[content][soKey] /= 3;
-              }
-            }
-          }
-        }
-        
-        // Save the split dictionaries into storage.
-        sessionStorage.setItem('studentAssignments', JSON.stringify(studentAssignments));
-        localStorage.setItem('curriculumXP', JSON.stringify(curriculumXP));
-        localStorage.setItem('standardObjectiveXP', JSON.stringify(standardObjectiveXP));
-        
-        console.log("Curriculum XPs", curriculumXP);
-        console.log("Standard/Objective XPs", standardObjectiveXP);
 
-        // Extract all content areas (keys) from the student assignments.
-        const assignedContent = Object.keys(studentAssignments) || [];
-        
-        // Process XP data if available.
-        if (data.data.xpData) {
-            // Retrieve existing XP data from localStorage.
-            const existingXPData = JSON.parse(localStorage.getItem("xpData")) || [];
-            
-            // Merge the existing XP data with the new data.
-            const mergedXPData = [...existingXPData, ...data.data.xpData];
-            
-            // Store the merged XP data and the new last fetched datetime in localStorage.
-            localStorage.setItem("xpData", JSON.stringify(mergedXPData));
-            localStorage.setItem("xpLastFetchedDatetime", data.data.xpLastFetchedDatetime);
-            console.log("XP Data updated and stored.");
-        } else {
-            console.log("No XP Data update needed.");
-        }
-        
-        // Update the xpUsername in localStorage.
-        localStorage.setItem("xpUsername", data.data.xpUsername);
-        
+    const params = new URLSearchParams({ lastUpdate, xpUsername });
+
+    try {
+        const response = await fetch(`/get_user_profile?${params.toString()}`);
+        if (!response.ok) throw new Error(`Fetch failed: ${response.status}`);
+        const data = await response.json();
+        return data.data;  // let the calling function unpack .userAssignments, .xpData, etc.
     } catch (error) {
-        console.error('Fetch error:', error);
+        console.error("Dashboard fetch failed:", error);
+        return null;
     }
+}
+
+//-----------------------------------------------------------------------------------------------------------------
+
+// Function to fetch user content/curriculum/question assignments and create global variables
+// Function will also save the xp history for the student in sessionStorage
+async function setupDashboardSession() {
+    const data = await fetchDashboardData();
+    if (!data) return;
+
+    const rawAssignments = data.userAssignments || {};
+    const studentAssignments = {};
+    const curriculumXP = {};
+    const standardObjectiveXP = {};
+    const tagSummary = {};
+
+    for (const content in rawAssignments) {
+        studentAssignments[content] = {};
+        standardObjectiveXP[content] = {};
+
+        for (const curriculum in rawAssignments[content]) {
+            const details = rawAssignments[content][curriculum];
+            studentAssignments[content][curriculum] = details.map(item => item.task_key);
+            const totalDifficulty = details.reduce((sum, item) => sum + item.difficulty, 0);
+            curriculumXP[curriculum] = totalDifficulty / 3;
+
+            details.forEach(item => {
+                // Standard/objective XP aggregation
+                const soKey = `${item.standard}.${item.objective}`;
+                standardObjectiveXP[content][soKey] = (standardObjectiveXP[content][soKey] || 0) + item.difficulty;
+
+                // Tag summary aggregation with content as outer key
+                if (item.tags && Array.isArray(item.tags)) {
+                  if (!tagSummary[content]) tagSummary[content] = {};
+                  
+                  item.tags.forEach(tag => {
+                    if (!tagSummary[content][tag]) {
+                      tagSummary[content][tag] = { questions: new Set(), totalDifficulty: 0 };
+                    }
+                    tagSummary[content][tag].questions.add(item.task_key);
+                    tagSummary[content][tag].totalDifficulty += item.difficulty;
+                  });
+                }
+            });
+        }
+    }
+
+    // Convert to XP
+    for (const content in standardObjectiveXP) {
+        for (const soKey in standardObjectiveXP[content]) {
+            standardObjectiveXP[content][soKey] /= 3;
+        }
+    }
+
+    // Flatten tagSummary questions and convert difficulty to XP
+    const finalTagSummary = {};
+    for (const content in tagSummary) {
+      finalTagSummary[content] = {};
+      for (const tag in tagSummary[content]) {
+        finalTagSummary[content][tag] = {
+          questions: Array.from(tagSummary[content][tag].questions),
+          potentialXP: tagSummary[content][tag].totalDifficulty / 3
+        };
+      }
+    }
+
+    // Save to storage
+    sessionStorage.setItem('studentAssignments', JSON.stringify(studentAssignments));
+    localStorage.setItem('curriculumXP', JSON.stringify(curriculumXP));
+    localStorage.setItem('standardObjectiveXP', JSON.stringify(standardObjectiveXP));
+    localStorage.setItem('tagSummary', JSON.stringify(finalTagSummary));
+
+    // Merge and save XP data
+    if (data.xpData) {
+        const existingXP = JSON.parse(localStorage.getItem("xpData")) || [];
+        const merged = [...existingXP, ...data.xpData];
+        localStorage.setItem("xpData", JSON.stringify(merged));
+        localStorage.setItem("xpLastFetchedDatetime", data.xpLastFetchedDatetime);
+    }
+
+    localStorage.setItem("xpUsername", data.xpUsername);
+}
+
+//-----------------------------------------------------------------------------------------------------------------
+
+function setupTagsData() {
+
 }
 
 //-----------------------------------------------------------------------------------------------------------------
@@ -287,6 +274,8 @@ function getColorForScore(score) {
     return "red";
   }
 }
+
+//-----------------------------------------------------------------------------------------------------------------
 
 function renderKPIPanel(currentContent) {
   // Create or select the KPI panel container (inserted between content-panel and chart-container)
@@ -532,6 +521,26 @@ function renderKPIPanel(currentContent) {
   };
   
   Plotly.newPlot('radar', radarData, radarLayout);
+  
+  document.getElementById('radar').on('plotly_click', function(eventData) {
+    const currentContent = sessionStorage.getItem("currentContent");
+    if (!currentContent) return;
+
+    // If a curriculum point was clicked
+    if (eventData?.points?.length > 0) {
+      const point = eventData.points[0];
+      const curriculumId = point.theta;
+
+      if (curriculumId) {
+        renderTagPerformancePanel(currentContent, curriculumId);
+        return;
+      }
+    }
+
+    // If the click wasn’t on a valid curriculum point, reset to show all tags
+    renderTagPerformancePanel(currentContent);
+  });
+
 
   // --- Draw Historical XP Chart ---
   // Assuming your drawAreaChart() function renders into the xpChart container.
@@ -539,21 +548,161 @@ function renderKPIPanel(currentContent) {
 }
 
 //-----------------------------------------------------------------------------------------------------------------
+
+// Function to render tag-level performance panel below the KPI section
+function renderTagPerformancePanel(content, filterCurriculum = null) {
+  const tagSummary = JSON.parse(localStorage.getItem("tagSummary")) || {};
+  const assignments = JSON.parse(sessionStorage.getItem("studentAssignments")) || {};
+  const xpData = JSON.parse(localStorage.getItem("xpData")) || [];
+
+  if (!tagSummary[content]) return; // no tag data for this content
+
+  // If filtering by curriculum, create a set of allowed task_ids
+  let allowedQuestions = null;
+  if (filterCurriculum && assignments[content]?.[filterCurriculum]) {
+    allowedQuestions = new Set(assignments[content][filterCurriculum]);
+  }
+
+  // Step 1: Collect all questions in this content area
+  let allQuestions = [];
+  Object.values(assignments[content] || {}).forEach(qList => {
+    allQuestions = allQuestions.concat(qList);
+  });
+
+  // Step 2: Use processPriorAnswers to get performance on those questions
+  const { correctAnswers, incorrectAnswers } = processPriorAnswers(xpData, allQuestions);
+  const correctSet = new Set(correctAnswers);
+  const incorrectSet = new Set(incorrectAnswers);
+
+  // Step 3: Create or reuse the tag panel
+  let tagPanel = document.getElementById("tag-panel");
+  if (!tagPanel) {
+    tagPanel = document.createElement("div");
+    tagPanel.id = "tag-panel";
+    tagPanel.style.margin = "20px auto";
+    tagPanel.style.maxWidth = "1200px";
+    tagPanel.style.color = "white";
+    document.body.appendChild(tagPanel);
+  }
+  
+  // Set the title dynamically
+  tagPanel.innerHTML = `<h4>${content} - Skill Acquisition Map${filterCurriculum ? `: ${filterCurriculum}` : ''}</h4>`;
+  // Remove any existing tag rows
+  document.querySelectorAll(".tag-row").forEach(el => el.remove());
+
+  
+
+  const tagList = Object.entries(tagSummary[content]).sort(([a], [b]) =>
+    a.toLowerCase().localeCompare(b.toLowerCase())
+  );
+
+  // Step 4: Measure longest label width
+  const testSpan = document.createElement("span");
+  testSpan.style.visibility = "hidden";
+  testSpan.style.position = "absolute";
+  testSpan.style.fontWeight = "bold";
+  document.body.appendChild(testSpan);
+
+  let maxLabelWidth = 100;
+  tagList.forEach(([tag]) => {
+    testSpan.textContent = tag;
+    const width = testSpan.offsetWidth;
+    if (width > maxLabelWidth) maxLabelWidth = width;
+  });
+
+  document.body.removeChild(testSpan);
+
+  // Step 5: Draw each tag line with colored blocks
+  tagList.forEach(([tag, info]) => {
+    // If filtering, exclude tags that don't have any matching questions
+    const filteredQuestions = allowedQuestions
+      ? info.questions.filter(task_id => allowedQuestions.has(task_id))
+      : info.questions;
+
+    if (filteredQuestions.length === 0) return; // skip this tag if no questions match
+
+    const row = document.createElement("div");
+    row.style.display = "flex";
+    row.style.alignItems = "center";
+    row.style.marginBottom = "8px";
+    row.style.gap = "0px";
+
+    // Tag label
+    const label = document.createElement("div");
+    label.textContent = tag;
+    label.style.width = `${maxLabelWidth + 10}px`;
+    label.style.fontWeight = "bold";
+    label.style.textAlign = "right";
+    label.style.marginRight = "10px";
+    label.className = "tag-label";
+    row.appendChild(label);
+
+    // Each question block
+    filteredQuestions.forEach(task_id => {
+      const box = document.createElement("div");
+      box.style.width = "16px";
+      box.style.height = "16px";
+      box.style.borderRadius = "2px";
+      box.style.cursor = "pointer";
+      box.className = "tag-box";
+
+      const isCorrect = correctSet.has(task_id);
+      const isIncorrect = incorrectSet.has(task_id);
+
+      if (isCorrect && isIncorrect) {
+        box.style.backgroundColor = "yellow";
+      } else if (isCorrect) {
+        box.style.backgroundColor = "green";
+      } else if (isIncorrect) {
+        box.style.backgroundColor = "red";
+      } else {
+        box.style.backgroundColor = "gray";
+      }
+
+      box.title = task_id;
+
+      // Clicking the box navigates to the question
+      box.addEventListener("click", () => {
+        for (let contentKey in assignments) {
+          for (let curriculum in assignments[contentKey]) {
+            if (assignments[contentKey][curriculum].includes(task_id)) {
+              sessionStorage.setItem("currentContent", contentKey);
+              sessionStorage.setItem("currentCurriculum", curriculum);
+              sessionStorage.setItem("currentQuestionId", task_id);
+              window.location.href = "testprep";
+              return;
+            }
+          }
+        }
+      });
+
+      row.appendChild(box);
+    });
+
+    tagPanel.appendChild(row);
+  });
+}
+
+//-----------------------------------------------------------------------------------------------------------------
+
 // Function to load the kpi panel with content related to session curriculumId
 function loadKpiPanelFromCurrentCurriculum() {
   const currentCurriculum = sessionStorage.getItem('currentCurriculum');
   if (currentCurriculum) {
     const assignments = JSON.parse(sessionStorage.getItem("studentAssignments"));
     let foundContent = null;
-    // Iterate through each content area to see if it contains the currentCurriculum.
+
+    // Find which content includes the current curriculum
     for (let content in assignments) {
       if (assignments[content].hasOwnProperty(currentCurriculum)) {
         foundContent = content;
         break;
       }
     }
+
     if (foundContent) {
       renderKPIPanel(foundContent);
+      renderTagPerformancePanel(foundContent);  // ← Add this line to draw tags panel too
     }
   }
 }
@@ -612,39 +761,25 @@ function getXPDataForChart() {
 }
 
 //-----------------------------------------------------------------------------------------------------------------
-function processPriorAnswers(xpData, questions) {
-    
-    // If xpData is empty, store empty arrays in sessionStorage and return.
-    if (!xpData || xpData.length === 0) {
-        sessionStorage.setItem("correctAnswers", JSON.stringify([]));
-        sessionStorage.setItem("incorrectAnswers", JSON.stringify([]));
-        return;
-    }
 
+function processPriorAnswers(xpData, questions) {
     const correctAnswersSet = new Set();
     const incorrectAnswersSet = new Set();
-    
+
     xpData.forEach(record => {
-        // Check if record.question_id is in the questions array.
         if (questions.includes(record.question_id)) {
-            // If dXP is positive, add question_id value to correctAnswers.
             if (record.dXP > 0) {
-              correctAnswersSet.add(record.question_id);
+                correctAnswersSet.add(record.question_id);
+            } else if (record.dXP < 0) {
+                incorrectAnswersSet.add(record.question_id);
             }
-            // If dXP is negative, add question_id value to incorrectAnswers.
-            else if (record.dXP < 0) {
-              incorrectAnswersSet.add(record.question_id);
-            }
-            // (If key2 is zero or another value, decide what to do.)
         }
     });
 
-  // Save the arrays in sessionStorage
-  const correctAnswers = [...correctAnswersSet];
-  const incorrectAnswers = [...incorrectAnswersSet];
-  sessionStorage.setItem("correctAnswers", JSON.stringify(correctAnswers));
-  sessionStorage.setItem("incorrectAnswers", JSON.stringify(incorrectAnswers));
-  
+    return {
+        correctAnswers: Array.from(correctAnswersSet),
+        incorrectAnswers: Array.from(incorrectAnswersSet)
+    };
 }
 
 //-----------------------------------------------------------------------------------------------------------------
@@ -839,6 +974,7 @@ function renderContentPanel() {
     title.addEventListener("click", () => {
       sessionStorage.setItem("currentContent", content);
       renderKPIPanel(content);
+      renderTagPerformancePanel(content);
     });
     row.appendChild(title);
 
@@ -883,13 +1019,18 @@ function renderContentPanel() {
       box.addEventListener("click", () => {
         sessionStorage.setItem("currentCurriculum", curriculum);
         const questions = assignments[content][curriculum];
-        processPriorAnswers(xpData, questions);
-        const correctAnswers = JSON.parse(sessionStorage.getItem("correctAnswers")) || [];
-        const incorrectAnswers = JSON.parse(sessionStorage.getItem("incorrectAnswers")) || [];
+      
+        const xpData = JSON.parse(localStorage.getItem("xpData")) || [];
+        const { correctAnswers, incorrectAnswers } = processPriorAnswers(xpData, questions);
+      
+        sessionStorage.setItem("correctAnswers", JSON.stringify(correctAnswers));
+        sessionStorage.setItem("incorrectAnswers", JSON.stringify(incorrectAnswers));
+      
         const nextQuestion = chooseNextQuestion(questions, correctAnswers, incorrectAnswers);
         sessionStorage.setItem("currentQuestionId", nextQuestion);
         window.location.href = "testprep";
       });
+
       
       row.appendChild(box);
     }

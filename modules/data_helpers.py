@@ -455,7 +455,6 @@ def fetch_user_assignments(user_id, logger=None):
         
 
     '''
-    logger.debug(f"Student Profile Request for {user_id}")
     # A set to hold unique Content.content_id values for the user.
     user_content_ids = set()
 
@@ -484,7 +483,7 @@ def fetch_user_assignments(user_id, logger=None):
     # Prepare the result dictionary.
     # Outer keys: Content.content_id (strings), plus a "custom" key for curricula not tied to any Content.
     result = {content_id: {} for content_id in user_content_ids}
-    logger.debug(f"Content Fetched: {result}")
+
     #For each classroom-related Content, get the associated curriculums via ContentCurriculum.
     for content_id in user_content_ids:
         # Retrieve the Content row (we assume content_id is unique in Content).
@@ -503,7 +502,7 @@ def fetch_user_assignments(user_id, logger=None):
         for curriculum in content_curricula:
             # For each curriculum, get the Questions.task_key values via CurriculumQuestion.
             question_data = (
-                db.session.query(Questions.task_key, Questions.difficulty, Questions.standard, Questions.objective)
+                db.session.query(Questions.task_key, Questions.difficulty, Questions.standard, Questions.objective, Questions.tags)
                 .join(CurriculumQuestion, CurriculumQuestion.question_id == Questions.id)
                 .filter(CurriculumQuestion.curriculum_id == curriculum.id)
                 .all()
@@ -513,8 +512,9 @@ def fetch_user_assignments(user_id, logger=None):
                 {"task_key": qk,
                  "difficulty": difficulty,
                  "standard": standard,
-                 "objective": objective}
-                for (qk, difficulty, standard, objective) in question_data
+                 "objective": objective,
+                 "tags": tags}
+                for (qk, difficulty, standard, objective, tags) in question_data
             ]
 
     # Handle custom curricula: these are assigned to the user via UserCurriculum.
@@ -529,7 +529,7 @@ def fetch_user_assignments(user_id, logger=None):
     for curriculum in custom_curricula:
         # For each custom curriculum, get the question data
         question_data = (
-            db.session.query(Questions.task_key, Questions.difficulty, Questions.standard, Questions.objective)
+            db.session.query(Questions.task_key, Questions.difficulty, Questions.standard, Questions.objective, Questions.tags)
             .join(CurriculumQuestion, CurriculumQuestion.question_id == Questions.id)
             .filter(CurriculumQuestion.curriculum_id == curriculum.id)
             .all()
@@ -539,8 +539,9 @@ def fetch_user_assignments(user_id, logger=None):
             {"task_key": qk,
              "difficulty": difficulty,
              "standard": standard,
-             "objective": objective}
-            for (qk, difficulty, standard, objective) in question_data
+             "objective": objective,
+             "tags": tags}
+            for (qk, difficulty, standard, objective, tags) in question_data
         ]    
 
     # Place custom curricula under the "custom" key in the outer dictionary.
@@ -596,6 +597,29 @@ def fetch_user_data(username, logger=None):
         return user_data
     else:
         return None
+
+def fetch_tags_data(questions, logger=None):
+    '''
+    This function retrieves the tags data for a list of questions.
+
+    Parameters
+    ----------
+    questions : list of task_key strings
+    logger : Flask app.logger, optional
+
+    Returns
+    -------
+    dict : {task_key: [tags]} for each task_key in the input list
+    '''
+    try:
+        results = db.session.query(Questions.task_key, Questions.tags)\
+                            .filter(Questions.task_key.in_(questions)).all()
+        return {task_key: tags for task_key, tags in results}
+
+    except Exception as e:
+        if logger:
+            logger.error(f"Error fetching tag data: {e}")
+        return {}
 
 def update_user_data(username, changes, logger=None):
     '''

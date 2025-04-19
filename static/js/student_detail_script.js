@@ -186,104 +186,61 @@ function calculateKPIs(xpData) {
 
 //-----------------------------------------------------------------------------------------------------------------
 
-// Function to fetch user content/curriculum/question assignments and create global variables
-// Function will also save the xp history for the student in sessionStorage
-async function setupDashboardSession(studentName) {
-    // Retrieve parameters from localStorage or define defaults.
-    lastUpdate = "1970-01-01";
-    
-    // Build query parameters.
+async function fetchStudentDashboardData(studentName) {
+    const lastUpdate = "1970-01-01";
     const params = new URLSearchParams({
         lastUpdate: lastUpdate,
         xpUsername: studentName
     });
-    
-    console.log("Search Params:", lastUpdate, studentName);
-  
-    try {
-        // Use GET with query parameters.
-        const response = await fetch(`/get_student_profile?${params.toString()}`, {
-            method: 'GET'
-        });
-    
-        if (!response.ok) {
-            throw new Error('Network response was not ok: ' + response.status);
-        }
-    
-        const data = await response.json();
-        // Note: Adjusting to match your Flask response structure (data.data)
-        console.log('Student Assignments:', data.data.userAssignments);
-        
-        // Get the raw assignments from the response
-        const rawAssignments = data.data.userAssignments || {};
-        console.log("RAW ASSIGNMENTS", rawAssignments);
-        
-        // Initialize our dictionaries.
-        studentAssignments = {};      // { content: { curriculum: [question_ids] } }
-        curriculumXP = {};            // { curriculum: potential_xp }
-        standardObjectiveXP = {};     // { content: { "standard.objective": potential_xp } }
-        
-        // Iterate through the raw assignments.
-        for (const content in rawAssignments) {
-          if (rawAssignments.hasOwnProperty(content)) {
-            // Initialize the content key for both studentAssignments and standardObjectiveXP.
-            studentAssignments[content] = {};
-            standardObjectiveXP[content] = {};
-        
-            // Loop through each curriculum under this content.
-            for (const curriculum in rawAssignments[content]) {
-              if (rawAssignments[content].hasOwnProperty(curriculum)) {
-                const details = rawAssignments[content][curriculum]; // Array of objects: { task_key, difficulty, standard, objective }
-        
-                // Build the array of question_ids (task_keys) for studentAssignments.
-                studentAssignments[content][curriculum] = details.map(item => item.task_key);
-        
-                // Calculate total difficulty for the curriculum.
-                const totalDifficulty = details.reduce((sum, item) => sum + item.difficulty, 0);
-                // Compute potential XP for the curriculum (scaled by dividing by 3).
-                curriculumXP[curriculum] = totalDifficulty / 3;
-        
-                // For each question, accumulate difficulty for its standard/objective pairing.
-                details.forEach(item => {
-                  const soKey = `${item.standard}.${item.objective}`;
-                  if (!standardObjectiveXP[content].hasOwnProperty(soKey)) {
-                    standardObjectiveXP[content][soKey] = 0;
-                  }
-                  standardObjectiveXP[content][soKey] += item.difficulty;
-                });
-              }
-            }
-          }
-        }
-        
-        // Now, convert each standard/objective total into potential XP by dividing by 3.
-        for (const content in standardObjectiveXP) {
-          if (standardObjectiveXP.hasOwnProperty(content)) {
-            for (const soKey in standardObjectiveXP[content]) {
-              if (standardObjectiveXP[content].hasOwnProperty(soKey)) {
-                standardObjectiveXP[content][soKey] /= 3;
-              }
-            }
-          }
-        }
-        
-        // Save the split dictionaries into storage.
-        curriculumXP = curriculumXP;
-        standardObjectiveXP = standardObjectiveXP;
-        
-        console.log("Curriculum XPs", curriculumXP);
-        console.log("Standard/Objective XPs", standardObjectiveXP);
 
-        // Extract all content areas (keys) from the student assignments.
-        const assignedContent = Object.keys(studentAssignments) || [];
-        
-        // Get Students XP Data
-        xpData = data.data.xpData || [];
-        console.log("XP DATA DUDE", xpData)
-        
+    try {
+        const response = await fetch(`/get_student_profile?${params.toString()}`);
+        if (!response.ok) throw new Error(`Fetch failed: ${response.status}`);
+        const data = await response.json();
+        return data.data;
     } catch (error) {
-        console.error('Fetch error:', error);
+        console.error("Fetch error:", error);
+        return null;
     }
+}
+
+//-----------------------------------------------------------------------------------------------------------------
+
+// Function to fetch user content/curriculum/question assignments and create global variables
+// Function will also save the xp history for the student in sessionStorage
+async function setupDashboardSession(studentName) {
+    const data = await fetchStudentDashboardData(studentName);
+    if (!data) return;
+
+    const rawAssignments = data.userAssignments || {};
+    studentAssignments = {};
+    curriculumXP = {};
+    standardObjectiveXP = {};
+
+    for (const content in rawAssignments) {
+        studentAssignments[content] = {};
+        standardObjectiveXP[content] = {};
+
+        for (const curriculum in rawAssignments[content]) {
+            const details = rawAssignments[content][curriculum];
+            studentAssignments[content][curriculum] = details.map(item => item.task_key);
+            const totalDifficulty = details.reduce((sum, item) => sum + item.difficulty, 0);
+            curriculumXP[curriculum] = totalDifficulty / 3;
+
+            details.forEach(item => {
+                const soKey = `${item.standard}.${item.objective}`;
+                standardObjectiveXP[content][soKey] = (standardObjectiveXP[content][soKey] || 0) + item.difficulty;
+            });
+        }
+    }
+
+    for (const content in standardObjectiveXP) {
+        for (const soKey in standardObjectiveXP[content]) {
+            standardObjectiveXP[content][soKey] /= 3;
+        }
+    }
+
+    xpData = data.xpData || [];
 }
 
 //-----------------------------------------------------------------------------------------------------------------

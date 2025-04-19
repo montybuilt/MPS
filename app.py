@@ -153,6 +153,16 @@ def get_user_profile():
     # Get the content and curriculum assignments for the user
     user_assignments = fetch_user_assignments(user_id, app.logger)
     
+    # Extract the questions as a list from user_assignments
+    questions = []
+    for content in user_assignments:
+        for curriculum in user_assignments[content]:
+            for question in user_assignments[content][curriculum]:
+                questions.append(question['task_key'])
+    
+    # Get the tags data for all assigned questions
+    tags_data = fetch_tags_data(questions)
+    
     response = {'userAssignments': user_assignments, 'xpUsername': username}
     
     if xp_data:
@@ -212,7 +222,19 @@ def get_student_profile():
     else:
 
         return jsonify({"data": response, "message": "No new XP Data", "student": xp_username})
+
+@app.route('/get_task_tags', methods=['GET'])
+def get_task_tags():
+    '''
+    Function returns task_id and tags
+    Arg(s): List of task_key in request
+    Returns: JSON - key: task_key value: tags as list
+    '''
+    task_keys = request.args.get('keys')
+    tag_dict = {key:[] for key in task_keys}
     
+    return jsonify({"data": tag_dict})
+
 @app.route('/admin', methods=['GET'])
 def admin():
     '''Admin dashboard route'''
