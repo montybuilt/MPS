@@ -5,18 +5,20 @@ let xpLevel = "Beginner";
 let xpScore = 0;
 let xpCompletion = 0;
 let studentName;
-let lastUpdate = ""
+let lastUpdate = "";
 let curriculumXP = {};
 let standardObjectiveXP = {};
 let xpData = [];
 let studentAssignments = {};
 let completedCurriculums = [];
+let currentContent = "";
 let currentCurriculum;
 let currentQuestionId;
-window.standardsData = {}
+let tagSummary = {};  // <-- Step 1: add tag summary for tag performance panel
+window.standardsData = {};
 
-currentCurriculum = 'pcap1'
-currentQuestionId = 'pcap.1.1.1'
+currentCurriculum = ""
+currentQuestionId = ""
 
 //-----------------------------------------------------------------------------------------------------------------
 
@@ -59,6 +61,22 @@ async function fetchAndPopulateUsers() {
         alert(`Error: ${error.message}`);
     }
 }
+
+//-----------------------------------------------------------------------------------------------------------------
+
+// NEW: Event listener for radar chart clicks
+function setupRadarChartClickHandler(content) {
+  const radarDiv = document.getElementById('radar');
+  if (!radarDiv) return;
+
+  radarDiv.on('plotly_click', function (eventData) {
+    const point = eventData?.points?.[0];
+    const curriculumId = point?.theta || null;
+    if (content) {
+      renderTagPerformancePanel(content, curriculumId);
+    }
+  });
+} 
 
 //-----------------------------------------------------------------------------------------------------------------
 
@@ -216,10 +234,12 @@ async function setupDashboardSession(studentName) {
     studentAssignments = {};
     curriculumXP = {};
     standardObjectiveXP = {};
+    tagSummary = {};  // Ensure tagSummary is initialized
 
     for (const content in rawAssignments) {
         studentAssignments[content] = {};
         standardObjectiveXP[content] = {};
+        tagSummary[content] = {};
 
         for (const curriculum in rawAssignments[content]) {
             const details = rawAssignments[content][curriculum];
@@ -230,6 +250,17 @@ async function setupDashboardSession(studentName) {
             details.forEach(item => {
                 const soKey = `${item.standard}.${item.objective}`;
                 standardObjectiveXP[content][soKey] = (standardObjectiveXP[content][soKey] || 0) + item.difficulty;
+
+                // Build tagSummary
+                if (item.tags && Array.isArray(item.tags)) {
+                    item.tags.forEach(tag => {
+                        if (!tagSummary[content][tag]) {
+                            tagSummary[content][tag] = { questions: new Set(), totalDifficulty: 0 };
+                        }
+                        tagSummary[content][tag].questions.add(item.task_key);
+                        tagSummary[content][tag].totalDifficulty += item.difficulty;
+                    });
+                }
             });
         }
     }
@@ -240,7 +271,17 @@ async function setupDashboardSession(studentName) {
         }
     }
 
+    // Finalize tagSummary
+    for (const content in tagSummary) {
+        for (const tag in tagSummary[content]) {
+            tagSummary[content][tag].questions = Array.from(tagSummary[content][tag].questions);
+            tagSummary[content][tag].potentialXP = tagSummary[content][tag].totalDifficulty / 3;
+            delete tagSummary[content][tag].totalDifficulty;
+        }
+    }
+
     xpData = data.xpData || [];
+    currentContent = data.currentContent || null;
 }
 
 //-----------------------------------------------------------------------------------------------------------------
@@ -255,6 +296,8 @@ function getColorForScore(score) {
     return "red";
   }
 }
+
+//-----------------------------------------------------------------------------------------------------------------
 
 function renderKPIPanel(currentContent) {
   // Create or select the KPI panel container (inserted between content-panel and chart-container)
@@ -506,25 +549,143 @@ function renderKPIPanel(currentContent) {
 }
 
 //-----------------------------------------------------------------------------------------------------------------
+
+function renderTagPerformancePanel(content, filterCurriculum = null) {
+  console.log("tagSummary", tagSummary);
+  console.log("currentContent", currentContent);
+  console.log("Rendering tags for:", content);
+  console.log("Tag summary available:", tagSummary[content]);
+
+  if (!tagSummary[content]) return;
+
+  const assignments = studentAssignments || {};
+  let allowedQuestions = null;
+  if (filterCurriculum && assignments[content]?.[filterCurriculum]) {
+    allowedQuestions = new Set(assignments[content][filterCurriculum]);
+  }
+
+  // Gather all questions for performance lookup
+  let allQuestions = [];
+  Object.values(assignments[content] || {}).forEach(qList => {
+    allQuestions = allQuestions.concat(qList);
+  });
+
+  const { correctAnswers, incorrectAnswers } = processPriorAnswers(xpData, allQuestions);
+  const correctSet = new Set(correctAnswers);
+  const incorrectSet = new Set(incorrectAnswers);
+
+  // Remove any existing panel
+  let tagPanel = document.getElementById("tag-panel");
+  if (!tagPanel) {
+    tagPanel = document.createElement("div");
+    tagPanel.id = "tag-panel";
+    tagPanel.style.margin = "20px auto";
+    tagPanel.style.maxWidth = "1200px";
+    tagPanel.style.color = "white";
+    document.body.appendChild(tagPanel);
+  }
+  tagPanel.innerHTML = `<h4>${content} - Skill Acquisition Map${filterCurriculum ? ` (${filterCurriculum})` : ""}</h4>`;
+
+  const tagList = Object.entries(tagSummary[content]).sort(([a], [b]) =>
+    a.toLowerCase().localeCompare(b.toLowerCase())
+  );
+
+  const testSpan = document.createElement("span");
+  testSpan.style.visibility = "hidden";
+  testSpan.style.position = "absolute";
+  testSpan.style.fontWeight = "bold";
+  document.body.appendChild(testSpan);
+
+  let maxLabelWidth = 100;
+  tagList.forEach(([tag]) => {
+    testSpan.textContent = tag;
+    const width = testSpan.offsetWidth;
+    if (width > maxLabelWidth) maxLabelWidth = width;
+  });
+  document.body.removeChild(testSpan);
+
+  tagList.forEach(([tag, info]) => {
+    const filteredQuestions = allowedQuestions
+      ? info.questions.filter(task_id => allowedQuestions.has(task_id))
+      : info.questions;
+
+    if (filteredQuestions.length === 0) return;
+
+    const row = document.createElement("div");
+    row.style.display = "flex";
+    row.style.alignItems = "center";
+    row.style.marginBottom = "8px";
+    row.style.gap = "0px";
+
+    const label = document.createElement("div");
+    label.textContent = tag;
+    label.style.width = `${maxLabelWidth + 10}px`;
+    label.style.fontWeight = "bold";
+    label.style.textAlign = "right";
+    label.style.marginRight = "10px";
+    row.appendChild(label);
+
+    filteredQuestions.forEach(task_id => {
+      const box = document.createElement("div");
+      box.style.width = "16px";
+      box.style.height = "16px";
+      box.style.borderRadius = "2px";
+      box.style.cursor = "pointer";
+
+      const isCorrect = correctSet.has(task_id);
+      const isIncorrect = incorrectSet.has(task_id);
+
+      if (isCorrect && isIncorrect) {
+        box.style.backgroundColor = "yellow";
+      } else if (isCorrect) {
+        box.style.backgroundColor = "green";
+      } else if (isIncorrect) {
+        box.style.backgroundColor = "red";
+      } else {
+        box.style.backgroundColor = "gray";
+      }
+
+      box.title = task_id;
+      box.className = "tag-box";
+
+      box.addEventListener("click", () => {
+        for (let contentKey in assignments) {
+          for (let curriculum in assignments[contentKey]) {
+            if (assignments[contentKey][curriculum].includes(task_id)) {
+              currentCurriculum = curriculum;
+              currentQuestionId = task_id;
+              window.location.href = "testprep";
+              return;
+            }
+          }
+        }
+      });
+
+      row.appendChild(box);
+    });
+
+    tagPanel.appendChild(row);
+  });
+}
+
+//-----------------------------------------------------------------------------------------------------------------
+
 // Function to load the kpi panel with content related to session curriculumId
 function loadKpiPanelFromCurrentCurriculum() {
-  //const currentCurriculum = currentCurriculum;
   if (currentCurriculum) {
-    const assignments = studentAssignments;
     let foundContent = null;
-    // Iterate through each content area to see if it contains the currentCurriculum.
-    for (let content in assignments) {
-      if (assignments[content].hasOwnProperty(currentCurriculum)) {
+    for (let content in studentAssignments) {
+      if (studentAssignments[content].hasOwnProperty(currentCurriculum)) {
         foundContent = content;
         break;
       }
     }
     if (foundContent) {
       renderKPIPanel(foundContent);
+      renderTagPerformancePanel(foundContent);  // <-- Add this line
     }
   }
 }
-
 
 //-----------------------------------------------------------------------------------------------------------------
 // Function to process XP data
@@ -579,39 +740,25 @@ function getXPDataForChart() {
 
 //-----------------------------------------------------------------------------------------------------------------
 function processPriorAnswers(xpData, questions) {
-    
-    // If xpData is empty, store empty arrays in sessionStorage and return.
-    if (!xpData || xpData.length === 0) {
-        correctAnswers = [];
-        incorrectAnswers = [];
-        return;
+  const correctAnswersSet = new Set();
+  const incorrectAnswersSet = new Set();
+
+  xpData.forEach(record => {
+    if (questions.includes(record.question_id)) {
+      if (record.dXP > 0) {
+        correctAnswersSet.add(record.question_id);
+      } else if (record.dXP < 0) {
+        incorrectAnswersSet.add(record.question_id);
+      }
     }
+  });
 
-    const correctAnswersSet = new Set();
-    const incorrectAnswersSet = new Set();
-    
-    xpData.forEach(record => {
-        // Check if record.question_id is in the questions array.
-        if (questions.includes(record.question_id)) {
-            // If dXP is positive, add question_id value to correctAnswers.
-            if (record.dXP > 0) {
-              correctAnswersSet.add(record.question_id);
-            }
-            // If dXP is negative, add question_id value to incorrectAnswers.
-            else if (record.dXP < 0) {
-              incorrectAnswersSet.add(record.question_id);
-            }
-            // (If key2 is zero or another value, decide what to do.)
-        }
-    });
-
-  // Save the arrays in sessionStorage
-  const correctAnswers = [...correctAnswersSet];
-  const incorrectAnswers = [...incorrectAnswersSet];
-  correctAnswers = correctAnswers;
-  incorrectAnswers = incorrectAnswers;
-  
+  return {
+    correctAnswers: [...correctAnswersSet],
+    incorrectAnswers: [...incorrectAnswersSet]
+  };
 }
+
 
 //-----------------------------------------------------------------------------------------------------------------
 
@@ -723,6 +870,18 @@ function drawAreaChart() {
     };
 
     Plotly.newPlot('xpChart', data, layout);
+    
+    // Add click event to filter tag panel when a curriculum is selected
+    document.getElementById('radar').on('plotly_click', function(eventData) {
+      const point = eventData?.points?.[0];
+      const curriculumId = point?.theta;
+    
+      if (curriculumId) {
+        renderTagPerformancePanel(currentContent, curriculumId);
+      } else {
+        renderTagPerformancePanel(currentContent); // fallback to all tags
+      }
+    });
 }
 
 //-----------------------------------------------------------------------------------------------------------------
@@ -848,6 +1007,19 @@ function renderContentPanel() {
     }
 
     panel.appendChild(row);
+    
+    document.getElementById('radar').on('plotly_click', function(eventData) {
+      if (!eventData?.points?.length) {
+        renderTagPerformancePanel(currentContent); // Reset to all tags
+        return;
+      }
+    
+      const point = eventData.points[0];
+      const curriculumId = point?.theta;
+      if (curriculumId) {
+        renderTagPerformancePanel(currentContent, curriculumId); // Filtered view
+      }
+    });
   }
 }
 
@@ -885,15 +1057,20 @@ async function loadStudentName() {
     if (!studentName) return;  // ignore empty selection
     console.log("Student Name Selected:", studentName);
     await setupDashboardSession(studentName);
+    renderKPIPanel(currentContent);
+    renderTagPerformancePanel(currentContent);
     console.log("Processing XP");
     await processXP();
     console.log("Calculating all curriculums status");
     completedCurriculums = identifyCompletedCurriculums();
     console.log("Drawing KPI Charts");
     //loadKpiPanelFromCurrentCurriculum();
+    console.log("Drawing KPI Charts");
+    loadKpiPanelFromCurrentCurriculum();    
     console.log("Displaying KPI Summary");
     renderContentPanel();
     displayKPIData();
+
 }
 
 //--------------------------------------------------------------------------------------

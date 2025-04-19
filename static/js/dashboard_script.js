@@ -685,6 +685,41 @@ function renderTagPerformancePanel(content, filterCurriculum = null) {
 
 //-----------------------------------------------------------------------------------------------------------------
 
+// NEW: Track tag data during dashboard setup
+function updateTagSummary(rawAssignments) {
+  tagSummary = {};
+
+  for (const content in rawAssignments) {
+    tagSummary[content] = {};
+
+    for (const curriculum in rawAssignments[content]) {
+      const details = rawAssignments[content][curriculum];
+
+      details.forEach(item => {
+        if (Array.isArray(item.tags)) {
+          item.tags.forEach(tag => {
+            if (!tagSummary[content][tag]) {
+              tagSummary[content][tag] = { questions: new Set(), totalDifficulty: 0 };
+            }
+            tagSummary[content][tag].questions.add(item.task_key);
+            tagSummary[content][tag].totalDifficulty += item.difficulty;
+          });
+        }
+      });
+    }
+  }
+
+  for (const content in tagSummary) {
+    for (const tag in tagSummary[content]) {
+      tagSummary[content][tag].questions = Array.from(tagSummary[content][tag].questions);
+      tagSummary[content][tag].potentialXP = tagSummary[content][tag].totalDifficulty / 3;
+      delete tagSummary[content][tag].totalDifficulty;
+    }
+  }
+}
+
+//-----------------------------------------------------------------------------------------------------------------
+
 // Function to load the kpi panel with content related to session curriculumId
 function loadKpiPanelFromCurrentCurriculum() {
   const currentCurriculum = sessionStorage.getItem('currentCurriculum');

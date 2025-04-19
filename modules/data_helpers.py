@@ -160,6 +160,25 @@ def build_session(username, logger=None):
     
     # Force the session to update
     session.modified = True
+
+def fetch_current_curriculum(username):
+    '''
+    function to find the current curriculum
+
+    Parameters
+    ----------
+    username : username as string
+        Relates to User.username in database
+
+    Returns
+    -------
+    curriculum as string
+
+    '''
+    user = db.session.query(User).filter_by(username=username).first()
+    if user:
+        return user.current_curriculum
+    return None
     
 def fetch_usernames():
     '''

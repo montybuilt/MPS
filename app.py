@@ -207,7 +207,14 @@ def get_student_profile():
     # Get the content and curriculum assignments for the user
     user_assignments = fetch_user_assignments(student_id, app.logger)
     
-    response = {'userAssignments': user_assignments, 'xpUsername': xp_username}
+    # Get the current curriculum and content
+    current_curriculum = fetch_current_curriculum(xp_username)
+    current_content = next((content for content, currics in user_assignments.items()
+                    if current_curriculum in currics), None)
+    
+    app.logger.debug(f"Students Current Content: {current_content}")
+    
+    response = {'userAssignments': user_assignments, 'xpUsername': xp_username, 'currentContent': current_content}
     
     if xp_data:
     
