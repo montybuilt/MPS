@@ -115,39 +115,34 @@
             font-weight: bold;
         }
         
-        .accordion-body {
-            display: none; /* Hidden by default */
-            width: 75%;
-            flex-direction: row;
-            padding-top: 10px;
-            margin: 0px;
-            border-top: 0px solid #ddd;
-            justify-content: ;
-            gap: 10px;
-        }
-        
-        
+        .accordion-body,
         .accordion-body-middle {
             display: none;
             width: 100%;
-            flex-direction: column;
             padding-top: 10px;
             margin: 50px 0;
             border-top: 1px solid #ddd;
+        }
+        
+        .accordion-body.show,
+        .accordion-body-middle.show {
+            display: flex;
+            flex-direction: row;
             justify-content: center;
-            align-items: center;
-            gap: 10px;
+            align-items: flex-start;
+            gap: 15px;
         }
         
         .accordion-body.show {
-            display: flex; /* Shows the content when active */
+            gap: 5px;
         }
         
-        #system-group-2 {
-            display: block;
-            width: 100%;
+        .accordion-body > * {
+            flex: 1 1 0;
+            box-sizing: border-box;
         }
-        
+
+  
         label {
             margin-bottom: 10px; /* Small spacing between label and input */
         }
@@ -227,48 +222,41 @@
             </div>
         </div>
         <!-- Select and edit curriculum to content assignments container -->
-        <div id="system-group-2">
-            <div class="row-container">
-                <div class="accordion-container">
-                    <div class="accordion-header" onclick="toggleAccordion('accordion2')">Assign Curriculums to Content Areas</div>
-                        <div class="accordion-body-middle" id="accordion2">
-                            <div class="dual-list-container">                    
-                                <div class="form-group">
-                                    <label for="content-selector">Select Content Area:</label>
-                                    <select id="content-selector" class="form-select">
-                                        <option value="" disabled selected>Select Content</option>
-                                    </select>
-                                </div>
-                                <div class="form-group">
-                                    <!-- Left Box: Available Curriculum Areas -->
-                                    <div class="list-box">
-                                        <h5>Available Curriculums</h5>
-                                        <select id="available-curriculums" class="form-select-curriculums" multiple>
-                                            <!-- Placeholder items, will be dynamically updated -->
-                                            <option value="curriculum_1"></option>
-                                        </select>
-                                    </div>
-                                </div>
-                                <div class="form-group">
-                                    <!-- Control Buttons -->
-                                    <div class="list-controls">
-                                        <button id="add-curriculum" class="btn btn-primary" type="button">&rarr;</button>
-                                        <button id="remove-curriculum" class="btn btn-secondary" type="button">&larr;</button>
-                                        <!-- this button submits the new base curriculum assignments to a content area -->
-                                        <button id="submit-content-assignment" class="btn btn-primary" type="button">Submit</button>
-                                    </div>
-                                </div>
-                                
-                                <div class="form-group">
-                                    <!-- Right Box: Assigned Curriculums -->
-                                    <div class="list-box">
-                                        <h5>Base Curriculums</h5>
-                                        <select id="assigned-curriculums" class="form-select-curriculums" multiple>
-                                            <!-- Placeholder items, will be dynamically updated -->
-                                            <option value=""></option>
-                                        </select>
-                                    </div>
-                                </div>
+        <div class="row-container">
+            <div class="accordion-container">
+                <div class="accordion-header" onclick="toggleAccordion('accordion2')">Assign Curriculums to Content Areas</div>
+                <div class="accordion-body-middle" id="accordion2">
+                    <div class="dual-list-container">
+                        <div class="form-group">
+                            <label for="content-selector">Select Content Area:</label>
+                            <select id="content-selector" class="form-select">
+                                <option value="" disabled selected>Select Content</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <!-- Left Box: Available Curriculum Areas -->
+                            <div class="list-box">
+                                <h5>Available Curriculums</h5>
+                                <select id="available-curriculums" class="form-select-curriculums" multiple>
+                                    <option value="curriculum_1"></option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <!-- Control Buttons -->
+                            <div class="list-controls">
+                                <button id="add-curriculum" class="btn btn-primary" type="button">&rarr;</button>
+                                <button id="remove-curriculum" class="btn btn-secondary" type="button">&larr;</button>
+                                <button id="submit-content-assignment" class="btn btn-primary" type="button">Submit</button>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <!-- Right Box: Assigned Curriculums -->
+                            <div class="list-box">
+                                <h5>Base Curriculums</h5>
+                                <select id="assigned-curriculums" class="form-select-curriculums" multiple>
+                                    <option value=""></option>
+                                </select>
                             </div>
                         </div>
                     </div>
