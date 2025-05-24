@@ -1015,9 +1015,10 @@ function renderContentPanel() {
 
     const curricula = assignments[content];
     // Extract curriculum keys and sort them naturally.
-    const curriculumKeys = Object.keys(curricula).sort((a, b) =>
-      a.localeCompare(b, undefined, { numeric: true, sensitivity: 'base' })
-    );
+    const curriculumKeys = Object.keys(curricula);
+    //const curriculumKeys = Object.keys(curricula).sort((a, b) =>
+    //  a.localeCompare(b, undefined, { numeric: true, sensitivity: 'base' })
+    //);
 
     const completed = JSON.parse(sessionStorage.getItem("completedCurriculums")) || [];
     for (let curriculum of curriculumKeys) {

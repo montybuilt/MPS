@@ -7,7 +7,7 @@ from sqlalchemy.orm.attributes import flag_modified
 from datetime import datetime
 from functools import wraps
 from werkzeug.exceptions import Forbidden, BadRequest, Unauthorized
-from collections import defaultdict
+from collections import defaultdict, OrderedDict
 
 ####################################################################################
 #### Default Variables #############################################################
@@ -501,7 +501,7 @@ def fetch_user_assignments(user_id, logger=None):
 
     # Prepare the result dictionary.
     # Outer keys: Content.content_id (strings), plus a "custom" key for curricula not tied to any Content.
-    result = {content_id: {} for content_id in user_content_ids}
+    result = {content_id: OrderedDict() for content_id in user_content_ids}
 
     #For each classroom-related Content, get the associated curriculums via ContentCurriculum.
     for content_id in user_content_ids:
@@ -544,7 +544,7 @@ def fetch_user_assignments(user_id, logger=None):
         .all()
     )
     
-    custom_dict = {}
+    custom_dict = OrderedDict()
     for curriculum in custom_curricula:
         # For each custom curriculum, get the question data
         question_data = (
