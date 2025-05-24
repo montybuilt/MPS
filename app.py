@@ -1,7 +1,7 @@
 # Import packages
 import subprocess, logging, secrets, os, redis
 from flask_migrate import Migrate
-from flask import Flask, render_template, request, jsonify, redirect, url_for, session as flask_session
+from flask import Flask, render_template, request, Response, jsonify, redirect, url_for, session as flask_session
 from flask_session import Session
 from sqlalchemy.exc import SQLAlchemyError, IntegrityError
 from werkzeug.exceptions import HTTPException
@@ -173,7 +173,16 @@ def get_user_profile():
         })
 
         # Return the XP data to the client (or None if no data)
-        return jsonify({"data": response, "message": "XP data found", "username": username})
+        full_response = {
+            "data": response,
+            "message": "XP data found",
+            "username": username
+        }
+
+        return Response(
+            json.dumps(full_response, ensure_ascii=False, default=str),
+            mimetype='application/json'
+        )
     
     else:
 
