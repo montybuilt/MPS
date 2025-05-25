@@ -782,6 +782,29 @@ def student_assignments():
     except Exception as e:
         return jsonify({'error': f"Unexpected Error: {e}"}), 500
 
+# API Routes ------------------------------------------------------------------------------#
+
+@app.route('/api/export_user_assignments/<int:user_id>', methods=['GET'])
+def export_user_assignments(user_id):
+    user_assignments, _ = fetch_user_assignments(user_id, app.logger)
+
+    rows = []
+    for content, curriculums in user_assignments.items():
+        for curriculum, questions in curriculums.items():
+            for q in questions:
+                rows.append({
+                    "content": content,
+                    "curriculum": curriculum,
+                    "task_key": q["task_key"],
+                    "difficulty": q["difficulty"],
+                    "standard": q["standard"],
+                    "objective": q["objective"],
+                    "tags": q["tags"]
+                })
+
+    return jsonify(rows)
+
+
 #------------------------------------------------------------------------------------------#
 
 if __name__ == '__main__':
