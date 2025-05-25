@@ -805,6 +805,36 @@ def export_user_assignments(user_id):
 
     return jsonify(rows)
 
+@app.route('/api/export_user_xp/<user_id>', methods=['GET'])
+def export_user_xp(user_id):
+    try:
+        user_id = int(user_id)
+    except ValueError:
+        return jsonify({"error": "Invalid user_id"}), 400
+
+    xp_records = XP.query.filter_by(user_id=user_id).order_by(XP.timestamp).all()
+
+    results = []
+    for record in xp_records:
+        results.append({
+            "question_id": record.question_id,
+            "content_id": record.content_id,
+            "curriculum_id": record.curriculum_id,
+            "dXP": record.dXP,
+            "possible_xp": record.possible_xp,
+            "difficulty": record.difficulty,
+            "standard": record.standard,
+            "objective": record.objective,
+            "tags": record.tags,  # This may render as a list in Excel Power Query
+            "elapsed_time": record.elapsed_time,
+            "timestamp": record.timestamp.isoformat()
+        })
+
+    return jsonify(results)
+
+
+    
+
 
 #------------------------------------------------------------------------------------------#
 
