@@ -516,6 +516,7 @@ def fetch_user_assignments(user_id, logger=None):
             db.session.query(Curriculum)
             .join(ContentCurriculum, ContentCurriculum.curriculum_id == Curriculum.id)
             .filter(ContentCurriculum.content_id == content_obj.id)
+            .order_by(ContentCurriculum.id)
             .all()
         )
         for curriculum in content_curricula:
