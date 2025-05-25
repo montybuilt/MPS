@@ -198,47 +198,46 @@ async function setupDashboardSession() {
         for (const curriculum in rawAssignments[content]) {
             const details = rawAssignments[content][curriculum];
             studentAssignments[content][curriculum] = details.map(item => item.task_key);
-            const totalDifficulty = details.reduce((sum, item) => sum + item.difficulty, 0);
-            curriculumXP[curriculum] = totalDifficulty / 3;
+
+            curriculumXP[curriculum] = 0;
 
             details.forEach(item => {
-                // Standard/objective XP aggregation
-                const soKey = `${item.standard}.${item.objective}`;
-                standardObjectiveXP[content][soKey] = (standardObjectiveXP[content][soKey] || 0) + item.difficulty;
+                const xp = item.difficulty / 3;
 
-                // Tag summary aggregation with content as outer key
+                // Curriculum-level XP
+                curriculumXP[curriculum] += xp;
+
+                // Standard/objective XP
+                const soKey = `${item.standard}.${item.objective}`;
+                standardObjectiveXP[content][soKey] =
+                    (standardObjectiveXP[content][soKey] || 0) + xp;
+
+                // Tag-level XP
                 if (item.tags && Array.isArray(item.tags)) {
-                  if (!tagSummary[content]) tagSummary[content] = {};
-                  
-                  item.tags.forEach(tag => {
-                    if (!tagSummary[content][tag]) {
-                      tagSummary[content][tag] = { questions: new Set(), totalDifficulty: 0 };
-                    }
-                    tagSummary[content][tag].questions.add(item.task_key);
-                    tagSummary[content][tag].totalDifficulty += item.difficulty;
-                  });
+                    if (!tagSummary[content]) tagSummary[content] = {};
+
+                    item.tags.forEach(tag => {
+                        if (!tagSummary[content][tag]) {
+                            tagSummary[content][tag] = { questions: new Set(), totalDifficulty: 0 };
+                        }
+                        tagSummary[content][tag].questions.add(item.task_key);
+                        tagSummary[content][tag].totalDifficulty += item.difficulty;
+                    });
                 }
             });
-        }
-    }
-
-    // Convert to XP
-    for (const content in standardObjectiveXP) {
-        for (const soKey in standardObjectiveXP[content]) {
-            standardObjectiveXP[content][soKey] /= 3;
         }
     }
 
     // Flatten tagSummary questions and convert difficulty to XP
     const finalTagSummary = {};
     for (const content in tagSummary) {
-      finalTagSummary[content] = {};
-      for (const tag in tagSummary[content]) {
-        finalTagSummary[content][tag] = {
-          questions: Array.from(tagSummary[content][tag].questions),
-          potentialXP: tagSummary[content][tag].totalDifficulty / 3
-        };
-      }
+        finalTagSummary[content] = {};
+        for (const tag in tagSummary[content]) {
+            finalTagSummary[content][tag] = {
+                questions: Array.from(tagSummary[content][tag].questions),
+                potentialXP: tagSummary[content][tag].totalDifficulty / 3
+            };
+        }
     }
 
     // Save to storage
@@ -247,7 +246,6 @@ async function setupDashboardSession() {
     localStorage.setItem('standardObjectiveXP', JSON.stringify(standardObjectiveXP));
     localStorage.setItem('tagSummary', JSON.stringify(finalTagSummary));
 
-    // Merge and save XP data
     if (data.xpData) {
         const existingXP = JSON.parse(localStorage.getItem("xpData")) || [];
         const merged = [...existingXP, ...data.xpData];
