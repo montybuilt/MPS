@@ -152,7 +152,7 @@ def get_user_profile():
     
     # Get the content and curriculum assignments for the user
     user_assignments, curriculum_order_map = fetch_user_assignments(user_id, app.logger)
-    
+    app.logger.debug(f"Curriculum Order: {curriculum_order_map}")
     # Extract the questions as a list from user_assignments
     questions = []
     for content in user_assignments:
