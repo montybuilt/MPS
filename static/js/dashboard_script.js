@@ -6,6 +6,8 @@ let myAssignments;
 let myContent;
 let myCurriculums;
 let curriculumOrderMap;
+let questionDifficultyMap;
+let tag
 window.standardsData = {}
 
 //-----------------------------------------------------------------------------------------------------------------
@@ -25,124 +27,129 @@ async function loadStandardsData() {
 //-----------------------------------------------------------------------------------------------------------------
 
 function calculateKPIs(xpData) {
-    // Retrieve potential XP data from localStorage.
-    const curriculumXPFromStorage = JSON.parse(localStorage.getItem('curriculumXP')) || {};
-    const standardObjectiveXPFromStorage = JSON.parse(localStorage.getItem('standardObjectiveXP')) || {};
+    const assignments = JSON.parse(sessionStorage.getItem('studentAssignments')) || {};
+    const difficultyMap = JSON.parse(sessionStorage.getItem('questionDifficultyMap')) || {};
+    const standardObjectiveXP = JSON.parse(localStorage.getItem('standardObjectiveXP')) || {};
+    const tagSummary = JSON.parse(localStorage.getItem('tagSummary')) || {};
 
     const summary = {
-        overall: { totalEarned: 0, scoreEarned: 0, totalPossible: 0, percent: 0 },
+        overall: { scoreEarned: 0, totalPossible: 0, percent: 0 },
         content: {},
         curriculum: {},
         standardObjective: {}
     };
 
-    // Iterate over xpData to accumulate earned XP.
-    xpData.forEach(record => {
-        const { content_id, curriculum_id, standard, objective, dXP } = record;
-        
-        // Overall: accumulate raw earned XP and positive earned XP.
-        summary.overall.totalEarned += dXP;
-        summary.overall.scoreEarned += (dXP > 0 ? dXP : 0);
-    
-    // Content grouping: accumulate earned XP.
-    if (!summary.content[content_id]) {
-        summary.content[content_id] = { totalEarned: 0, scoreEarned: 0, totalPossible: 0, percent: 0 };
-    }
-    summary.content[content_id].totalEarned += dXP;
-    summary.content[content_id].scoreEarned += (dXP > 0 ? dXP : 0);
-    
-    // Curriculum grouping: accumulate earned XP.
-    if (!summary.curriculum[curriculum_id]) {
-        summary.curriculum[curriculum_id] = { totalEarned: 0, scoreEarned: 0, totalPossible: 0, percent: 0 };
-    }
-    summary.curriculum[curriculum_id].totalEarned += dXP;
-    summary.curriculum[curriculum_id].scoreEarned += (dXP > 0 ? dXP : 0);
-    
-    // Standard/Objective grouping (nested by content)
-    if (!summary.standardObjective[content_id]) {
-        summary.standardObjective[content_id] = {};
-    }
-    const soKey = `${standard}.${objective}`;
-    if (!summary.standardObjective[content_id][soKey]) {
-        summary.standardObjective[content_id][soKey] = { totalEarned: 0, scoreEarned: 0, totalPossible: 0, percent: 0 };
-    }
-    summary.standardObjective[content_id][soKey].totalEarned += dXP;
-    summary.standardObjective[content_id][soKey].scoreEarned += (dXP > 0 ? dXP : 0);
-    });
+    // Step 1: Build performance map
+    const history = {};
+    const performanceMap = {};
 
-    // Build a mapping of content -> set of unique curriculum_ids encountered in xpData.
-    const contentCurricula = {};
-    xpData.forEach(record => {
-        const { content_id, curriculum_id } = record;
-        if (!contentCurricula[content_id]) {
-          contentCurricula[content_id] = new Set();
-        }
-        contentCurricula[content_id].add(curriculum_id);
-    });
+    xpData.sort((a, b) => new Date(a.timestamp) - new Date(b.timestamp));
+    for (const record of xpData) {
+        const qid = record.question_id;
+        if (!history[qid]) history[qid] = { correct: false, incorrect: false };
 
-    // For each curriculum group, override totalPossible from curriculumXP.
-    for (const curriculum_id in summary.curriculum) {
-        if (summary.curriculum.hasOwnProperty(curriculum_id)) {
-            summary.curriculum[curriculum_id].totalPossible = curriculumXPFromStorage[curriculum_id] || 0;
-        }
-    }
-
-    // For content grouping, sum up the curriculumXP values for each curriculum in that content
-    const assignments = JSON.parse(sessionStorage.getItem('studentAssignments')) || {};
-    for (const content_id in summary.content) {
-        if (summary.content.hasOwnProperty(content_id)) {
-            let totalPossible = 0;
-            if (assignments[content_id]) {
-                Object.keys(assignments[content_id]).forEach(curriculum_id => {
-                    totalPossible += (curriculumXPFromStorage[curriculum_id] || 0);
-                });
+        if (record.dXP > 0) {
+            if (history[qid].correct) {
+                performanceMap[qid] = 0.001;
+            } else if (history[qid].incorrect) {
+                performanceMap[qid] = 0.5;
+            } else {
+                performanceMap[qid] = 1.0;
             }
-            summary.content[content_id].totalPossible = totalPossible;
+            history[qid].correct = true;
+        } else {
+            history[qid].incorrect = true;
         }
     }
 
-    // For overall, sum up all unique curriculumXP values (across all curricula encountered).
-    let overallPossible = 0;
-    for (const curriculum_id in curriculumXPFromStorage) {
-        if (curriculumXPFromStorage.hasOwnProperty(curriculum_id)) {
-            overallPossible += curriculumXPFromStorage[curriculum_id];
-        }
-    }
-    summary.overall.totalPossible = overallPossible;
-    console.log("Overall Possible", overallPossible);
+    // Step 2: Calculate earnedXP and totalPossible based on current assignments
+    for (const content in assignments) {
+        summary.content[content] = { scoreEarned: 0, totalPossible: 0, percent: 0 };
+        summary.standardObjective[content] = {};
 
-    // For standard/objective grouping: override totalPossible using standardObjectiveXP.
-    for (const content_id in summary.standardObjective) {
-        if (summary.standardObjective.hasOwnProperty(content_id)) {
-            for (const soKey in summary.standardObjective[content_id]) {
-                if (summary.standardObjective[content_id].hasOwnProperty(soKey)) {
-                    summary.standardObjective[content_id][soKey].totalPossible =
-                      (standardObjectiveXPFromStorage[content_id] &&
-                        standardObjectiveXPFromStorage[content_id][soKey]) || 0;
+        for (const curriculum in assignments[content]) {
+            summary.curriculum[curriculum] = { scoreEarned: 0, totalPossible: 0, percent: 0 };
+
+            const questions = assignments[content][curriculum];
+
+            for (const task_key of questions) {
+                const difficulty = (typeof difficultyMap[task_key] === 'number') ? difficultyMap[task_key] / 3 : 0;
+                const multiplier = performanceMap[task_key] || 0;
+                const earned = difficulty * multiplier;
+
+                // Overall
+                summary.overall.totalPossible += difficulty;
+                summary.overall.scoreEarned += earned;
+
+                // Curriculum
+                summary.curriculum[curriculum].totalPossible += difficulty;
+                summary.curriculum[curriculum].scoreEarned += earned;
+
+                // Content
+                summary.content[content].totalPossible += difficulty;
+                summary.content[content].scoreEarned += earned;
+
+                // Standard.Objective
+                const raw = xpData.find(r =>
+                    r.question_id === task_key &&
+                    r.content_id === content &&
+                    r.curriculum_id === curriculum
+                );
+                const soKey = raw ? `${raw.standard}.${raw.objective}` : "0.0";
+
+                if (!summary.standardObjective[content][soKey]) {
+                    summary.standardObjective[content][soKey] = { scoreEarned: 0, totalPossible: 0, percent: 0 };
                 }
+
+                summary.standardObjective[content][soKey].scoreEarned += earned;
             }
         }
     }
 
-    // Compute overall percent using scoreEarned (only positive dXP) over totalPossible.
-    summary.overall.percent = summary.overall.totalPossible > 0 ?
-        (summary.overall.scoreEarned / summary.overall.totalPossible) * 100 : 0;
-    
-    // Set the global XP values.
-    totalXP = summary.overall.totalEarned;  // raw total earned XP (including negatives)
-    xpScore = summary.overall.percent;        // XP Score is percentage of positive earned XP
-    
-    // Helper: Compute percentage for group using scoreEarned.
-    function computePercentage(group) {
-        group.percent = group.totalPossible > 0 ? (group.scoreEarned / group.totalPossible) * 100 : 0;
+    // Step 2.5: Plug in totalPossible from standardObjectiveXP
+    for (const content in summary.standardObjective) {
+        for (const soKey in summary.standardObjective[content]) {
+            summary.standardObjective[content][soKey].totalPossible =
+                (standardObjectiveXP[content] && standardObjectiveXP[content][soKey]) || 0;
+        }
     }
 
+    // Step 3: Compute tag XP performance and insert into tagSummary
+    for (const content in tagSummary) {
+        for (const tag in tagSummary[content]) {
+            const questions = tagSummary[content][tag].questions || [];
+            const possibleXP = tagSummary[content][tag].potentialXP || 0;
+
+            let earnedXP = 0;
+            for (const task_key of questions) {
+                const base = typeof difficultyMap[task_key] === 'number' ? difficultyMap[task_key] / 3 : 0;
+                const multiplier = performanceMap[task_key] || 0;
+                earnedXP += base * multiplier;
+            }
+
+            tagSummary[content][tag].earnedXP = earnedXP;
+            tagSummary[content][tag].percent = possibleXP > 0 ? (earnedXP / possibleXP) * 100 : 0;
+        }
+    }
+
+    // Step 4: Compute percentages
+    function computePercentage(group) {
+        group.percent = group.totalPossible > 0
+            ? (group.scoreEarned / group.totalPossible) * 100
+            : 0;
+    }
+
+    computePercentage(summary.overall);
     Object.values(summary.content).forEach(computePercentage);
     Object.values(summary.curriculum).forEach(computePercentage);
-    Object.values(summary.standardObjective).forEach(soGroup => {
-        Object.values(soGroup).forEach(computePercentage);
-    });
-    
+    Object.values(summary.standardObjective).forEach(soGroup =>
+        Object.values(soGroup).forEach(computePercentage)
+    );
+
+    totalXP = summary.overall.scoreEarned;
+    localStorage.setItem("tagSummary", JSON.stringify(tagSummary));
+    xpScore = summary.overall.percent;
+
     return summary;
 }
 
@@ -190,6 +197,7 @@ async function setupDashboardSession() {
     const standardObjectiveXP = {};
     const tagSummary = {};
     curriculumOrderMap = data.curriculumOrderMap || {};
+    questionDifficultyMap = {};
 
     for (const content in rawAssignments) {
         studentAssignments[content] = {};
@@ -203,6 +211,9 @@ async function setupDashboardSession() {
 
             details.forEach(item => {
                 const xp = item.difficulty / 3;
+
+                // Build question → difficulty mapping
+                questionDifficultyMap[item.task_key] = item.difficulty;
 
                 // Curriculum-level XP
                 curriculumXP[curriculum] += xp;
@@ -254,6 +265,7 @@ async function setupDashboardSession() {
     }
 
     localStorage.setItem("xpUsername", data.xpUsername);
+    sessionStorage.setItem('questionDifficultyMap', JSON.stringify(questionDifficultyMap));
 }
 
 //-----------------------------------------------------------------------------------------------------------------
@@ -624,16 +636,39 @@ function renderTagPerformancePanel(content, filterCurriculum = null) {
     const row = document.createElement("div");
     row.style.display = "flex";
     row.style.alignItems = "center";
+    row.style.flexWrap = "nowrap";
+    row.style.whiteSpace = "nowrap";
     row.style.marginBottom = "8px";
     row.style.gap = "0px";
 
     // Tag label
     const label = document.createElement("div");
+    const tagData = tagSummary[content][tag];
     label.textContent = tag;
-    label.style.width = `${maxLabelWidth + 10}px`;
+    // This adds the score %
+    if (tagData && typeof tagData.percent === 'number') {
+      const scoreSpan = document.createElement("span");
+      scoreSpan.textContent = `${tagData.percent.toFixed(0)}%`;
+      scoreSpan.style.minWidth = "30px";
+      scoreSpan.style.display = "inline-block";
+      scoreSpan.style.marginLeft = "6px";
+      scoreSpan.style.padding = "2px 4px";
+      scoreSpan.style.borderRadius = "4px";
+      scoreSpan.style.fontSize = "0.75em";
+      scoreSpan.style.fontWeight = "bold";
+      scoreSpan.style.color = "black";
+      scoreSpan.style.backgroundColor =
+        tagData.percent > 70 ? "green" :
+        tagData.percent >= 50 ? "yellow" :
+        "red";
+
+      label.appendChild(scoreSpan);
+    }
+    label.style.width = `${maxLabelWidth + 50}px`;
     label.style.fontWeight = "bold";
     label.style.textAlign = "right";
     label.style.marginRight = "10px";
+    label.style.justifyContent = "flex-end";
     label.className = "tag-label";
     row.appendChild(label);
 
