@@ -784,9 +784,10 @@ def student_assignments():
 
 # API Routes ------------------------------------------------------------------------------#
 
-@app.route('/api/export_user_assignments/<int:user_id>', methods=['GET'])
+@app.route('/api/export_user_assignments/<user_id>', methods=['GET'])
 def export_user_assignments(user_id):
-    user_assignments, _ = fetch_user_assignments(user_id, app.logger)
+    app.logger.debug(f"User ID: {type(user_id)}")
+    user_assignments, _ = fetch_user_assignments(int(user_id), app.logger)
 
     rows = []
     for content, curriculums in user_assignments.items():
