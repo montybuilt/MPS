@@ -151,7 +151,7 @@ def get_user_profile():
     xp_data = fetch_xp_data(xp_username, last_fetched_datetime, app.logger)
     
     # Get the content and curriculum assignments for the user
-    user_assignments = fetch_user_assignments(user_id, app.logger)
+    user_assignments, curriculum_order_map = fetch_user_assignments(user_id, app.logger)
     
     # Extract the questions as a list from user_assignments
     questions = []
@@ -163,7 +163,11 @@ def get_user_profile():
     # Get the tags data for all assigned questions
     tags_data = fetch_tags_data(questions)
     
-    response = {'userAssignments': user_assignments, 'xpUsername': username}
+    response = {
+        'userAssignments': user_assignments,
+        'curriculumOrderMap': curriculum_order_map,
+        'xpUsername': username
+    }
     
     if xp_data:
     
@@ -214,16 +218,19 @@ def get_student_profile():
     xp_data = fetch_xp_data(xp_username, last_fetched_datetime, app.logger)
     
     # Get the content and curriculum assignments for the user
-    user_assignments = fetch_user_assignments(student_id, app.logger)
+    user_assignments, curriculum_order_map = fetch_user_assignments(student_id, app.logger)
     
     # Get the current curriculum and content
     current_curriculum = fetch_current_curriculum(xp_username)
     current_content = next((content for content, currics in user_assignments.items()
                     if current_curriculum in currics), None)
-    
-    app.logger.debug(f"Students Current Content: {current_content}")
-    
-    response = {'userAssignments': user_assignments, 'xpUsername': xp_username, 'currentContent': current_content}
+        
+    response = {
+        'userAssignments': user_assignments,
+        'curriculumOrderMap': curriculum_order_map,
+        'xpUsername': xp_username,
+        'currentContent': current_content
+    }
     
     if xp_data:
     

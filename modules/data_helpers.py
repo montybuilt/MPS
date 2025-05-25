@@ -566,8 +566,13 @@ def fetch_user_assignments(user_id, logger=None):
     # Place custom curricula under the "custom" key in the outer dictionary.
     if custom_dict:
         result["custom"] = custom_dict
+
+    # Create curriculum order maps for the client to sort properly
+    curriculum_order_map = {}
+    for content, currics in result.items():
+        curriculum_order_map[content] = list(currics.keys())
     
-    return result
+    return result, curriculum_order_map
 
 def fetch_user_data(username, logger=None):
     '''

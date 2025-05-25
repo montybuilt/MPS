@@ -5,6 +5,7 @@ let xpCompletion = 0;
 let myAssignments;
 let myContent;
 let myCurriculums;
+let curriculumOrderMap;
 window.standardsData = {}
 
 //-----------------------------------------------------------------------------------------------------------------
@@ -188,6 +189,7 @@ async function setupDashboardSession() {
     const curriculumXP = {};
     const standardObjectiveXP = {};
     const tagSummary = {};
+    curriculumOrderMap = data.curriculumOrderMap || {};
 
     for (const content in rawAssignments) {
         studentAssignments[content] = {};
@@ -1014,11 +1016,8 @@ function renderContentPanel() {
     row.appendChild(title);
 
     const curricula = assignments[content];
-    // Extract curriculum keys and sort them naturally.
-    const curriculumKeys = Object.keys(curricula);
-    //const curriculumKeys = Object.keys(curricula).sort((a, b) =>
-    //  a.localeCompare(b, undefined, { numeric: true, sensitivity: 'base' })
-    //);
+    // Extract curriculum keys
+    const curriculumKeys = curriculumOrderMap[content] || Object.keys(curricula);
 
     const completed = JSON.parse(sessionStorage.getItem("completedCurriculums")) || [];
     for (let curriculum of curriculumKeys) {

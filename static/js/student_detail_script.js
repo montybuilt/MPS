@@ -14,6 +14,7 @@ let completedCurriculums = [];
 let currentContent = "";
 let currentCurriculum;
 let currentQuestionId;
+let curriculumOrderMap;
 let tagSummary = {};  // <-- Step 1: add tag summary for tag performance panel
 window.standardsData = {};
 
@@ -235,6 +236,7 @@ async function setupDashboardSession(studentName) {
     curriculumXP = {};
     standardObjectiveXP = {};
     tagSummary = {};  // Ensure tagSummary is initialized
+    curriculumOrderMap = data.curriculumOrderMap || {};
 
     for (const content in rawAssignments) {
         studentAssignments[content] = {};
@@ -968,10 +970,8 @@ function renderContentPanel() {
     row.appendChild(title);
 
     const curricula = assignments[content];
-    // Extract curriculum keys and sort them naturally.
-    const curriculumKeys = Object.keys(curricula).sort((a, b) =>
-      a.localeCompare(b, undefined, { numeric: true, sensitivity: 'base' })
-    );
+    // Extract curriculum keys
+    const curriculumKeys = curriculumOrderMap[content] || Object.keys(curricula);
 
     const completed = completedCurriculums || [];
     for (let curriculum of curriculumKeys) {
