@@ -577,6 +577,21 @@ function renderKPIPanel(currentContent) {
 //-----------------------------------------------------------------------------------------------------------------
 
 function renderTagPerformancePanel(content, filterCurriculum = null) {
+  // Always ensure the tag panel exists and is cleared
+  let tagPanel = document.getElementById("tag-panel");
+  if (!tagPanel) {
+    tagPanel = document.createElement("div");
+    tagPanel.id = "tag-panel";
+    tagPanel.style.margin = "20px auto";
+    tagPanel.style.maxWidth = "1200px";
+    tagPanel.style.color = "white";
+    document.body.appendChild(tagPanel);
+  }
+
+  // Always clear previous content before proceeding
+  tagPanel.innerHTML = `<h4>${content} - Skill Acquisition Map${filterCurriculum ? ` (${filterCurriculum})` : ""}</h4>`;
+
+  // If there's no tag data for the selected content, exit early
   if (!tagSummary[content]) return;
 
   const assignments = studentAssignments || {};
@@ -594,17 +609,6 @@ function renderTagPerformancePanel(content, filterCurriculum = null) {
   const { correctAnswers, incorrectAnswers } = processPriorAnswers(xpData, allQuestions);
   const correctSet = new Set(correctAnswers);
   const incorrectSet = new Set(incorrectAnswers);
-
-  let tagPanel = document.getElementById("tag-panel");
-  if (!tagPanel) {
-    tagPanel = document.createElement("div");
-    tagPanel.id = "tag-panel";
-    tagPanel.style.margin = "20px auto";
-    tagPanel.style.maxWidth = "1200px";
-    tagPanel.style.color = "white";
-    document.body.appendChild(tagPanel);
-  }
-  tagPanel.innerHTML = `<h4>${content} - Skill Acquisition Map${filterCurriculum ? ` (${filterCurriculum})` : ""}</h4>`;
 
   const tagList = Object.entries(tagSummary[content]).sort(([a], [b]) =>
     a.toLowerCase().localeCompare(b.toLowerCase())
@@ -629,8 +633,7 @@ function renderTagPerformancePanel(content, filterCurriculum = null) {
       ? info.questions.filter(task_id => allowedQuestions.has(task_id))
       : info.questions;
 
-    if (filteredQuestions.length === 0) return;
-
+    // Always render the row, even if there's no performance data
     const row = document.createElement("div");
     row.style.display = "flex";
     row.style.alignItems = "center";
@@ -643,27 +646,24 @@ function renderTagPerformancePanel(content, filterCurriculum = null) {
     const tagData = tagSummary[content][tag];
     label.textContent = tag;
 
-    // Add percent badge
-    if (tagData && typeof tagData.percent === 'number') {
-      const scoreSpan = document.createElement("span");
-      scoreSpan.textContent = `${tagData.percent.toFixed(0)}%`;
-      scoreSpan.textContent = `${tagData.percent.toFixed(0)}%`;
-      scoreSpan.style.minWidth = "30px";
-      scoreSpan.style.display = "inline-block";
-      scoreSpan.style.marginLeft = "6px";
-      scoreSpan.style.padding = "2px 4px";
-      scoreSpan.style.borderRadius = "4px";
-      scoreSpan.style.fontSize = "0.75em";
-      scoreSpan.style.fontWeight = "bold";
-      scoreSpan.style.color = "black";
-      scoreSpan.style.backgroundColor =
-        tagData.percent > 70 ? "green" :
-        tagData.percent >= 50 ? "yellow" :
-        "red";
+    // Add percent badge (even if 0)
+    const percent = typeof tagData.percent === 'number' ? tagData.percent : 0;
+    const scoreSpan = document.createElement("span");
+    scoreSpan.textContent = `${percent.toFixed(0)}%`;
+    scoreSpan.style.minWidth = "30px";
+    scoreSpan.style.display = "inline-block";
+    scoreSpan.style.marginLeft = "6px";
+    scoreSpan.style.padding = "2px 4px";
+    scoreSpan.style.borderRadius = "4px";
+    scoreSpan.style.fontSize = "0.75em";
+    scoreSpan.style.fontWeight = "bold";
+    scoreSpan.style.color = "black";
+    scoreSpan.style.backgroundColor =
+      percent > 70 ? "green" :
+      percent >= 50 ? "yellow" :
+      "red";
 
-      label.appendChild(scoreSpan);
-    }
-
+    label.appendChild(scoreSpan);
     label.style.width = `${maxLabelWidth + 50}px`;
     label.style.fontWeight = "bold";
     label.style.textAlign = "right";
