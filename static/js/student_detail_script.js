@@ -254,6 +254,20 @@ async function setupDashboardSession(studentName) {
         }
     }
 
+    // If there's no XP data, forcibly zero out all tag percent values
+    if (xpData.length === 0) {
+        for (const content in tagSummary) {
+            for (const tag in tagSummary[content]) {
+                const tagObj = tagSummary[content][tag];
+                tagSummary[content][tag] = {
+                    questions: Array.from(tagObj.questions),
+                    potentialXP: tagObj.totalDifficulty / 3,
+                    percent: 0
+                };
+            }
+        }
+    }
+
     // Flatten tagSummary and calculate % scores based on actual XP data
     xpData = data.xpData || [];
     currentContent = data.currentContent || null;
@@ -263,7 +277,7 @@ async function setupDashboardSession(studentName) {
             const tagObj = tagSummary[content][tag];
             const questions = Array.from(tagObj.questions);
             const possibleXP = tagObj.totalDifficulty / 3;
-            tagSummary[content][tag].percent = 0;
+
             let earnedXP = 0;
             const seen = {};
             xpData.sort((a, b) => new Date(a.timestamp) - new Date(b.timestamp));
