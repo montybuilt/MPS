@@ -263,7 +263,7 @@ async function setupDashboardSession(studentName) {
             const tagObj = tagSummary[content][tag];
             const questions = Array.from(tagObj.questions);
             const possibleXP = tagObj.totalDifficulty / 3;
-
+            tagSummary[content][tag].percent = 0;
             let earnedXP = 0;
             const seen = {};
             xpData.sort((a, b) => new Date(a.timestamp) - new Date(b.timestamp));
