@@ -266,6 +266,7 @@ async function setupDashboardSession(studentName) {
                 };
             }
         }
+        return;
     }
 
     // Flatten tagSummary and calculate % scores based on actual XP data
