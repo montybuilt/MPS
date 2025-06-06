@@ -838,9 +838,11 @@ def export_tags():
 
     # Get the task_id from the request
     task_ids = request.get_json()
+    app.logger.debug(f"task IDs: {task_ids}")
 
     # Get the tags from the database
     tags = fetch_tags_data(task_ids)
+    app.logger.debug(f"Tags: {tags}")
 
     if tags:
         return jsonify(tags)
