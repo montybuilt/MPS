@@ -832,7 +832,7 @@ def export_user_xp(user_id):
 
     return jsonify(results)
 
-@app.route('/api/export_tags', methods=['GET'])
+@app.route('/api/export_tags', methods=['GET', 'POST'])
 def export_tags():
     '''Route to send tags to API call'''
 
