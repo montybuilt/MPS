@@ -840,7 +840,7 @@ def export_tags():
     task_ids = request.get_json()
 
     # Get the tags from the database
-    tags = fetch_tags_data()
+    tags = fetch_tags_data(task_ids)
 
     if tags:
         return jsonify(tags)
