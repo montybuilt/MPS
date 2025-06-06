@@ -832,7 +832,18 @@ def export_user_xp(user_id):
 
     return jsonify(results)
 
+@app.route('api/export_tags', methods=['GET'])
+def export_tags():
+    '''Route to send tags to API call'''
 
+    # Get the task_id from the request
+    task_ids = request.get_json()
+
+    # Get the tags from the database
+    tags = fetch_tags_data()
+
+    if tags:
+        return jsonify(tags)
     
 
 
