@@ -230,8 +230,13 @@ function updateXP(questionId, difficulty, status) {
     }
 
     // Calculate ΔXP using the given formula
-    let dXP = (Number(difficulty) / 3) - (status === 'correct' ? 0 : 1);
-    
+    let dXP;
+    if (status === 'correct') {
+        dXP = Number(difficulty) / 3;
+    } else {
+        dXP = Math.min(0, (Number(difficulty) - 3) / 3);
+    }
+ 
     // Apply the multiplier and round to two decimals.
     //dXP = Math.round(dXP * multiplier * 100) / 100;
     dXP = dXP * multiplier;
