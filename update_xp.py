@@ -56,7 +56,7 @@ def find_and_update_xp_discrepancies(session: Session):
         elif isclose(xp_value, 0.5 * (old_difficulty / 3), rel_tol=1e-6) and xp_value != 0:
             case = "second_correct"
             xp.dXP = 0.5 * (new_difficulty / 3)
-            xp.possible_xp = new_difficulty / 3
+            xp.possible_xp = xp.dXP
         
         elif isclose(xp_value, 0.01 * (old_difficulty / 3), rel_tol=1e-6) and xp_value != 0:
             case = "repeat_correct"
