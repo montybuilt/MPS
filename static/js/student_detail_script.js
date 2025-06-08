@@ -1063,11 +1063,11 @@ function renderContentPanel() {
 function clearKPIPanel() {
 
     let kpiPanel = document.getElementById('kpi-panel');
-    let totalXP = document.getElementById('total-xp');
+    let total_xp = document.getElementById('total-xp');
     let xpLevel = document.getElementById('xp-level');
     let xpScore = document.getElementById('xp-score');
     kpiPanel.innerHTML = "";
-    totalXP.innerHTML = "";
+    total_xp.innerHTML = "";
     xpLevel.innerHTML = "";
     xpScore.innerHTML = "";
     curriculumXP = {};
