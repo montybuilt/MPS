@@ -216,6 +216,7 @@ def get_student_profile():
     
     # Get the xp history update for the user
     xp_data = fetch_xp_data(xp_username, last_fetched_datetime, app.logger)
+    app.logger.debug(f"User XP Data: {xp_data}")
     
     # Get the content and curriculum assignments for the user
     user_assignments, curriculum_order_map = fetch_user_assignments(student_id, app.logger)

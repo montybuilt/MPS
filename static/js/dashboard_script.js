@@ -80,6 +80,7 @@ function calculateKPIs(xpData) {
                 // Overall
                 summary.overall.totalPossible += difficulty;
                 summary.overall.scoreEarned += earned;
+                
 
                 // Curriculum
                 summary.curriculum[curriculum].totalPossible += difficulty;
@@ -146,7 +147,7 @@ function calculateKPIs(xpData) {
         Object.values(soGroup).forEach(computePercentage)
     );
 
-    totalXP = summary.overall.scoreEarned;
+    totalXP = xpData.reduce((sum, record) => sum + (record.dXP || 0), 0);
     localStorage.setItem("tagSummary", JSON.stringify(tagSummary));
     xpScore = summary.overall.percent;
 

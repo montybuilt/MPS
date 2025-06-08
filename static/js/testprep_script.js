@@ -235,7 +235,6 @@ function updateXP(questionId, difficulty, status) {
         dXP = Number(difficulty) / 3;
     } else {
         dXP = Math.min(0, (Number(difficulty) - 3) / 3);
-        console.log("Status:", status, "dXP", dXP)
     }
  
     // Apply the multiplier and round to two decimals.
