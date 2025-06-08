@@ -92,6 +92,8 @@ function calculateKPIs(xpData) {
         standardObjective: {}
     };
 
+    console.log("XP DATA:", xpData);
+
     // Step 1: Build performance map
     const history = {};
     const performanceMap = {};  // task_key → multiplier
