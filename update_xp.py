@@ -1,4 +1,4 @@
-import os
+import os, sys
 from math import isclose
 from sqlalchemy import create_engine
 from sqlalchemy.orm import Session, sessionmaker
@@ -20,8 +20,14 @@ else:
 engine = create_engine(db_url)
 SessionLocal = sessionmaker(bind=engine)
 
-DRY_RUN = False
-TEST_USER_ID = 1
+DRY_RUN = True
+TEST_USER_ID = None
+
+for arg in sys.argv[1:]:
+    if arg == "-p":
+        DRY_RUN = False
+    elif arg.startswith("-") and arg[1:].isdigit():
+        TEST_USER_ID = int(arg[1:])
 
 # ---- Mismatch checker and updater function ----
 def find_and_update_xp_discrepancies(session: Session):
