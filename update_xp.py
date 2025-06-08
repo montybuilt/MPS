@@ -68,7 +68,7 @@ def find_and_update_xp_discrepancies(session: Session):
             xp.dXP = (new_difficulty - 3) / 3
             xp.possible_xp = new_difficulty / 3
         
-        elif isclose(xp_value, 0.0, abs_tol=1e-8) and isclose(xp.possible_xp, 0.0, abs_tol=1e-8):
+        elif isclose(xp_value, 0.0, abs_tol=1e-6) and isclose(xp.possible_xp, 0.0, abs_tol=1e-6):
             case = "timeout_correct"
             xp.difficulty = new_difficulty
 
