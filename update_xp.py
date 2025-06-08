@@ -21,7 +21,7 @@ engine = create_engine(db_url)
 SessionLocal = sessionmaker(bind=engine)
 
 DRY_RUN = False
-TEST_USER_ID = None
+TEST_USER_ID = 1
 
 # ---- Mismatch checker and updater function ----
 def find_and_update_xp_discrepancies(session: Session):
