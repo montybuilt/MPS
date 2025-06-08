@@ -182,7 +182,7 @@ function calculateKPIs(xpData) {
     );
 
     // Set global values
-    totalXP = summary.overall.scoreEarned;
+    totalXP = xpData.reduce((sum, record) => sum + (record.dXP || 0), 0);
     xpScore = summary.overall.percent;
 
     return summary;
