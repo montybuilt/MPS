@@ -72,6 +72,9 @@ def find_and_update_xp_discrepancies(session: Session):
             case = "timeout_correct"
             xp.difficulty = new_difficulty
 
+        elif xp.difficulty != new_difficulty:
+            xp.difficulty = new_difficulty
+
         else:
             print(f"[Skipped] {xp.id}: dXP = {xp_value}, old_difficulty = {old_difficulty}")
             skipped_count += 1
