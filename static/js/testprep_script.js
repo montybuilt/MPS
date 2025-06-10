@@ -879,7 +879,6 @@ document.getElementById("run").onclick = function() {
         .then(response => response.json())
         .then(data => {
             // Display the output in the console div
-            console.log(data.output)
             displayOutput(data.output);
         })
         .catch((error) => {
