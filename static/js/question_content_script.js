@@ -6,9 +6,13 @@ let teacherContent;
 
 // Initialize CodeMirror
 const codeEditor = CodeMirror.fromTextArea(document.getElementById("code"), {
-    mode: "python",
     lineNumbers: true,
-    matchBrackets: true
+    mode: "python",
+    //theme: "dracula",
+    tabSize: 4,
+    indentUnit: 4,
+    matchBrackets: true,
+    viewportMargin: Infinity,
 });
 
 // Centralized error handling for fetch requests
