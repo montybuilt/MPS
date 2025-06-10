@@ -767,15 +767,21 @@ function updateAnswerStatus(questionId, status) {
 
 //---------------------------------------------------------------------------------------------
 
-// This is the function to display the console output
 function displayOutput(output) {
   let consoleDiv = document.getElementById('console');
+
+  // Escape HTML special characters
+  let escapedOutput = output
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;");
+
   // Replace newlines with <br> for proper formatting
-  let formattedOutput = output.replace(/\n/g, '<br>');
-  
+  let formattedOutput = escapedOutput.replace(/\n/g, '<br>');
+
   // Optional: Colorize errors or warnings
   formattedOutput = formattedOutput.replace(/Error/g, '<span style="color: red;">Error</span>');
-  
+
   // Update the console div with the formatted output
   consoleDiv.innerHTML = formattedOutput;
 }
@@ -873,6 +879,7 @@ document.getElementById("run").onclick = function() {
         .then(response => response.json())
         .then(data => {
             // Display the output in the console div
+            console.log(data.output)
             displayOutput(data.output);
         })
         .catch((error) => {
