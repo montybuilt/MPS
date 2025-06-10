@@ -16,4 +16,6 @@ dependencies:
   - psycopg2-binary=2.9.10
   - flask-session=0.8.0
   - redis-py=5.2.1
+  - flask-jwt-extended=4.7.0
+
 
