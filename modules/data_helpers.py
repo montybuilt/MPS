@@ -1140,7 +1140,7 @@ def fetch_classroom_data(class_code, logger=None):
     '''
     Function to fetch classroom data.
     Arg(s): class_code as string, logger as logger object
-    Returns: Dictionary keys: emails, content - values as lists
+    Returns: Dictionary keys: usernames, emails, content - values as lists
     '''
     ### CHANGE needed for new schema ###
     
@@ -1179,6 +1179,9 @@ def fetch_classroom_data(class_code, logger=None):
         
         # Extract student emails from User records
         student_emails = [student.email for student in students if student.email]
+
+        # Extract student usernames from User records
+        student_usernames = [student.username for student in students if student.username]
         
         # Get content already assigned to this classroom
         content_query = db.session.query(ClassroomContent.content_id).filter_by(classroom_id=class_id).all()
@@ -1201,7 +1204,7 @@ def fetch_classroom_data(class_code, logger=None):
         
         available_content = [c[0] for c in available_content]
         
-        return{'students': student_emails, 'availableContent': available_content, 'assignedContent': assigned_content}
+        return{'usernames': student_usernames, 'emails': student_emails, 'availableContent': available_content, 'assignedContent': assigned_content}
         
     except Exception as e:
         logger.debug(f"An unexpected error occurred: {e}")
@@ -1562,6 +1565,7 @@ def update_curriculum_assignments(data, logger=None):
         raise
         
 def add_new_classroom(class_code, class_description, logger=None):
+
     '''Function to write new classroom code and description to database'''
     ### No change needed for new schema ###
     
@@ -1589,4 +1593,44 @@ def add_new_classroom(class_code, class_description, logger=None):
         
     except Exception as e:
         logger.debug(f"Unexpected error writing classroom {class_code} to database: {e}")
+        raise e
+    
+def fetch_student_xp_for_teacher(logger=None):
+    '''
+    This function grabs raw xp data for all students assigned to a teacher (all classrooms)
+
+    Arg(s): logger as app.logger
+
+    Returns: XP data as a list of records as dictionaries
+    '''
+
+    usernames = ['monty', 'amontanus', 'april']
+
+    try:
+
+        xp_query = (
+            db.session.query(XP)
+            .join(User)
+            .filter(User.username.in_(usernames))
+            .all()
+        )
+
+        xp_data = [{
+                "username": entry.user.username,
+                "dXP": entry.dXP,
+                "possible_xp": entry.possible_xp,
+                "question_id": entry.question_id,
+                "curriculum_id": entry.curriculum_id,
+                "content_id": entry.content_id,
+                "difficulty": entry.difficulty,
+                "standard": entry.standard,
+                "objective": entry.objective,
+                "elapsed_time": entry.elapsed_time,
+                "timestamp": entry.timestamp.replace(tzinfo=None)
+            } for entry in xp_query]
+
+        return xp_data
+    
+    except Exception as e:
+
         raise e

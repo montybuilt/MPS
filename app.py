@@ -3,6 +3,7 @@ import subprocess, logging, secrets, os, redis
 from flask_migrate import Migrate
 from flask import Flask, render_template, request, Response, jsonify, redirect, url_for, session as flask_session
 from flask_session import Session
+from flask_jwt_extended import JWTManager, create_access_token, jwt_required, get_jwt_identity
 from sqlalchemy.exc import SQLAlchemyError, IntegrityError
 from werkzeug.exceptions import HTTPException
 from modules import *
@@ -24,8 +25,9 @@ logging.basicConfig(level=logging.DEBUG, format='%(asctime)s %(levelname)s: %(me
 env = os.getenv('FLASK_ENV', 'development')
 app.config.from_object(config_map[env])
 
-# Set the secret key
+# Set the secret keys
 app.secret_key = app.config['SECRET_KEY']
+app.config['JWT_SECRET_KEY'] = app.config['SECRET_KEY']
 
 # Set the database and session management configurations
 if env == 'production':
@@ -54,6 +56,9 @@ db.init_app(app)
 
 # Initialize flask-migrate
 migrate = Migrate(app, db)
+
+# Initialize the JWT Manager for API calls
+jwt = JWTManager(app)
 
 @app.route('/test_session', methods=['GET'])
 def test_session():
@@ -784,6 +789,59 @@ def student_assignments():
         return jsonify({'error': f"Unexpected Error: {e}"}), 500
 
 # API Routes ------------------------------------------------------------------------------#
+
+@app.route('/api/login', methods=['POST'])
+def api_login():
+    data = request.get_json()
+    username = data.get('username')
+    password = data.get('password')
+
+    result = verify(username, password)
+
+    if result is not True:
+        return jsonify({"msg": result}), 401
+
+    access_token = create_access_token(identity=username)
+    return jsonify(access_token=access_token)
+
+
+@app.route("/api/authenticator", methods=["GET"])
+@jwt_required()
+def authenticator():
+    current_user = get_jwt_identity()
+    build_session(current_user)
+    user_role = session.get("role", "unknown")
+
+    return jsonify(message=f"Hello, {current_user}. You are authenticated as a {user_role}."), 200
+
+@app.route('/api/classrooms', methods=['GET'])
+@jwt_required()
+def classrooms_api():
+    current_user = get_jwt_identity()
+    build_session(current_user)
+    classrooms = fetch_classrooms()
+    sections = {}
+    for classroom in classrooms:
+        students = fetch_classroom_data(classroom)['usernames']
+        sections.update({classroom:students})
+
+
+    app.logger.debug(f"Sections: {sections}")
+
+    return jsonify({'classrooms': sections}), 200
+
+@app.route('/api/xp_for_teacher', methods=['GET'])
+@jwt_required()
+def xp_for_teacher():
+    current_user = get_jwt_identity()
+    build_session(current_user)
+
+    all_xp = fetch_student_xp_for_teacher(app.logger)
+
+    app.logger.debug(f"XP for teacher: {all_xp}")
+
+    return jsonify(all_xp), 200
+
 
 @app.route('/api/export_user_assignments/<user_id>', methods=['GET'])
 def export_user_assignments(user_id):

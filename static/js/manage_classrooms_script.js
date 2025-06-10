@@ -129,7 +129,7 @@ function populateClassroomDropdown(id) {
 // Initialize the Students Added list with students already in the classroom
 function populateStudentsAddedList(id) {
     console.log(classroomData);
-    const assignedStudents = classroomData['students'] || [];
+    const assignedStudents = classroomData['emails'] || [];
 
     // Identify which accordion is activated
     let unassignedList;
@@ -485,7 +485,7 @@ function handleSubmitAdditions() {
     
     // Get the student additions information
     const assignedStudents = Array.from(document.getElementById('assigned-students')?.children || []).map(item => item.value);
-    const existingStudents = classroomData['students'] || [];
+    const existingStudents = classroomData['emails'] || [];
     const newStudents = assignedStudents.filter(student => !existingStudents.includes(student));
     
     // Get the content additions information
