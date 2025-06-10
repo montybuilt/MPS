@@ -76,10 +76,6 @@ input[type="submit"]:hover {
         height: 30px;
     }
     
-    .CodeMirror {
-        height: 450px;
-    }
-    
     #questionStem {
         height: 70px;
     }
