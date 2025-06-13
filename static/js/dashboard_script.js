@@ -48,7 +48,7 @@ function calculateKPIs(xpData) {
         const qid = record.question_id;
         if (!history[qid]) history[qid] = { correct: false, incorrect: false };
 
-        if (record.dXP > 0) {
+        if (record.dXP >= 0) {
             if (history[qid].correct) {
                 performanceMap[qid] = 1.0;
             } else if (history[qid].incorrect) {
