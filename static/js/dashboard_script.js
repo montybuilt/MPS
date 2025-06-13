@@ -50,7 +50,7 @@ function calculateKPIs(xpData) {
 
         if (record.dXP > 0) {
             if (history[qid].correct) {
-                performanceMap[qid] = 0.001;
+                performanceMap[qid] = 1.0;
             } else if (history[qid].incorrect) {
                 performanceMap[qid] = 0.5;
             } else {
