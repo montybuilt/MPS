@@ -62,7 +62,7 @@ function calculateKPIs(xpData) {
         }
     }
 
-    sessionStorage.setItem('Performance Map', JSON.stringify(performanceMap));
+    sessionStorage.setItem('PerformanceMap', JSON.stringify(performanceMap));
 
     // Step 2: Calculate earnedXP and totalPossible based on current assignments
     for (const content in assignments) {
