@@ -94,7 +94,7 @@ def login():
         sessionStorage_data = initialize_user_sessionStorage_data(app.logger)
         
         # crafte the response
-        response = jsonify({'message': 'Login successful', 'session_data': sessionStorage_data, 'username': username, 'is_admin': session.get('is_admin')})
+        response = jsonify({'message': 'Login successful', 'session_data': sessionStorage_data, 'username': username, 'is_admin': session.get('is_admin'), 'role': session.get('role')})
         return response
     
     return jsonify({'error': result}), 401
@@ -268,11 +268,13 @@ def get_task_tags():
 def admin():
     '''Admin dashboard route'''
 
-    # Get username
+    # Get username and role
     username = session.get('username')
+    is_admin = session.get('is_admin')
+    role = session.get('role')
     
-    if session.get('is_admin'):
-        return render_template('admin.html', username=username, is_admin=True)
+    if is_admin:
+            return render_template('admin.html', username=username, is_admin=True, role=role)
     else:
         return redirect(url_for('index'))
 
@@ -490,13 +492,13 @@ def manage_classrooms():
 def course_content():
     '''Route to draw the course_content page'''
     username = session.get('username')
-    user_role = session.get('role')
+    role = session.get('role')
     
     # Check if the user is an admin
     if not session.get('is_admin'):
         return redirect(url_for('index'))  # Redirect non-admin users
 
-    return render_template('course_content.html', username=username, user_role=user_role)  # Render the content creation page
+    return render_template('course_content.html', username=username, role=role)  # Render the content creation page
     
 # Route to the admin content creation page "content"
 @app.route('/question_content', methods=['GET'])
@@ -810,9 +812,9 @@ def api_login():
 def authenticator():
     current_user = get_jwt_identity()
     build_session(current_user)
-    user_role = session.get("role", "unknown")
+    role = session.get("role", "unknown")
 
-    return jsonify(message=f"Hello, {current_user}. You are authenticated as a {user_role}."), 200
+    return jsonify(message=f"Hello, {current_user}. You are authenticated as a {role}."), 200
 
 @app.route('/api/classrooms', methods=['GET'])
 @jwt_required()

@@ -40,7 +40,7 @@ function handleLoginSubmit(event) {
                 }
             }
 
-            console.log("Redirecting, is_admin:", data.is_admin);
+            console.log("Redirecting, is_admin:", data.is_admin, "Role:", data.role);
             if (data.is_admin) {
                 console.log("Going to /admin");
                 window.location.href = '/admin';

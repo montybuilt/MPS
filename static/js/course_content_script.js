@@ -253,7 +253,6 @@ document.getElementById('submit-new-curriculum').addEventListener('click', funct
         });
     })
     .then(data => {
-        console.log('Success:', data);
         // Update allCurriculums in sessionStorage
         let allCurriculums = JSON.parse(sessionStorage.getItem('allCurriculums')) || [];
         allCurriculums.push(newCurriculum);
@@ -385,7 +384,6 @@ function handleSubmitContentAssignment() {
     // Get the content_id and array of curriculums assigned
     const contentId = document.getElementById('content-selector')?.value;
     const assignedCurriculums = Array.from(document.getElementById('assigned-curriculums')?.children || []).map(item => item.value);
-    console.log("contentID", contentId, "assignedCurriculums", assignedCurriculums)
     if (!contentId) {
         alert('Please select a content item.');
         return;
@@ -438,7 +436,6 @@ function handleSubmitCurriculumAssignment() {
 
     // Prepare the payload
     const curriculumAssignments = { 'curriculum_id': curriculumId, 'task_list': assignedQuestions };
-    console.log("Curriculum Assignments:", curriculumAssignments)
     // Send the POST request using Fetch API
     fetch('/assign_tasks_to_curriculum', {
         method: 'POST',
@@ -476,7 +473,6 @@ document.addEventListener('DOMContentLoaded', function () {
     fetchCourseData();
     assignAddRemoveButtons(); // For add/remove curriculum
     assignAssignmentButtons();    // For submit content or curriculum assignment
-    if (userRole === 'teacher') {console.log("Role is working")};
 
     // Retreive prior page state
     const pageState = JSON.parse(sessionStorage.getItem('pageState')) || [];
@@ -491,7 +487,6 @@ document.addEventListener('DOMContentLoaded', function () {
     sessionStorage.removeItem('pageState');
     
     // Role-based element control:
-    // Assume user_role is defined on the page (e.g., set by your server template)
     if (typeof userRole !== 'undefined' && userRole.trim() === 'teacher') {
         // 1) Hide the new-content label/input/button inside accordion1.
         // For example, wrap those elements in a container with id "new-content-group".

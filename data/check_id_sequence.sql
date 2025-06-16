@@ -1,1 +1,1 @@
-select last_value from questions_id_seq;
+select last_value from user_id_seq;

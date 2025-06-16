@@ -64,17 +64,6 @@
             <ul>
                 <li><a href="/manage_classrooms">Manage Classrooms</a></li>
                 <li><a href="/question_content">Create or Edit Questions</a></li>
-                <li>
-                    <a href="/course_content">
-                        {% if role == 'teacher' %}
-                        View and Edit Custom Curriculums
-                        {% elif role == 'system' %}
-                        View and Edit Content and Curriculum Setup
-                        {% else %}
-                        View and Edit Course Content
-                        {% endif %}
-                    </a>
-                    </li>
             </ul>
         </nav>
         <h2>Student Performance Data</h2>
@@ -92,9 +81,6 @@
         </nav>
     </div>
     <!-- Include the script file -->
-     <script>
-        let userRole = {{ role | tojson }};
-     </script>
     <script src="{{ url_for('static', filename='js/index_script.js') }}"></script>
 </body>
 </html>

@@ -794,6 +794,8 @@ function processXP() {
     } else {
         xpLevel = 'Beginner';
     }
+
+    console.log("Total XP:",totalXP,"XP Level:", xpLevel);
 }
 
 //-----------------------------------------------------------------------------------------------------------------
@@ -1115,13 +1117,13 @@ function renderContentPanel() {
 async function initializePage() {
     await setupDashboardSession();
     await loadStandardsData();
-    console.log("Processing XP")
+    console.log("Processing KPIs")
+    calculateKPIs(JSON.parse(localStorage.getItem('xpData')));
     processXP();
     console.log("Calculating all curriculums status")
     identifyCompletedCurriculums();
-    console.log("Drawing KPI Charts")
+    console.log("Drawing KPI Visuals")
     loadKpiPanelFromCurrentCurriculum();
-    console.log("Displaying KPI Summary")
     displayKPIData();
 }
 
@@ -1133,17 +1135,10 @@ document.addEventListener("DOMContentLoaded", async function() {
     await initializePage();
     console.log("Rendering Content Panel");
     renderContentPanel();
-    console.log("Calculating Key Performance Indicators");
-    console.log(calculateKPIs(JSON.parse(localStorage.getItem('xpData'))));
 });
 
 
 
 //-----------------------------------------------------------------------------------------------------------------
-// Prepare data items on page load
-window.onload = function() {
-    //initializePage();
-};
-
 //-----------------------------------------------------------------------------------------------------------------
 
