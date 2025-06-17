@@ -7,8 +7,9 @@ let myContent;
 let myCurriculums;
 let curriculumOrderMap;
 let questionDifficultyMap;
-let tag
-window.standardsData = {}
+let tag;
+let summary;
+window.standardsData = {};
 
 //-----------------------------------------------------------------------------------------------------------------
 
@@ -18,7 +19,6 @@ async function loadStandardsData() {
     const response = await fetch('/static/data/standards.json');
     const data = await response.json();
     window.standardsData = data;
-    console.log("Standards data loaded:", window.standardsData);
   } catch (error) {
     console.error("Error loading standards data:", error);
   }
@@ -165,7 +165,6 @@ async function fetchDashboardData() {
     const username = sessionStorage.getItem("username") || "default_username";
 
     if (xpUsername !== username) {
-        console.log("NEW USER ALERT!");
         localStorage.setItem("xpLastFetchedDatetime", "1970-01-01");
         localStorage.setItem("xpUsername", username);
         localStorage.removeItem("xpData");
@@ -402,7 +401,7 @@ function renderKPIPanel(currentContent) {
 
   // Retrieve KPI summary data (assumes xpData is in localStorage)
   const xpData = JSON.parse(localStorage.getItem('xpData')) || [];
-  const summary = calculateKPIs(xpData);
+  summary = calculateKPIs(xpData); // changed from const
   const soData = summary.standardObjective[currentContent] || {};
 
   // Build a fixed 5x6 grid for standards/objectives.
@@ -423,9 +422,7 @@ function renderKPIPanel(currentContent) {
       if (soData.hasOwnProperty(key)) {
         const score = soData[key].percent;
         cell.style.backgroundColor = getColorForScore(score);
-        
-        console.log("Standards Available?", window.standardsData)
-        
+
         // Build a detailed tooltip using the standardsData.
         let tooltipText = `${currentContent} ${key}: ${score.toFixed(1)}%\n`;
         if (window.standardsData &&
@@ -539,7 +536,12 @@ function renderKPIPanel(currentContent) {
   
   document.getElementById('radar').on('plotly_click', function(eventData) {
     const currentContent = sessionStorage.getItem("currentContent");
-    if (!currentContent) return;
+
+    // If currentContent is not set, choose the first content in studentAssignments
+    if (!currentContent) {
+      const studentAssignments = JSON.parse(sessionStorage.getItem('studentAssignments'));
+      currentContent = Object.keys(studentAssignments)[0];
+    };
 
     // If a curriculum point was clicked
     if (eventData?.points?.length > 0) {
@@ -794,8 +796,6 @@ function processXP() {
     } else {
         xpLevel = 'Beginner';
     }
-
-    console.log("Total XP:",totalXP,"XP Level:", xpLevel);
 }
 
 //-----------------------------------------------------------------------------------------------------------------
@@ -999,7 +999,7 @@ function updateKPI(id, value, condition) {
 function renderContentPanel() {
   const assignments = JSON.parse(sessionStorage.getItem("studentAssignments"));
   const xpData = JSON.parse(localStorage.getItem("xpData")) || [];
-  const summary = calculateKPIs(xpData); // Calculate KPI summary here
+  //const summary = calculateKPIs(xpData); // Calculate KPI summary here
   const panel = document.getElementById("content-panel");
   panel.innerHTML = '';
 
@@ -1117,12 +1117,9 @@ function renderContentPanel() {
 async function initializePage() {
     await setupDashboardSession();
     await loadStandardsData();
-    console.log("Processing KPIs")
-    calculateKPIs(JSON.parse(localStorage.getItem('xpData')));
+    //calculateKPIs(JSON.parse(localStorage.getItem('xpData')));
     processXP();
-    console.log("Calculating all curriculums status")
     identifyCompletedCurriculums();
-    console.log("Drawing KPI Visuals")
     loadKpiPanelFromCurrentCurriculum();
     displayKPIData();
 }
@@ -1133,7 +1130,6 @@ async function initializePage() {
 document.addEventListener("DOMContentLoaded", async function() {
     console.log("Initializing Page");
     await initializePage();
-    console.log("Rendering Content Panel");
     renderContentPanel();
 });
 

@@ -324,6 +324,7 @@
     <!-- Import Java Script -->
     <script>
     let userRole = {{ role | tojson }};
+    sessionStorage.setItem('role', userRole);
     </script>
     <script src="{{ url_for('static', filename='js/course_content_script.js') }}"></script>
 </body>

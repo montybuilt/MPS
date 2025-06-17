@@ -413,7 +413,10 @@ function handleSubmitContentAssignment() {
             alert('Content and curriculum assignments updated successfully!');
             // Store the open accordion container name in sessionStorage
             pageState = JSON.parse(sessionStorage.getItem('pageState')) || [];
-            if (!pageState.includes('accordion2')) { pageState.push('accordion2')};
+            const userRole = sessionStorage.getItem('role');
+            if (userRole !== 'teacher' && !pageState.includes('accordion2')) {
+                pageState.push('accordion2');
+            }
             sessionStorage.setItem('pageState', JSON.stringify(pageState));           
             // Refresh the page
             location.reload();
@@ -472,32 +475,34 @@ document.addEventListener('DOMContentLoaded', function () {
     // Fetch course data and attach event listeners
     fetchCourseData();
     assignAddRemoveButtons(); // For add/remove curriculum
-    assignAssignmentButtons();    // For submit content or curriculum assignment
+    assignAssignmentButtons(); // For submit content or curriculum assignment
 
-    // Retreive prior page state
-    const pageState = JSON.parse(sessionStorage.getItem('pageState')) || [];
-    
-    if (pageState) {
-        pageState.forEach(accordionId => {
-            toggleAccordion(accordionId);
-        });
-    }
-     
-    // Remove the page state
-    sessionStorage.removeItem('pageState');
-    
-    // Role-based element control:
-    if (typeof userRole !== 'undefined' && userRole.trim() === 'teacher') {
-        // 1) Hide the new-content label/input/button inside accordion1.
-        // For example, wrap those elements in a container with id "new-content-group".
+    // Role-based element control
+    const userRole = sessionStorage.getItem('role');
+
+    // Hide restricted elements if role is teacher
+    if (userRole === 'teacher') {
         const newContentGroup = document.getElementById('system-group-1');
         if (newContentGroup) {
             newContentGroup.style.display = 'none';
         }
-        // 2) Hide the entire accordion2 group.
+
         const accordion2Group = document.getElementById('system-group-2');
         if (accordion2Group) {
             accordion2Group.style.display = 'none';
         }
     }
+
+    // Restore previously open accordion sections if allowed
+    const pageState = JSON.parse(sessionStorage.getItem('pageState')) || [];
+    pageState.forEach(accordionId => {
+        if (userRole === 'teacher' && accordionId === 'accordion2') {
+            console.log(`Skipping ${accordionId} reopen due to teacher role.`);
+            return;
+        }
+        toggleAccordion(accordionId);
+    });
+
+    // Clean up stored UI state
+    sessionStorage.removeItem('pageState');
 });

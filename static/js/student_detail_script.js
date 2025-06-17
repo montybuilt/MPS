@@ -17,8 +17,8 @@ let currentQuestionId;
 let curriculumOrderMap;
 let questionDifficultyMap;
 let tagSummary = {};  // <-- Step 1: add tag summary for tag performance panel
+let summary;
 window.standardsData = {};
-
 currentCurriculum = ""
 currentQuestionId = ""
 
@@ -30,7 +30,6 @@ async function loadStandardsData() {
     const response = await fetch('/static/data/standards.json');
     const data = await response.json();
     window.standardsData = data;
-    console.log("Standards data loaded:", window.standardsData);
   } catch (error) {
     console.error("Error loading standards data:", error);
   }
@@ -47,7 +46,6 @@ async function fetchAndPopulateUsers() {
             throw new Error(errorData.error || `HTTP error! Status: ${response.status}`);
         }
         const data = await response.json();  // Assume response is { "users": [...] }
-        console.log("Data:", data);
         // Populate the dropdown
         const dropdown = document.getElementById('studentName');
         data.users.forEach(username => {  // Access the usernames via 'data.users'
@@ -420,7 +418,7 @@ function renderKPIPanel(currentContent) {
   kpiPanel.appendChild(panelsContainer);
 
   // Retrieve KPI summary data
-  const summary = calculateKPIs(xpData);
+  summary = calculateKPIs(xpData);
   const soData = summary.standardObjective[currentContent] || {};
 
   // Build a fixed 5x6 grid for standards/objectives.
@@ -441,9 +439,7 @@ function renderKPIPanel(currentContent) {
       if (soData.hasOwnProperty(key)) {
         const score = soData[key].percent;
         cell.style.backgroundColor = getColorForScore(score);
-        
-        console.log("Standards Available?", window.standardsData)
-        
+                
         // Build a detailed tooltip using the standardsData.
         let tooltipText = `${currentContent} ${key}: ${score.toFixed(1)}%\n`;
         if (window.standardsData &&
@@ -946,7 +942,7 @@ function updateKPI(id, value, condition) {
 function renderContentPanel() {
   const assignments = studentAssignments;
   //const xpData = xpData || [];
-  const summary = calculateKPIs(xpData); // Calculate KPI summary here
+  //const summary = calculateKPIs(xpData); // Calculate KPI summary here
   const panel = document.getElementById("content-panel");
   panel.innerHTML = '';
 
@@ -1087,19 +1083,13 @@ async function loadStudentName() {
     // Fetch the student name from dropdown
     const studentName = document.getElementById("studentName").value;
     if (!studentName) return;  // ignore empty selection
-    console.log("Student Name Selected:", studentName);
     await setupDashboardSession(studentName);
     renderKPIPanel(currentContent);
     renderTagPerformancePanel(currentContent);
-    console.log("Processing XP");
     await processXP();
-    console.log("Calculating all curriculums status");
     completedCurriculums = identifyCompletedCurriculums();
-    console.log("Drawing KPI Charts");
     //loadKpiPanelFromCurrentCurriculum();
-    console.log("Drawing KPI Charts");
     loadKpiPanelFromCurrentCurriculum();    
-    console.log("Displaying KPI Summary");
     renderContentPanel();
     displayKPIData();
 
@@ -1111,7 +1101,6 @@ async function loadStudentName() {
 document.addEventListener("DOMContentLoaded", async function() {
     await loadStandardsData();
     await fetchAndPopulateUsers();
-    console.log("Page Loaded. Waiting for student selection.");
 });
 
 
